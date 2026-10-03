@@ -25,7 +25,7 @@ class ResetPasswordNotification extends Notification
             'email' => $notifiable->getEmailForPasswordReset(),
         ], '', '&', PHP_QUERY_RFC3986);
 
-        $imagePath = 'images/programandoweb/default/recover.png';
+        $imagePath = 'programandoweb/default/recover.jpg';
 
         return (new MailMessage())
             ->subject('Recuperación de contraseña')
