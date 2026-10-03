@@ -41,6 +41,7 @@ services:
       DEPLOYMENT_SCRIPT: /var/www/gaspronal.programandoweb.net/scripts/deploy.sh
       DEPLOYMENT_USE_SUDO: "true"
       DEPLOYMENT_TIMEOUT: ${DEPLOYMENT_TIMEOUT:-1800}
+      AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -91,6 +92,7 @@ services:
       AGENTS_PATH: /app/agents
       CORS_ORIGIN: ${REALTIME_CORS_ORIGIN:-https://gaspronal.programandoweb.net}
       AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+      LARAVEL_API_URL: http://backend-nginx/api/v1
     ports:
       - "${REALTIME_PORT:-4100}:4100"
     healthcheck:
@@ -108,6 +110,10 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      NEXT_PUBLIC_REALTIME_URL: ${NEXT_PUBLIC_REALTIME_URL:-}
+      REALTIME_INTERNAL_URL: http://realtime:4100
+      AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+        NEXT_PUBLIC_REALTIME_URL: ${NEXT_PUBLIC_REALTIME_URL:-}
     image: gaspronal/frontend:latest
     container_name: gaspronal-frontend
     restart: unless-stopped
