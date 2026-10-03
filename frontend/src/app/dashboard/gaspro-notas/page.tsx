@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Save, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ExternalLink, FileText, Pencil, Save, Trash2 } from "lucide-react";
 
 type Category={id:number;name:string;slug:string};
 type Post={id:number;title:string;status:string;public_url:string;category?:Category|null};
@@ -39,7 +40,7 @@ export default function NotesPage(){
     <section className="grid gap-6 xl:grid-cols-[1.3fr_.7fr]">
       <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
         <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4"><FileText size={18}/><h2 className="font-semibold">Publicaciones</h2></div>
-        <div className="divide-y divide-[var(--border)]">{posts.map(post=><div key={post.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center"><div className="min-w-0"><strong>{post.title}</strong><p className="mt-1 truncate text-sm text-[var(--muted)]">{post.public_url}</p><p className="mt-1 text-xs text-[var(--muted)]">{post.category?.name??"Sin categoría"} · {post.status}</p></div><button onClick={()=>remove(post.id)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-red-600"><Trash2 size={16}/>Eliminar</button></div>)}{!posts.length&&<p className="px-5 py-10 text-center text-sm text-[var(--muted)]">Aún no hay publicaciones.</p>}</div>
+        <div className="divide-y divide-[var(--border)]">{posts.map(post=><div key={post.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center"><div className="min-w-0"><strong>{post.title}</strong><p className="mt-1 truncate text-sm text-[var(--muted)]">{post.public_url}</p><p className="mt-1 text-xs text-[var(--muted)]">{post.category?.name??"Sin categoría"} · {post.status}</p></div><div className="flex flex-wrap gap-2 sm:justify-end"><a href={`https://www.gaspronal.com${post.public_url}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ExternalLink size={16}/>Ver original</a><Link href={`/dashboard/gaspro-notas/${post.id}/editar`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><Pencil size={16}/>Editar</Link><button onClick={()=>remove(post.id)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-red-600"><Trash2 size={16}/>Eliminar</button></div></div>)}{!posts.length&&<p className="px-5 py-10 text-center text-sm text-[var(--muted)]">Aún no hay publicaciones.</p>}</div>
       </div>
       <form onSubmit={create} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
         <h2 className="font-semibold">Nueva Gaspro-nota</h2>
