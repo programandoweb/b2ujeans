@@ -130,6 +130,60 @@ EOF
   fi
 }
 
+port_in_use() {
+  local port="$1"
+  ss -H -ltn 2>/dev/null | awk '{print $4}' | grep -Eq "(^|:)$port$"
+}
+
+port_owned_by_gaspronal() {
+  local port="$1"
+  docker ps --format '{{.Names}} {{.Ports}}' 2>/dev/null \
+    | grep -E '^gaspronal-' \
+    | grep -Eq "[:.]$port->|0\.0\.0\.0:$port->|\[::\]:$port->"
+}
+
+next_free_port() {
+  local port="$1"
+  while port_in_use "$port" && ! port_owned_by_gaspronal "$port"; do
+    port=$((port + 1))
+  done
+  printf '%s' "$port"
+}
+
+set_docker_env_value() {
+  local key="$1"
+  local value="$2"
+
+  if grep -q "^$key=" "$DOCKER_ENV"; then
+    sed -i "s|^$key=.*|$key=$value|" "$DOCKER_ENV"
+  else
+    printf '%s=%s\n' "$key" "$value" >> "$DOCKER_ENV"
+  fi
+}
+
+ensure_host_ports() {
+  local backend_port frontend_port new_backend_port new_frontend_port
+
+  backend_port="$(grep '^BACKEND_PORT=' "$DOCKER_ENV" | cut -d= -f2-)"
+  frontend_port="$(grep '^FRONTEND_PORT=' "$DOCKER_ENV" | cut -d= -f2-)"
+
+  backend_port="${backend_port:-8080}"
+  frontend_port="${frontend_port:-3000}"
+
+  new_backend_port="$(next_free_port "$backend_port")"
+  new_frontend_port="$(next_free_port "$frontend_port")"
+
+  if [[ "$new_backend_port" != "$backend_port" ]]; then
+    log "Puerto backend $backend_port ocupado; usando $new_backend_port."
+    set_docker_env_value BACKEND_PORT "$new_backend_port"
+  fi
+
+  if [[ "$new_frontend_port" != "$frontend_port" ]]; then
+    log "Puerto frontend $frontend_port ocupado; usando $new_frontend_port."
+    set_docker_env_value FRONTEND_PORT "$new_frontend_port"
+  fi
+}
+
 compose() {
   docker compose --env-file "$DOCKER_ENV" -f "$PROJECT_ROOT/docker-compose.yml" "$@"
 }
@@ -212,6 +266,7 @@ main() {
   install_base_packages
   install_docker
   create_environment
+  ensure_host_ports
   initial_install
 }
 
