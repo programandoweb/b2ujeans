@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { ExternalLink, Pencil, Plus, Save, Trash2 } from "lucide-react";
 
 type Category={id:number;name:string;slug:string};
 type Item={id:number;type:"product"|"service";name:string;slug:string;reference?:string|null;status:string;public_url:string;category?:Category|null};
@@ -66,7 +67,7 @@ export default function CatalogPage(){
               <p className="mt-1 truncate text-sm text-[var(--muted)]">{item.public_url}</p>
               <p className="mt-1 text-xs text-[var(--muted)]">{item.category?.name??"Sin categoría"} · {item.status}</p>
             </div>
-            <button onClick={()=>remove(item.id)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-red-600"><Trash2 size={16}/>Eliminar</button>
+            <div className="flex flex-wrap gap-2 sm:justify-end"><a href={`https://www.gaspronal.com${item.public_url}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ExternalLink size={16}/>Ver original</a><Link href={`/dashboard/catalogo/${item.id}/editar`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><Pencil size={16}/>Editar</Link><button onClick={()=>remove(item.id)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-red-600"><Trash2 size={16}/>Eliminar</button></div>
           </div>)}
           {!items.length&&<p className="px-5 py-10 text-center text-sm text-[var(--muted)]">Aún no hay elementos.</p>}
         </div>
