@@ -63,11 +63,17 @@ create_environment() {
 
   app_url="${GASPRONAL_URL:-https://gaspronal.programandoweb.net}"
   backend_url="${GASPRONAL_BACKEND_URL:-https://backend.gaspronal.programandoweb.net}"
-  admin_email="${ADMIN_EMAIL:-}"
+  admin_email="${ADMIN_EMAIL:-lic.jorgemendez@gmail.com}"
   admin_password="${ADMIN_PASSWORD:-}"
 
-  if [[ -z "$admin_email" && -t 0 ]]; then
-    read -rp "Correo del administrador inicial (opcional): " admin_email
+  if [[ -t 0 ]]; then
+    local admin_email_input
+    read -rp "Correo del administrador inicial [$admin_email] (opcional, escribe '-' para dejarlo vacío): " admin_email_input
+    if [[ "$admin_email_input" == "-" ]]; then
+      admin_email=""
+    elif [[ -n "$admin_email_input" ]]; then
+      admin_email="$admin_email_input"
+    fi
   fi
 
   if [[ -n "$admin_email" && -z "$admin_password" ]]; then
