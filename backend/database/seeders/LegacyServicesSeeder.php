@@ -45,6 +45,12 @@ class LegacyServicesSeeder extends Seeder
                 'description' => 'Asesoría y entrenamiento al personal operativo para la manipulación, cuidado y limpieza de los equipos, orientados a reducir riesgos, optimizar recursos, prolongar la vida útil de los equipos y facilitar su operación.',
             ],
             [
+                'name' => 'Desarrollo de equipos especiales a medida',
+                'slug' => 'desarrollo-de-equipos-especiales-a-medida',
+                'short_description' => 'Diseño y desarrollo de equipos especiales en acero inoxidable adaptados a cada proyecto.',
+                'description' => 'Gaspronal desarrolla equipos especiales a medida para materializar proyectos de cocina y unidades de negocio, adaptando el diseño y la fabricación en acero inoxidable a las necesidades particulares del cliente.',
+            ],
+            [
                 'name' => 'Servicio correctivo de equipos industriales',
                 'slug' => 'servicio-correctivo-de-equipos-industriales',
                 'short_description' => 'Recuperación, reparación y mantenimiento correctivo de equipos industriales.',
