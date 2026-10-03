@@ -59,13 +59,25 @@ class DeploymentService
 
         $timeout = max(60, (int) config('deployment.timeout', 1800));
 
+        $marker = '/tmp/gaspronal-init-private-repo';
+
+        if ($deployment->initialize_private_repo) {
+            file_put_contents($marker, (string) $deployment->id);
+        } else {
+            @unlink($marker);
+        }
+
         $command = (bool) config('deployment.use_sudo', false)
             ? 'sudo -n '.escapeshellarg((string) config('deployment.sudo_command', '/usr/local/bin/gaspronal-deploy'))
             : 'bash '.escapeshellarg($script);
 
-        $result = Process::path(dirname($script))
-            ->timeout($timeout)
-            ->run($command);
+        try {
+            $result = Process::path(dirname($script))
+                ->timeout($timeout)
+                ->run($command);
+        } finally {
+            @unlink($marker);
+        }
 
         $output = trim($result->output().PHP_EOL.$result->errorOutput());
 
