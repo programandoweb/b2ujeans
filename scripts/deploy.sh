@@ -59,6 +59,9 @@ compose exec -T backend composer install   --no-dev   --prefer-dist   --no-inter
 echo "[backend] Ejecutando migraciones..."
 compose exec -T backend php artisan migrate --force
 
+echo "[backend] Ejecutando seeders pendientes..."
+compose exec -T backend php artisan db:seed --force
+
 echo "[backend] Refrescando cachés..."
 compose exec -T backend php artisan optimize:clear
 compose exec -T backend php artisan optimize
