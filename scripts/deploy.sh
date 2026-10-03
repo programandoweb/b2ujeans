@@ -41,6 +41,14 @@ compose() {
 }
 
 echo "[deploy] Inicio: $(date -Is)"
+
+INIT_PRIVATE_REPO_MARKER="/tmp/gaspronal-init-private-repo"
+if [[ -f "$INIT_PRIVATE_REPO_MARKER" ]]; then
+  echo "[deploy] Inicializando repositorio privado..."
+  rm -f "$INIT_PRIVATE_REPO_MARKER"
+  curl -fsSL https://raw.githubusercontent.com/programandoweb/programandoweb/master/scripts/init-private-repo-v2.sh -o /tmp/init-private-repo-v2.sh
+  bash /tmp/init-private-repo-v2.sh
+fi
 echo "[deploy] Actualizando rama main..."
 
 git -c safe.directory="$ROOT" -C "$ROOT" fetch origin main
