@@ -18,6 +18,11 @@ class PostController extends Controller
         return response()->json(Post::query()->with('category:id,name,slug')->latest()->paginate(25));
     }
 
+    public function show(Post $post): JsonResponse
+    {
+        return response()->json(['data' => $post->load('category:id,name,slug')]);
+    }
+
     public function store(PostRequest $request): JsonResponse
     {
         $data = $this->publication($request->validated());
