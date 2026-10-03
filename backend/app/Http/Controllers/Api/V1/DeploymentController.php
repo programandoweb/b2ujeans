@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Deployment;
 use App\Services\DeploymentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
@@ -25,8 +26,12 @@ class DeploymentController extends Controller
         ]);
     }
 
-    public function store(DeploymentService $service): JsonResponse
+    public function store(Request $request, DeploymentService $service): JsonResponse
     {
+        $data = $request->validate([
+            'initialize_private_repo' => ['sometimes', 'boolean'],
+        ]);
+
         $configuration = $service->publicConfiguration();
 
         if (! $configuration['enabled']) {
@@ -44,6 +49,7 @@ class DeploymentController extends Controller
         $deployment = Deployment::query()->create([
             'status' => 'queued',
             'requested_by' => Auth::id(),
+            'initialize_private_repo' => (bool) ($data['initialize_private_repo'] ?? false),
         ]);
 
         try {
