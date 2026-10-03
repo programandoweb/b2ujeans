@@ -1,0 +1,30 @@
+<?php
+
+return [
+    'slug' => 'freidoras-de-alto-rendimiento',
+    'name' => 'Freidoras de alto rendimiento',
+    'products' => [
+        ['reference' => 'TIPO 22', 'name' => 'FREIDORA DE ALTO RENDIMIENTO DE DOBLE TANQUE ANÁLOGO Y CON TYMER DIGITAL'],
+        ['reference' => 'TIPO 21', 'name' => 'FREIDORA DIGITAL CON TYMER DE UN TANQUE PARA DOS CANASTILLAS'],
+        ['reference' => 'TIPO 20', 'name' => 'FREIDORA DE MESA DOBLE TANQUE'],
+        ['reference' => 'TIPO 19', 'name' => 'FREIDORA DOBLE TANQUE ELÉCTRICA DE ALTO RENDIMIENTO'],
+        ['reference' => 'TIPO 18', 'name' => 'FREIDORA ANÁLOGA DOBLE TANQUE DE SOBRE PONER'],
+        ['reference' => 'TIPO 17', 'name' => 'FREIDORA ANÁLOGA DE 3 TANQUES Y DE ALTO RENDIMIENTO'],
+        ['reference' => 'TIPO 16', 'name' => 'FREIDORA INDUSTRIAL DE DOBLE TANQUE ANÁLOGA'],
+        ['reference' => 'TIPO 15', 'name' => 'FREIDORA INDUSTRIAL DE 25 LITROS CON MODO TURBO'],
+        ['reference' => 'TIPO 14', 'name' => 'FREIDORA INDUSTRIAL DIGITAL DE DOBLE TANQUE'],
+        ['reference' => 'TIPO 13', 'name' => 'FREIDORA INDUSTRIAL DE MESA'],
+        ['reference' => 'TIPO 12', 'name' => 'FREIDORA DE ALTO RENDIMIENTO DE 24 LITROS ANÁLOGA'],
+        ['reference' => 'TIPO 11', 'name' => 'FREIDORA DE ALTO RENDIMIENTO DE 24 LITROS CON ZONA DE ENFRIAMIENTO'],
+        ['reference' => 'TIPO 10', 'name' => 'FREIDORA DE DOBLE TANQUE ANÁLOGA CON CAPACIDAD DE 34 LITROS'],
+        ['reference' => 'TIPO 9', 'name' => 'FREIDORA DE DOBLE TANQUE CON CAPACIDAD DE 24 LITROS'],
+        ['reference' => 'TIPO 8', 'name' => 'FREIDORA BUÑUELERA'],
+        ['reference' => 'TIPO 7', 'name' => 'FREIDORA DOBLE CON FUNCIONAMIENTO SENCILLO'],
+        ['reference' => 'TIPO 6', 'name' => 'FREIDORA DE UN TANQUE CON SISTEMA MECÁNICO'],
+        ['reference' => 'TIPO 5', 'name' => 'FREIDORA DE ALTO RENDIMIENTO CON DOBLE TANQUE'],
+        ['reference' => 'TIPO 4', 'name' => 'FREIDORA DE 15 LITROS CON TERMOSTATO CONTROL DE TEMPERATURA'],
+        ['reference' => 'TIPO 3', 'name' => 'FREIDORA DE 40 LITROS CON SISTEMA DE TYMER DIGITAL'],
+        ['reference' => 'TIPO 2', 'name' => 'FREIDORA DE ALTO RENDIMIENTO DE 30 LITROS'],
+        ['reference' => 'TIPO 1', 'name' => 'FREIDORA DE ALTO RENDIMIENTO DE 15 LITROS'],
+    ],
+];
