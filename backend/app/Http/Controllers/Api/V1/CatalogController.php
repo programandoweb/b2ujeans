@@ -25,6 +25,11 @@ class CatalogController extends Controller
         );
     }
 
+    public function show(CatalogItem $catalogItem): JsonResponse
+    {
+        return response()->json(['data' => $catalogItem->load('category:id,name,slug')]);
+    }
+
     public function store(CatalogItemRequest $request): JsonResponse
     {
         $data = $this->publication($request->validated());
