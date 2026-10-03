@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -11,8 +12,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(GasproNotasSeeder::class);
-        $this->call(GoogleIndexedGasproNotasSeeder::class);
+        $this->runOnce(GasproNotasSeeder::class);
+        $this->runOnce(GoogleIndexedGasproNotasSeeder::class);
 
         $email = trim((string) env('ADMIN_EMAIL', ''));
         $password = (string) env('ADMIN_PASSWORD', '');
@@ -31,5 +32,26 @@ class DatabaseSeeder extends Seeder
 
         $role = Role::findOrCreate('admin', 'api');
         $user->syncRoles([$role]);
+    }
+
+    /**
+     * Ejecuta cada seeder una sola vez por base de datos.
+     */
+    private function runOnce(string $seederClass): void
+    {
+        if (DB::table('seeder_runs')->where('seeder', $seederClass)->exists()) {
+            $this->command?->info("Seeder omitido (ya ejecutado): {$seederClass}");
+
+            return;
+        }
+
+        DB::transaction(function () use ($seederClass): void {
+            $this->call($seederClass);
+
+            DB::table('seeder_runs')->insert([
+                'seeder' => $seederClass,
+                'executed_at' => now(),
+            ]);
+        });
     }
 }
