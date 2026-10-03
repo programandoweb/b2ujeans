@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function (): void {
         Route::delete('catalog/categories/{catalogCategory}', [CatalogController::class, 'destroyCategory']);
 
         Route::get('content/posts', [PostController::class, 'index']);
+        Route::get('content/posts/{post}', [PostController::class, 'show']);
         Route::post('content/posts', [PostController::class, 'store']);
         Route::put('content/posts/{post}', [PostController::class, 'update']);
         Route::delete('content/posts/{post}', [PostController::class, 'destroy']);
