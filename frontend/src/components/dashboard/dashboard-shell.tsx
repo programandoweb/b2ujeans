@@ -21,21 +21,25 @@ const navItems = [
     href: "/dashboard/catalogo",
     label: "Productos y servicios",
     icon: Boxes,
+    exact: false,
   },
   {
     href: "/dashboard/gaspro-notas",
     label: "Gaspro-notas",
     icon: BookOpen,
+    exact: false,
   },
   {
     href: "/dashboard/seo/redirecciones",
     label: "Redirecciones 301",
     icon: CornerDownRight,
+    exact: false,
   },
   {
     href: "/dashboard/configuracion",
     label: "Configuración",
     icon: Settings,
+    exact: false,
   },
 ] as const;
 
