@@ -73,6 +73,12 @@ echo "[nginx] Validando y recargando configuración..."
 compose exec -T backend-nginx nginx -t
 compose exec -T backend-nginx nginx -s reload
 
+echo "[realtime] Construyendo imagen NestJS..."
+compose build --pull realtime
+
+echo "[realtime] Publicando nueva imagen..."
+compose up -d --no-deps realtime
+
 echo "[frontend] Construyendo imagen Next.js..."
 compose build --pull frontend
 
@@ -82,6 +88,9 @@ compose up -d --no-deps frontend
 echo "[health] Backend..."
 compose exec -T backend-nginx wget -q -O - http://127.0.0.1/api/v1/health
 echo
+
+echo "[health] Realtime..."
+compose exec -T realtime node -e "fetch('http://127.0.0.1:4100/health').then(async r=>{if(!r.ok)process.exit(1);console.log(await r.text())}).catch(()=>process.exit(1))"
 
 echo "[health] Frontend..."
 compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/login
