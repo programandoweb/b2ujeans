@@ -3,11 +3,6 @@ set -Eeuo pipefail
 umask 077
 
 PROJECT_ROOT="/var/www/gaspronal.programandoweb.net"
-REPOSITORY="programandoweb/gaspronal"
-BRANCH="main"
-DEPLOY_KEY_DIR="/root/.ssh/gaspronal"
-DEPLOY_KEY="$DEPLOY_KEY_DIR/id_ed25519"
-SSH_CONFIG="/root/.ssh/config"
 DOCKER_ENV="$PROJECT_ROOT/.env.docker"
 BACKEND_ENV="$PROJECT_ROOT/backend/.env"
 FRONTEND_ENV="$PROJECT_ROOT/frontend/.env"
@@ -35,9 +30,9 @@ install_base_packages() {
   if command -v apt-get >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y ca-certificates curl git openssh-client openssl gh
+    apt-get install -y ca-certificates curl git openssh-client openssl
   elif command -v dnf >/dev/null 2>&1; then
-    dnf install -y ca-certificates curl git openssh-clients openssl gh
+    dnf install -y ca-certificates curl git openssh-clients openssl
   elif command -v yum >/dev/null 2>&1; then
     yum install -y ca-certificates curl git openssh-clients openssl gh
   else
@@ -57,90 +52,6 @@ install_docker() {
 
   docker version >/dev/null
   docker compose version >/dev/null
-}
-
-configure_github_access() {
-  log "Configurando acceso a GitHub..."
-
-  if ! gh auth status >/dev/null 2>&1; then
-    printf '\nSe abrirá el flujo oficial de autenticación de GitHub CLI.\n'
-    printf 'Autoriza una cuenta con acceso administrativo al repositorio %s.\n\n' "$REPOSITORY"
-    gh auth login --hostname github.com --git-protocol ssh --web
-  fi
-
-  gh repo view "$REPOSITORY" >/dev/null
-
-  mkdir -p "$DEPLOY_KEY_DIR" /root/.ssh
-  chmod 700 "$DEPLOY_KEY_DIR" /root/.ssh
-
-  if [[ ! -f "$DEPLOY_KEY" ]]; then
-    ssh-keygen -t ed25519 -C "gaspronal-autodeploy@$(hostname)" -f "$DEPLOY_KEY" -N ""
-  fi
-
-  chmod 600 "$DEPLOY_KEY"
-  chmod 644 "$DEPLOY_KEY.pub"
-
-  touch /root/.ssh/known_hosts
-  chmod 600 /root/.ssh/known_hosts
-  ssh-keygen -F github.com -f /root/.ssh/known_hosts >/dev/null 2>&1 || \
-    ssh-keyscan -t ed25519 github.com >> /root/.ssh/known_hosts 2>/dev/null
-
-  local key_title
-  key_title="gaspronal-$(hostname)"
-
-  if ! gh repo deploy-key list --repo "$REPOSITORY" | grep -Fq "$key_title"; then
-    gh repo deploy-key add "$DEPLOY_KEY.pub" \
-      --repo "$REPOSITORY" \
-      --title "$key_title"
-  else
-    log "La deploy key $key_title ya está registrada."
-  fi
-
-  if ! grep -q "^Host github-gaspronal$" "$SSH_CONFIG" 2>/dev/null; then
-    cat >> "$SSH_CONFIG" <<EOF
-
-Host github-gaspronal
-    HostName github.com
-    User git
-    IdentityFile $DEPLOY_KEY
-    IdentitiesOnly yes
-    StrictHostKeyChecking yes
-EOF
-  fi
-
-  chmod 600 "$SSH_CONFIG"
-}
-
-checkout_project() {
-  local repository_ssh
-  repository_ssh="git@github-gaspronal:${REPOSITORY}.git"
-
-  log "Descargando proyecto en $PROJECT_ROOT..."
-
-  mkdir -p "$(dirname "$PROJECT_ROOT")"
-
-  if [[ -d "$PROJECT_ROOT/.git" ]]; then
-    git -c safe.directory="$PROJECT_ROOT" -C "$PROJECT_ROOT" remote set-url origin "$repository_ssh"
-    GIT_SSH_COMMAND="ssh -F $SSH_CONFIG" git -c safe.directory="$PROJECT_ROOT" -C "$PROJECT_ROOT" fetch origin "$BRANCH"
-    git -c safe.directory="$PROJECT_ROOT" -C "$PROJECT_ROOT" checkout -B "$BRANCH" "origin/$BRANCH"
-    git -c safe.directory="$PROJECT_ROOT" -C "$PROJECT_ROOT" reset --hard "origin/$BRANCH"
-  else
-    if [[ -d "$PROJECT_ROOT" ]] && [[ -n "$(find "$PROJECT_ROOT" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
-      die "$PROJECT_ROOT existe y no está vacío ni es un repositorio Git."
-    fi
-
-    rm -rf "$PROJECT_ROOT"
-    GIT_SSH_COMMAND="ssh -F $SSH_CONFIG" git clone \
-      --branch "$BRANCH" \
-      --single-branch \
-      "$repository_ssh" \
-      "$PROJECT_ROOT"
-  fi
-
-  git -c safe.directory="$PROJECT_ROOT" -C "$PROJECT_ROOT" remote set-url origin "$repository_ssh"
-
-  chmod +x "$PROJECT_ROOT/scripts/deploy.sh"
-  chmod +x "$PROJECT_ROOT/scripts/bootstrap-vps.sh"
 }
 
 create_environment() {
@@ -290,17 +201,18 @@ initial_install() {
 
   log "Instalación inicial completada."
   printf '\nProyecto: %s\n' "$PROJECT_ROOT"
-  printf 'Repositorio: %s\n' "$REPOSITORY"
   printf 'Autodespliegue: %s/scripts/deploy.sh\n' "$PROJECT_ROOT"
-  printf 'Deploy key: %s.pub\n' "$DEPLOY_KEY"
 }
 
 main() {
   require_root
+
+  [[ -d "$PROJECT_ROOT/.git" ]] || die "No existe un repositorio Git preparado en $PROJECT_ROOT. Ejecuta primero el inicializador público."
+
+  chmod +x "$PROJECT_ROOT/scripts/bootstrap-vps.sh" "$PROJECT_ROOT/scripts/deploy.sh"
+
   install_base_packages
   install_docker
-  configure_github_access
-  checkout_project
   create_environment
   initial_install
 }
