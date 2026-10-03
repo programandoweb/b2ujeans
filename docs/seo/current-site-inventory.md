@@ -27,10 +27,10 @@ Este archivo es la matriz base de preservación SEO del sitio legado. Una URL hi
 - `/2019/productos/categoria/marmitas` — 6 fichas enlazadas.
 - `/2019/productos/categoria/freidoras-de-alto-rendimiento` — 22 fichas enlazadas.
 - `/2019/productos/categoria/fabricas-de-arepas` — 11 fichas enlazadas.
-- `/2019/productos/categoria/asadores-y-planchas-asadoras` — 32 fichas enlazadas.
+- `/2019/productos/categoria/asadores-y-planchas-asadoras` — 31 fichas enlazadas.
 - `/2019/productos/categoria/panaderia` — 6 fichas enlazadas.
 
-Total observado desde los índices de categorías: **306 fichas de producto**.
+Total con URL individual confirmada: **304 fichas de producto**. El índice reciente de Baño María anuncia un TIPO 12 adicional cuyo href de detalle no pudo resolverse desde el HTML rastreable; se conserva como anomalía pendiente y no se inventa su slug.
 
 Las fichas conservan la familia histórica `/2019/productos/{slug}`. Durante la migración del catálogo se debe comparar cada slug importado contra el enlace legado antes de publicar.
 
