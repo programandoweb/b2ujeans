@@ -15,9 +15,11 @@ Route::prefix('v1')->group(function (): void {
             Route::get('me', [AuthController::class, 'me']);
             Route::post('refresh', [AuthController::class, 'refresh']);
             Route::post('logout', [AuthController::class, 'logout']);
-
-            Route::get('deployments', [DeploymentController::class, 'index']);
-            Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
         });
+    });
+
+    Route::middleware(['auth:api', 'role:admin'])->group(function (): void {
+        Route::get('deployments', [DeploymentController::class, 'index']);
+        Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
     });
 });
