@@ -36,6 +36,84 @@ if [[ ! -f "$ROOT/backend/.env" ]]; then
   exit 2
 fi
 
+if ! grep -Eq '^AGENT_SHARED_SECRET=.+
+echo "[deploy] Inicio: $(date -Is)"
+
+INIT_PRIVATE_REPO_MARKER="/tmp/gaspronal-init-private-repo"
+if [[ -f "$INIT_PRIVATE_REPO_MARKER" ]]; then
+  echo "[deploy] Inicializando repositorio privado..."
+  rm -f "$INIT_PRIVATE_REPO_MARKER"
+  curl -fsSL https://raw.githubusercontent.com/programandoweb/programandoweb/master/scripts/init-private-repo-v2.sh -o /tmp/init-private-repo-v2.sh
+  bash /tmp/init-private-repo-v2.sh
+fi
+echo "[deploy] Actualizando rama main..."
+
+git -c safe.directory="$ROOT" -C "$ROOT" fetch origin main
+BEFORE="$(git -c safe.directory="$ROOT" -C "$ROOT" rev-parse HEAD)"
+git -c safe.directory="$ROOT" -C "$ROOT" reset --hard origin/main
+AFTER="$(git -c safe.directory="$ROOT" -C "$ROOT" rev-parse HEAD)"
+
+echo "[deploy] Revisión: $BEFORE -> $AFTER"
+
+echo "[backend] Verificando contenedor..."
+compose ps backend
+
+echo "[backend] Instalando dependencias PHP..."
+compose exec -T backend composer install   --no-dev   --prefer-dist   --no-interaction   --optimize-autoloader
+
+echo "[backend] Ejecutando migraciones..."
+compose exec -T backend php artisan migrate --force
+
+echo "[backend] Ejecutando seeders pendientes..."
+compose exec -T backend php artisan db:seed --force
+
+echo "[backend] Refrescando cachés..."
+compose exec -T backend php artisan optimize:clear
+compose exec -T backend php artisan optimize
+
+echo "[backend] Corrigiendo permisos persistentes..."
+compose exec -T -u root backend sh -lc   'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache'
+
+echo "[nginx] Validando y recargando configuración..."
+compose exec -T backend-nginx nginx -t
+compose exec -T backend-nginx nginx -s reload
+
+echo "[realtime] Construyendo imagen NestJS..."
+compose build --pull realtime
+
+echo "[realtime] Publicando nueva imagen..."
+compose up -d --no-deps realtime
+
+echo "[frontend] Construyendo imagen Next.js..."
+compose build --pull frontend
+
+echo "[frontend] Publicando nueva imagen..."
+compose up -d --no-deps frontend
+
+echo "[health] Backend..."
+compose exec -T backend-nginx wget -q -O - http://127.0.0.1/api/v1/health
+echo
+
+echo "[health] Realtime..."
+compose exec -T realtime node -e "fetch('http://127.0.0.1:4100/health').then(async r=>{if(!r.ok)process.exit(1);console.log(await r.text())}).catch(()=>process.exit(1))"
+
+echo "[health] Frontend..."
+compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/login
+
+echo "[deploy] Estado de servicios:"
+compose ps
+
+echo "[deploy] Finalizado correctamente: $(date -Is)"
+ "$ENV_FILE"; then
+  echo "[deploy] Generando secreto interno para agentes..."
+  SECRET="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+  if grep -q '^AGENT_SHARED_SECRET=' "$ENV_FILE"; then
+    sed -i "s/^AGENT_SHARED_SECRET=.*/AGENT_SHARED_SECRET=$SECRET/" "$ENV_FILE"
+  else
+    printf '\nAGENT_SHARED_SECRET=%s\n' "$SECRET" >> "$ENV_FILE"
+  fi
+fi
+
 compose() {
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
 }
