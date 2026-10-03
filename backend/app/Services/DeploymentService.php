@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Deployment;
+use Illuminate\Support\Facades\Process;
+use RuntimeException;
+
+class DeploymentService
+{
+    public function publicConfiguration(): array
+    {
+        $script = trim((string) config('deployment.script', ''));
+
+        return [
+            'enabled' => (bool) config('deployment.enabled', false),
+            'ready' => (bool) config('deployment.enabled', false)
+                && $script !== ''
+                && is_file($script),
+            'script_name' => $script !== '' ? basename($script) : null,
+        ];
+    }
+
+    public function launch(Deployment $deployment): void
+    {
+        $php = trim((string) config('deployment.php_binary', 'php8.2'));
+
+        if ($php === '') {
+            throw new RuntimeException('No hay un binario PHP configurado para iniciar el despliegue.');
+        }
+
+        $command = sprintf(
+            'nohup %s %s deployment:run %d >/dev/null 2>&1 &',
+            escapeshellarg($php),
+            escapeshellarg(base_path('artisan')),
+            $deployment->id,
+        );
+
+        $result = Process::path(base_path())->timeout(10)->run($command);
+
+        if ($result->failed()) {
+            throw new RuntimeException('No fue posible iniciar el proceso de despliegue.');
+        }
+    }
+
+    public function run(Deployment $deployment): void
+    {
+        $script = trim((string) config('deployment.script', ''));
+
+        if (! (bool) config('deployment.enabled', false) || $script === '' || ! is_file($script)) {
+            throw new RuntimeException('El script de despliegue no está disponible.');
+        }
+
+        $deployment->update([
+            'status' => 'running',
+            'started_at' => now(),
+            'failure_message' => null,
+        ]);
+
+        $timeout = max(60, (int) config('deployment.timeout', 900));
+        $command = 'bash '.escapeshellarg($script);
+
+        $result = Process::path(dirname($script))
+            ->timeout($timeout)
+            ->run($command);
+
+        $output = trim($result->output().PHP_EOL.$result->errorOutput());
+
+        $deployment->update([
+            'status' => $result->successful() ? 'succeeded' : 'failed',
+            'finished_at' => now(),
+            'exit_code' => $result->exitCode(),
+            'output' => mb_substr($output, 0, 100000),
+            'failure_message' => $result->successful() ? null : 'El script de despliegue terminó con errores.',
+        ]);
+    }
+}
