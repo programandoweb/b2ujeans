@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\AgentSettingController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\SeoRedirectController;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('health', HealthController::class);
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
+    Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
 
     Route::prefix('auth')->group(function (): void {
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -26,6 +28,8 @@ Route::prefix('v1')->group(function (): void {
 
     Route::middleware(['auth:api', 'role:admin'])->group(function (): void {
         Route::get('deployments', [DeploymentController::class, 'index']);
+        Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
+        Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
 
         Route::get('catalog/items', [CatalogController::class, 'index']);
