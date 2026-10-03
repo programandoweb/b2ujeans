@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import { BookOpen, Boxes, CornerDownRight, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
@@ -16,6 +16,21 @@ const navItems = [
     label: "Dashboard",
     icon: LayoutDashboard,
     exact: true,
+  },
+  {
+    href: "/dashboard/catalogo",
+    label: "Productos y servicios",
+    icon: Boxes,
+  },
+  {
+    href: "/dashboard/gaspro-notas",
+    label: "Gaspro-notas",
+    icon: BookOpen,
+  },
+  {
+    href: "/dashboard/seo/redirecciones",
+    label: "Redirecciones 301",
+    icon: CornerDownRight,
   },
   {
     href: "/dashboard/configuracion",
