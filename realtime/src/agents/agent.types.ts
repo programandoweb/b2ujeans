@@ -18,5 +18,5 @@ export type AgentResponse = {
   requestId: string;
   agent: AgentSummary;
   message: string;
-  status: "placeholder";
+  status: "completed" | "configuration_required";
 };
