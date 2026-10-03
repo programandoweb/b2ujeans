@@ -76,13 +76,17 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <aside className="relative hidden overflow-hidden bg-neutral-950 text-white lg:flex lg:min-h-screen lg:items-end">
-        <div className="absolute inset-0 opacity-60"><div className="absolute -left-24 top-24 h-72 w-72 rounded-full border border-white/10" /><div className="absolute left-12 top-40 h-96 w-96 rounded-full border border-white/10" /><div className="absolute bottom-[-180px] right-[-80px] h-[520px] w-[520px] rounded-full border border-white/10" /></div>
+      <aside className="relative hidden min-h-screen overflow-hidden bg-neutral-950 text-white lg:flex lg:items-end">
+        <img
+          src="/api/media/login-programandoweb"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
         <div className="relative z-10 max-w-2xl p-14 xl:p-20">
-          <div className="mb-7 grid size-14 place-items-center rounded-2xl border border-white/15 bg-white/10"><Flame size={26} /></div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/50">Gestión digital Gaspronal</p>
-          <h2 className="mt-4 text-4xl font-bold leading-tight xl:text-5xl">Una plataforma moderna para administrar un activo construido durante años.</h2>
-          <p className="mt-5 max-w-xl text-base leading-7 text-white/60">Catálogo, contenido, oportunidades y operación digital desde un entorno centralizado.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Gestión digital Gaspronal</p>
+          <h2 className="mt-4 text-4xl font-bold leading-tight drop-shadow-sm xl:text-5xl">Una plataforma moderna para administrar un activo construido durante años.</h2>
+          <p className="mt-5 max-w-xl text-base leading-7 text-white/75">Catálogo, contenido, oportunidades y operación digital desde un entorno centralizado.</p>
         </div>
       </aside>
     </main>
