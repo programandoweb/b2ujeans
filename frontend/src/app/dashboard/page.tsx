@@ -1,42 +1,31 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { backendFetch } from "@/lib/backend";
+import Link from "next/link";
+import { ArrowRight, Settings } from "lucide-react";
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("gaspronal_access_token")?.value;
-
-  if (!token) {
-    redirect("/login");
-  }
-
-  const response = await backendFetch("/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    redirect("/login");
-  }
-
-  const { data: user } = await response.json();
-
+export default function DashboardPage() {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <header className="border-b border-neutral-200 pb-5">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em]">Dashboard restringido</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Gaspronal</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          Sesión activa: {user.name} · {user.email}
-        </p>
-      </header>
-
-      <section className="py-8">
-        <p className="text-neutral-600">
-          Foundation administrativa lista para comenzar los módulos de catálogo, contenido y CRM.
+    <div className="mx-auto w-full max-w-7xl space-y-7">
+      <section>
+        <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Gaspronal</span>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Dashboard</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)] sm:text-base">
+          Base administrativa de la nueva plataforma. Los módulos comerciales se incorporarán progresivamente.
         </p>
       </section>
-    </main>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="grid size-11 place-items-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+            <Settings size={21} />
+          </div>
+          <h2 className="mt-5 font-semibold">Configuración</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            Administración técnica y autodespliegue del proyecto.
+          </p>
+          <Link href="/dashboard/configuracion" className="mt-5 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[var(--brand)]">
+            Abrir configuración <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+    </div>
   );
 }
