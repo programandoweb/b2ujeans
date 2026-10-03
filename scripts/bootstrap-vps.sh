@@ -224,7 +224,7 @@ initial_install() {
 
   log "Preparando directorios Laravel..."
   compose exec -T -u root backend sh -lc \
-    'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache'
+    'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache resources/views && chown -R www-data:www-data storage bootstrap/cache resources/views && chmod -R ug+rwX storage bootstrap/cache resources/views'
 
   log "Instalando backend Laravel..."
   compose exec -T backend composer install \
