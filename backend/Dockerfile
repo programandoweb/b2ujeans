@@ -38,7 +38,7 @@ RUN mkdir -p \
         bootstrap/cache \
     && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
     && chown -R www-data:www-data storage bootstrap/cache \
-    && printf '#!/bin/sh\nexec /bin/bash /var/www/gaspronal/scripts/deploy.sh\n' > /usr/local/bin/gaspronal-deploy \
+    && printf '#!/bin/sh\nexec /bin/bash /var/www/gaspronal.programandoweb.net/scripts/deploy.sh\n' > /usr/local/bin/gaspronal-deploy \
     && chmod 0755 /usr/local/bin/gaspronal-deploy \
     && printf 'www-data ALL=(root) NOPASSWD: /usr/local/bin/gaspronal-deploy\n' > /etc/sudoers.d/gaspronal-deploy \
     && chmod 0440 /etc/sudoers.d/gaspronal-deploy
