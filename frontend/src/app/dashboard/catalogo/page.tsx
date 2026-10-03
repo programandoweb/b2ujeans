@@ -75,13 +75,13 @@ export default function CatalogPage(){
       <div className="space-y-5">
         <form onSubmit={createItem} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
           <div className="flex items-center gap-2"><Plus size={18}/><h2 className="font-semibold">Nuevo elemento</h2></div>
-          <select value={form.type} onChange={e=>setForm({...form,type:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="product">Producto</option><option value="service">Servicio</option></select>
+          <select value={form.type} onChange={e=>setForm({...form,type:e.target.value as CatalogForm["type"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="product">Producto</option><option value="service">Servicio</option></select>
           <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value,slug:slugify(e.target.value)})} placeholder="Nombre" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
           <input value={form.reference} onChange={e=>setForm({...form,reference:e.target.value})} placeholder="Referencia / tipo" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
           <input required value={form.slug} onChange={e=>setForm({...form,slug:slugify(e.target.value)})} placeholder="slug" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
           <select value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="">Sin categoría</option>{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>
           <textarea value={form.short_description} onChange={e=>setForm({...form,short_description:e.target.value})} placeholder="Descripción corta" rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
-          <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select>
+          <select value={form.status} onChange={e=>setForm({...form,status:e.target.value as CatalogForm["status"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select>
           <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white"><Save size={17}/>Guardar</button>
         </form>
 
