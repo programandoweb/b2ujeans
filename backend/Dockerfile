@@ -10,6 +10,7 @@ RUN apk add --no-cache \
     bash \
     curl \
     git \
+    openssh-client \
     sudo \
     docker-cli \
     docker-cli-compose \
