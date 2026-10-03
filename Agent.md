@@ -283,6 +283,18 @@ La analítica no debe bloquear la navegación ni degradar Core Web Vitals.
 - estados de carga y error.
 - no sacrificar SEO por convertir innecesariamente páginas públicas en Client Components.
 
+### Organización de assets del frontend
+
+- `frontend/src/app/` se reserva para rutas, layouts, componentes de ruta y archivos especiales reconocidos por Next.js.
+- No dejar imágenes, SVG o iconos genéricos sueltos dentro de `frontend/src/app/`.
+- Excepción: archivos especiales que Next.js requiere por convención en esa ubicación, por ejemplo `favicon.ico`, `icon.*`, `apple-icon.*`, `opengraph-image.*` o `twitter-image.*` cuando realmente se utilicen.
+- Los assets públicos reutilizables deben vivir bajo `frontend/public/programandoweb/` agrupados por propósito.
+- Estructura recomendada: `brand/` para logos e identidad, `auth/` para recursos de autenticación, `icons/` para iconografía estática y carpetas de feature cuando exista un dominio claro.
+- No duplicar variantes de favicon, PWA o branding si no están referenciadas por metadata, manifest o código.
+- Antes de agregar un asset, comprobar si ya existe una versión equivalente y reutilizarla.
+- SVG propios deben almacenarse como assets organizados o convertirse en componentes solo cuando necesiten manipulación dinámica; no dispersarlos entre rutas.
+- Los assets del backend destinados a correos o recursos servidos por Laravel deben permanecer bajo `backend/public/programandoweb/`, organizados por propósito y con rutas documentadas.
+
 ## 13. Rendimiento
 
 El sitio debe priorizar rendimiento real en móvil.
