@@ -40,6 +40,7 @@ export function DeploymentPanel() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [initializePrivateRepo, setInitializePrivateRepo] = useState(false);
 
   const load = useCallback(async () => {
     const response = await fetch("/api/deployments", { cache: "no-store" });
@@ -61,7 +62,11 @@ export function DeploymentPanel() {
     if (!window.confirm("Se actualizará y desplegará Gaspronal usando el script configurado en el servidor. ¿Deseas continuar?")) return;
     setStarting(true);
     setMessage(null);
-    const response = await fetch("/api/deployments", { method: "POST" });
+    const response = await fetch("/api/deployments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initialize_private_repo: initializePrivateRepo }),
+    });
     const result = await response.json().catch(() => ({}));
     setStarting(false);
     setMessage(response.ok ? "Despliegue iniciado correctamente." : (result.message ?? "No fue posible iniciar el despliegue."));
@@ -81,9 +86,15 @@ export function DeploymentPanel() {
           <h2 className="mt-2 text-xl font-bold">Despliegue desde el servidor</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Ejecuta el script privado del VPS directamente desde Gaspronal. No utiliza GitHub Actions ni consume créditos de ejecución.</p>
         </div>
-        <button onClick={deploy} disabled={!ready || Boolean(active) || starting} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--brand-hover)] disabled:cursor-not-allowed disabled:opacity-45">
-          <Rocket size={18} />{starting ? "Iniciando…" : active ? "Desplegando…" : "Desplegar ahora"}
-        </button>
+        <div className="flex shrink-0 flex-col items-stretch gap-3">
+          <button onClick={deploy} disabled={!ready || Boolean(active) || starting} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--brand-hover)] disabled:cursor-not-allowed disabled:opacity-45">
+            <Rocket size={18} />{starting ? "Iniciando…" : active ? "Desplegando…" : "Desplegar ahora"}
+          </button>
+          <label className="flex max-w-sm items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--app-bg)] p-3 text-xs leading-5 text-[var(--muted)]">
+            <input type="checkbox" checked={initializePrivateRepo} onChange={e=>setInitializePrivateRepo(e.target.checked)} disabled={Boolean(active) || starting} className="mt-0.5 size-4 accent-[var(--brand)]"/>
+            <span><strong className="text-[var(--foreground)]">Inicializar repositorio privado antes de desplegar</strong><br/>Opción avanzada. Está desmarcada por defecto.</span>
+          </label>
+        </div>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2 text-xs">
