@@ -1,0 +1,66 @@
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from "@nestjs/websockets";
+import { ForbiddenException } from "@nestjs/common";
+import type { Server, Socket } from "socket.io";
+import { AgentRegistryService } from "./agent-registry.service";
+import { AgentRuntimeService } from "./agent-runtime.service";
+import type { AgentMessageInput } from "./agent.types";
+
+@WebSocketGateway({
+  namespace: "/agents",
+  cors: { origin: process.env.CORS_ORIGIN?.split(",").map(v => v.trim()).filter(Boolean) || true },
+})
+export class AgentGateway implements OnGatewayConnection {
+  @WebSocketServer()
+  server!: Server;
+
+  constructor(
+    private readonly registry: AgentRegistryService,
+    private readonly runtime: AgentRuntimeService,
+  ) {}
+
+  handleConnection(client: Socket): void {
+    try {
+      this.authorize(client);
+      client.emit("agent:ready", { transport: "socket.io" });
+      client.emit("agent:list", this.registry.list());
+    } catch {
+      client.emit("agent:error", { message: "No autorizado." });
+      client.disconnect(true);
+    }
+  }
+
+  @SubscribeMessage("agent:list")
+  list(@ConnectedSocket() client: Socket): void {
+    this.authorize(client);
+    client.emit("agent:list", this.registry.list());
+  }
+
+  @SubscribeMessage("agent:message")
+  message(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: AgentMessageInput & { agentId?: string },
+  ): void {
+    try {
+      this.authorize(client);
+      const result = this.runtime.execute(String(payload.agentId ?? ""), payload);
+      client.emit("agent:response", result);
+    } catch (error) {
+      client.emit("agent:error", { message: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
+  private authorize(client: Socket): void {
+    const secret = process.env.AGENT_SHARED_SECRET?.trim();
+    if (!secret) return;
+
+    const token = String(client.handshake.auth?.token ?? "").trim();
+    if (token !== secret) throw new ForbiddenException();
+  }
+}
