@@ -133,7 +133,13 @@ EOF
 repair_backend_env() {
   [[ -f "$BACKEND_ENV" ]] || return
 
-  if grep -q '^ADMIN_NAME=Administrador Gaspronal
+  if grep -q '^ADMIN_NAME=Administrador Gaspronal$' "$BACKEND_ENV"; then
+    log "Corrigiendo ADMIN_NAME en backend/.env..."
+    sed -i 's/^ADMIN_NAME=Administrador Gaspronal$/ADMIN_NAME="Administrador Gaspronal"/' "$BACKEND_ENV"
+  fi
+}
+
+port_in_use() {
   local port="$1"
   ss -H -ltn 2>/dev/null | awk '{print $4}' | grep -Eq "(^|:)$port$"
 }
