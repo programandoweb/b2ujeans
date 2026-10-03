@@ -10,6 +10,7 @@ class Deployment extends Model
     protected $fillable = [
         'status',
         'requested_by',
+        'initialize_private_repo',
         'started_at',
         'finished_at',
         'exit_code',
@@ -22,6 +23,7 @@ class Deployment extends Model
         return [
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
+            'initialize_private_repo' => 'boolean',
         ];
     }
 
