@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\AgentSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
 
 class AgentSettingController extends Controller
