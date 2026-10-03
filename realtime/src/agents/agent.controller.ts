@@ -17,13 +17,13 @@ export class AgentController {
   }
 
   @Post(":id/messages")
-  message(
+  async message(
     @Param("id") id: string,
     @Body() payload: AgentMessageInput,
     @Headers("authorization") authorization?: string,
   ) {
     this.authorize(authorization);
-    return { data: this.runtime.execute(id, payload) };
+    return { data: await this.runtime.execute(id, payload) };
   }
 
   private authorize(authorization?: string): void {
