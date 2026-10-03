@@ -29,6 +29,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
 
         Route::get('catalog/items', [CatalogController::class, 'index']);
+        Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show']);
         Route::post('catalog/items', [CatalogController::class, 'store']);
         Route::put('catalog/items/{catalogItem}', [CatalogController::class, 'update']);
         Route::delete('catalog/items/{catalogItem}', [CatalogController::class, 'destroy']);
