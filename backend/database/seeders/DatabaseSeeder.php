@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(GasproNotasSeeder::class);
+        $this->call(GoogleIndexedGasproNotasSeeder::class);
 
         $email = trim((string) env('ADMIN_EMAIL', ''));
         $password = (string) env('ADMIN_PASSWORD', '');
