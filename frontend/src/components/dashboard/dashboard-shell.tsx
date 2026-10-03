@@ -35,14 +35,12 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
 
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col border-r border-[var(--border)] bg-[var(--sidebar)] text-white transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-          <Link href="/dashboard" className="flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
-            <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 font-black tracking-tight">
-              G
-            </div>
-            <div className="min-w-0">
-              <strong className="block truncate text-base tracking-[0.08em]">GASPRONAL</strong>
-              <span className="block truncate text-xs text-white/60">Administración</span>
-            </div>
+          <Link href="/dashboard" className="flex min-w-0 flex-1 items-center" onClick={() => setOpen(false)} aria-label="Ir al dashboard de Gaspronal">
+            <img
+              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
+              alt="Gaspronal"
+              className="h-auto max-h-12 w-auto max-w-[200px] object-contain object-left"
+            />
           </Link>
           <button className="grid size-10 place-items-center rounded-lg text-white/70 hover:bg-white/10 lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar menú">
             <X size={20} />
