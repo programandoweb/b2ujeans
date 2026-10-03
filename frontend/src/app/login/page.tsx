@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Flame, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -39,9 +39,13 @@ export default function LoginPage() {
     <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,0.9fr)_minmax(520px,1.1fr)]">
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-md">
-          <div className="mb-10 flex items-center gap-3">
-            <div className="grid size-11 place-items-center rounded-xl bg-neutral-950 text-white"><Flame size={22} /></div>
-            <div><strong className="block tracking-[0.12em]">GASPRONAL</strong><span className="text-xs text-neutral-500">Panel administrativo</span></div>
+          <div className="mb-10">
+            <img
+              src="/programandoweb/brand/main-logo-programandoweb.png"
+              alt="Gaspronal"
+              className="h-auto max-h-20 w-auto max-w-[280px] object-contain object-left"
+            />
+            <span className="mt-2 block text-xs text-neutral-500">Panel administrativo</span>
           </div>
 
           <div>
