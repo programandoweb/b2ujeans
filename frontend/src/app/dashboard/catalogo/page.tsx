@@ -5,8 +5,9 @@ import { Plus, Save, Trash2 } from "lucide-react";
 
 type Category={id:number;name:string;slug:string};
 type Item={id:number;type:"product"|"service";name:string;slug:string;reference?:string|null;status:string;public_url:string;category?:Category|null};
+type CatalogForm={type:"product"|"service";name:string;reference:string;slug:string;category_id:string;short_description:string;description:string;status:"draft"|"published"|"archived"};
 
-const initial={type:"product",name:"",reference:"",slug:"",category_id:"",short_description:"",description:"",status:"draft"};
+const initial:CatalogForm={type:"product",name:"",reference:"",slug:"",category_id:"",short_description:"",description:"",status:"draft"};
 
 function slugify(v:string){return v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
 
@@ -14,7 +15,7 @@ export default function CatalogPage(){
   const [items,setItems]=useState<Item[]>([]);
   const [categories,setCategories]=useState<Category[]>([]);
   const [filter,setFilter]=useState<"all"|"product"|"service">("all");
-  const [form,setForm]=useState<any>(initial);
+  const [form,setForm]=useState<CatalogForm>(initial);
   const [categoryName,setCategoryName]=useState("");
   const [message,setMessage]=useState("");
 
