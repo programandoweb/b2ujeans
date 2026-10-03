@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BookOpen, Boxes, CornerDownRight, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import { Bot, BookOpen, Boxes, CornerDownRight, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
@@ -27,6 +27,12 @@ const navItems = [
     href: "/dashboard/gaspro-notas",
     label: "Gaspro-notas",
     icon: BookOpen,
+    exact: false,
+  },
+  {
+    href: "/dashboard/agentes",
+    label: "Agentes",
+    icon: Bot,
     exact: false,
   },
   {
