@@ -1,0 +1,114 @@
+name: gaspronal
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: gaspronal-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-gaspronal}
+      MARIADB_USER: ${DB_USERNAME:-gaspronal}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-gaspronal_change_me}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-gaspronal_root_change_me}
+    volumes:
+      - gaspronal_mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$$MARIADB_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - gaspronal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: gaspronal/backend:latest
+    container_name: gaspronal-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-gaspronal}
+      DB_USERNAME: ${DB_USERNAME:-gaspronal}
+      DB_PASSWORD: ${DB_PASSWORD:-gaspronal_change_me}
+      DEPLOYMENT_ENABLED: "true"
+      DEPLOYMENT_SCRIPT: /var/www/gaspronal/scripts/deploy.sh
+      DEPLOYMENT_USE_SUDO: "true"
+      DEPLOYMENT_TIMEOUT: ${DEPLOYMENT_TIMEOUT:-1800}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - ./backend:/var/www/html
+      - gaspronal_backend_vendor:/var/www/html/vendor
+      - gaspronal_backend_storage:/var/www/html/storage
+      - /var/www/gaspronal:/var/www/gaspronal
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:-999}"
+    networks:
+      - gaspronal
+
+  backend-nginx:
+    image: nginx:1.27-alpine
+    container_name: gaspronal-backend-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${BACKEND_PORT:-8080}:80"
+    volumes:
+      - ./backend/public:/var/www/html/public:ro
+      - ./backend/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/api/v1/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - gaspronal
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    image: gaspronal/frontend:latest
+    container_name: gaspronal-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      LARAVEL_API_URL: http://backend-nginx
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    depends_on:
+      backend-nginx:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/login || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - gaspronal
+
+volumes:
+  gaspronal_mariadb:
+  gaspronal_backend_vendor:
+  gaspronal_backend_storage:
+
+networks:
+  gaspronal:
+    name: gaspronal
