@@ -209,8 +209,6 @@ main() {
 
   [[ -d "$PROJECT_ROOT/.git" ]] || die "No existe un repositorio Git preparado en $PROJECT_ROOT. Ejecuta primero el inicializador público."
 
-  chmod +x "$PROJECT_ROOT/scripts/bootstrap-vps.sh" "$PROJECT_ROOT/scripts/deploy.sh"
-
   install_base_packages
   install_docker
   create_environment
