@@ -5,20 +5,21 @@ import { FileText, Save, Trash2 } from "lucide-react";
 
 type Category={id:number;name:string;slug:string};
 type Post={id:number;title:string;status:string;public_url:string;category?:Category|null};
+type PostForm={title:string;slug:string;excerpt:string;content:string;category_id:string;status:"draft"|"published"|"archived"};
 
 function slugify(v:string){return v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
 
 export default function NotesPage(){
   const [posts,setPosts]=useState<Post[]>([]);
   const [categories,setCategories]=useState<Category[]>([]);
-  const [form,setForm]=useState<any>({title:"",slug:"",excerpt:"",content:"",category_id:"",status:"draft"});
+  const [form,setForm]=useState<PostForm>({title:"",slug:"",excerpt:"",content:"",category_id:"",status:"draft"});
   const [message,setMessage]=useState("");
 
   async function load(){
     const [a,b]=await Promise.all([fetch("/api/admin/content/posts"),fetch("/api/admin/content/post-categories")]);
     const aj=await a.json(); const bj=await b.json();
     setPosts(aj.data??[]); setCategories(bj.data??[]);
-    setForm((current:any)=>({...current,category_id:current.category_id||String(bj.data?.[0]?.id??"")}));
+    setForm(current=>({...current,category_id:current.category_id||String(bj.data?.[0]?.id??"")}));
   }
 
   useEffect(()=>{void load();},[]);
