@@ -48,7 +48,7 @@ export default function NotesPage(){
         <select required value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>
         <textarea value={form.excerpt} onChange={e=>setForm({...form,excerpt:e.target.value})} placeholder="Resumen" rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
         <textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} placeholder="Contenido" rows={8} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
-        <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select>
+        <select value={form.status} onChange={e=>setForm({...form,status:e.target.value as PostForm["status"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select>
         <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white"><Save size={17}/>Guardar</button>
       </form>
     </section>
