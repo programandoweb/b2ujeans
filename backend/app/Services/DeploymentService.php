@@ -23,7 +23,7 @@ class DeploymentService
 
     public function launch(Deployment $deployment): void
     {
-        $php = trim((string) config('deployment.php_binary', 'php8.2'));
+        $php = trim((string) config('deployment.php_binary', 'php'));
 
         if ($php === '') {
             throw new RuntimeException('No hay un binario PHP configurado para iniciar el despliegue.');
@@ -57,8 +57,11 @@ class DeploymentService
             'failure_message' => null,
         ]);
 
-        $timeout = max(60, (int) config('deployment.timeout', 900));
-        $command = 'bash '.escapeshellarg($script);
+        $timeout = max(60, (int) config('deployment.timeout', 1800));
+
+        $command = (bool) config('deployment.use_sudo', false)
+            ? 'sudo -n '.escapeshellarg((string) config('deployment.sudo_command', '/usr/local/bin/gaspronal-deploy'))
+            : 'bash '.escapeshellarg($script);
 
         $result = Process::path(dirname($script))
             ->timeout($timeout)
