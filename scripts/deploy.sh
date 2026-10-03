@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-ROOT="/var/www/gaspronal"
+ROOT="/var/www/gaspronal.programandoweb.net"
 COMPOSE_FILE="$ROOT/docker-compose.yml"
 ENV_FILE="$ROOT/.env.docker"
 LOCK_DIR="/tmp/gaspronal-deploy.lock"
@@ -54,11 +54,7 @@ echo "[backend] Verificando contenedor..."
 compose ps backend
 
 echo "[backend] Instalando dependencias PHP..."
-compose exec -T backend composer install \
-  --no-dev \
-  --prefer-dist \
-  --no-interaction \
-  --optimize-autoloader
+compose exec -T backend composer install   --no-dev   --prefer-dist   --no-interaction   --optimize-autoloader
 
 echo "[backend] Ejecutando migraciones..."
 compose exec -T backend php artisan migrate --force
@@ -68,8 +64,7 @@ compose exec -T backend php artisan optimize:clear
 compose exec -T backend php artisan optimize
 
 echo "[backend] Corrigiendo permisos persistentes..."
-compose exec -T -u root backend sh -lc \
-  'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache'
+compose exec -T -u root backend sh -lc   'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache'
 
 echo "[nginx] Validando y recargando configuración..."
 compose exec -T backend-nginx nginx -t
