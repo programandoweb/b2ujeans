@@ -49,7 +49,7 @@ class PostController extends Controller
             'description' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ]);
-        $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
+        $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
         return response()->json(['data' => PostCategory::create($data)], 201);
     }
 
