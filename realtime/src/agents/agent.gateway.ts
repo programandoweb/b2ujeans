@@ -7,6 +7,7 @@ import {
   WebSocketServer,
 } from "@nestjs/websockets";
 import { ForbiddenException } from "@nestjs/common";
+import { verifySocketToken } from "../socket-auth";
 import type { Server, Socket } from "socket.io";
 import { AgentRegistryService } from "./agent-registry.service";
 import { AgentRuntimeService } from "./agent-runtime.service";
@@ -43,13 +44,13 @@ export class AgentGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage("agent:message")
-  message(
+  async message(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: AgentMessageInput & { agentId?: string },
-  ): void {
+  ): Promise<void> {
     try {
       this.authorize(client);
-      const result = this.runtime.execute(String(payload.agentId ?? ""), payload);
+      const result = await this.runtime.execute(String(payload.agentId ?? ""), payload);
       client.emit("agent:response", result);
     } catch (error) {
       client.emit("agent:error", { message: error instanceof Error ? error.message : String(error) });
@@ -61,6 +62,10 @@ export class AgentGateway implements OnGatewayConnection {
     if (!secret) return;
 
     const token = String(client.handshake.auth?.token ?? "").trim();
-    if (token !== secret) throw new ForbiddenException();
+    try {
+      verifySocketToken(token, secret);
+    } catch {
+      throw new ForbiddenException();
+    }
   }
 }
