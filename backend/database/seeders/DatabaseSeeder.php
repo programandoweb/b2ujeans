@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->runOnce(GasproNotasSeeder::class);
         $this->runOnce(GoogleIndexedGasproNotasSeeder::class);
         $this->runOnce(LegacyProductsSeeder::class);
+        $this->runOnce(LegacyServicesSeeder::class);
 
         $email = trim((string) env('ADMIN_EMAIL', ''));
         $password = (string) env('ADMIN_PASSWORD', '');
