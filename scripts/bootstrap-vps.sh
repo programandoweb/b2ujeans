@@ -222,6 +222,10 @@ initial_install() {
     sleep 2
   done
 
+  log "Preparando directorios Laravel..."
+  compose exec -T -u root backend sh -lc \
+    'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache'
+
   log "Instalando backend Laravel..."
   compose exec -T backend composer install \
     --no-dev \
@@ -243,7 +247,7 @@ initial_install() {
   compose exec -T backend php artisan optimize
 
   compose exec -T -u root backend sh -lc \
-    'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache'
+    'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache'
 
   log "Iniciando frontend Next.js..."
   compose up -d frontend
