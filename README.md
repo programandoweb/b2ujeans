@@ -28,6 +28,19 @@ Se preservarán como punto de partida:
 - **SEO:** metadatos dinámicos, JSON-LD, sitemap, canonical, Open Graph y redirecciones 301.
 - **Integraciones:** WhatsApp, mapas, analítica y proveedores externos mediante adaptadores.
 
+## Recuperación de contraseña
+
+El flujo utiliza el Password Broker estándar de Laravel:
+
+- `POST /api/v1/auth/forgot-password`: respuesta neutra y rate limit de 5 solicitudes cada 15 minutos por IP/correo.
+- `POST /api/v1/auth/reset-password`: valida token, correo, contraseña y confirmación; el token usado queda invalidado.
+- Frontend público: `/forgot-password` y `/reset-password?token=...&email=...`.
+- Correo Blade: `resources/views/emails/auth/reset-password.blade.php`.
+- Imagen definitiva: `backend/public/images/programandoweb/default/recover.png`; mientras no exista se muestra un fallback.
+- Configuración: `FRONTEND_URL` y variables `MAIL_*` estándar. Tras cambiar el `.env` en producción ejecutar `php artisan optimize:clear`.
+
+El JWT actual no dispone de blacklist/revocación global por cambio de contraseña. El reset no inventa un mecanismo paralelo: los JWT previamente emitidos conservan su vigencia configurada; los nuevos inicios de sesión requieren la contraseña nueva.
+
 ## Principio UX
 
 La experiencia móvil es prioritaria. No basta con que el sitio "responda" a diferentes anchos: cada flujo público y administrativo debe diseñarse y validarse específicamente para teléfonos.

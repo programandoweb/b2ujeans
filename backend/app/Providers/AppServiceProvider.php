@@ -9,15 +9,16 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
     public function boot(): void
     {
         RateLimiter::for('login', function (Request $request): Limit {
             return Limit::perMinute(5)->by(strtolower((string) $request->input('email')).'|'.$request->ip());
+        });
+
+        RateLimiter::for('password-reset', function (Request $request): Limit {
+            return Limit::perMinutes(15, 5)->by(strtolower((string) $request->input('email')).'|'.$request->ip());
         });
     }
 }

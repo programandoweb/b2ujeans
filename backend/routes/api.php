@@ -10,6 +10,8 @@ Route::prefix('v1')->group(function (): void {
 
     Route::prefix('auth')->group(function (): void {
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-reset');
+        Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password-reset');
 
         Route::middleware('auth:api')->group(function (): void {
             Route::get('me', [AuthController::class, 'me']);
