@@ -2,22 +2,27 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-  --app-bg: #f6f7f8;
-  --app-fg: #171717;
+  --foreground: #163247;
+  --app-bg: #f4f8fb;
+  --app-fg: #163247;
   --surface: #ffffff;
-  --muted: #667085;
-  --border: #e5e7eb;
-  --sidebar: #171717;
-  --brand: #171717;
-  --brand-soft: #f1f2f4;
-}
+  --surface-muted: #eef5fa;
+  --muted: #627486;
+  --border: #d8e4ec;
 
-/*
- * La identidad cromática definitiva debe extraerse de los activos/CSS
- * vigentes de Gaspronal. Esta foundation usa únicamente neutros coherentes
- * con la marca visible y evita inventar un nuevo color corporativo.
- */
+  /* Identidad oficial Gaspronal — LOGO GASPRONAL 2026 */
+  --brand: #025c99;
+  --brand-hover: #014b7d;
+  --brand-soft: #e7f2f9;
+  --brand-strong: #01456f;
+
+  --accent: #ec7025;
+  --accent-hover: #d95f18;
+  --accent-soft: #fff0e7;
+
+  --sidebar: #025c99;
+  --focus-ring: rgba(236, 112, 37, 0.22);
+}
 
 * {
   box-sizing: border-box;
@@ -47,6 +52,6 @@ a {
 }
 
 ::selection {
-  background: #d9d9d9;
-  color: #111111;
+  background: var(--accent);
+  color: #ffffff;
 }

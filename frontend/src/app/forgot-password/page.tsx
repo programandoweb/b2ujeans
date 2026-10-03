@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Flame, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { forgotPassword } from "@/lib/auth-client";
@@ -37,48 +37,47 @@ export default function ForgotPasswordPage() {
     <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,0.9fr)_minmax(520px,1.1fr)]">
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-md">
-          <div className="mb-10 flex items-center gap-3">
-            <div className="grid size-11 place-items-center rounded-xl bg-neutral-950 text-white"><Flame size={22} /></div>
-            <div><strong className="block tracking-[0.12em]">GASPRONAL</strong><span className="text-xs text-neutral-500">Panel administrativo</span></div>
+          <div className="mb-10 flex justify-center">
+            <img src="/programandoweb/brand/main-logo-programandoweb.png" alt="Gaspronal" className="h-auto max-h-24 w-auto max-w-[330px] object-contain" />
           </div>
 
           {sent ? (
             <div>
-              <div className="grid size-12 place-items-center rounded-xl bg-neutral-100 text-neutral-950"><Mail size={22} /></div>
-              <span className="mt-6 block text-xs font-bold uppercase tracking-[0.18em] text-neutral-500">Solicitud recibida</span>
+              <div className="grid size-12 place-items-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]"><Mail size={22} /></div>
+              <span className="mt-6 block text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Solicitud recibida</span>
               <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Revisa tu correo</h1>
-              <p className="mt-4 text-sm leading-6 text-neutral-500">{successMessage}</p>
-              <Link href="/login" className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-bold text-white transition hover:bg-neutral-800">
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">{successMessage}</p>
+              <Link href="/login" className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)]">
                 <ArrowLeft size={17} />Volver a iniciar sesión
               </Link>
             </div>
           ) : (
             <>
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-500">Acceso seguro</span>
+              <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">Acceso seguro</span>
               <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Recuperar contraseña</h1>
-              <p className="mt-3 text-sm leading-6 text-neutral-500">Ingresa el correo asociado a tu cuenta. Si está registrado, recibirás un enlace temporal para crear una nueva contraseña.</p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Ingresa el correo asociado a tu cuenta. Si está registrado, recibirás un enlace temporal para crear una nueva contraseña.</p>
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-5" noValidate>
                 <label className="block space-y-2">
                   <span className="text-sm font-semibold">Correo electrónico</span>
-                  <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" inputMode="email" required autoFocus className="min-h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 outline-none transition focus:border-neutral-900 focus:ring-4 focus:ring-neutral-100" />
+                  <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" inputMode="email" required autoFocus className="min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 outline-none transition focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--focus-ring)]" />
                 </label>
 
                 {error ? <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700" role="alert">{error}</p> : null}
 
-                <button disabled={loading} className="min-h-12 w-full rounded-xl bg-neutral-950 px-4 text-sm font-bold text-white transition hover:bg-neutral-800 disabled:opacity-60">
+                <button disabled={loading} className="min-h-12 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)] disabled:opacity-60">
                   {loading ? "Enviando…" : "Enviar enlace de recuperación"}
                 </button>
               </form>
 
-              <Link href="/login" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-neutral-700 hover:text-neutral-950"><ArrowLeft size={16} />Volver a iniciar sesión</Link>
-              <div className="mt-8 flex items-start gap-2 text-xs leading-5 text-neutral-500"><ShieldCheck size={16} className="mt-0.5 shrink-0" /><p>Por seguridad, la pantalla no confirma si una dirección de correo pertenece a una cuenta.</p></div>
+              <Link href="/login" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand)] hover:text-[var(--accent)]"><ArrowLeft size={16} />Volver a iniciar sesión</Link>
+              <div className="mt-8 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]"><ShieldCheck size={16} className="mt-0.5 shrink-0" /><p>Por seguridad, la pantalla no confirma si una dirección de correo pertenece a una cuenta.</p></div>
             </>
           )}
         </div>
       </section>
 
-      <aside className="relative hidden min-h-screen overflow-hidden bg-neutral-950 text-white lg:flex lg:items-end">
+      <aside className="relative hidden min-h-screen overflow-hidden bg-[var(--brand)] text-white lg:flex lg:items-end">
         <img
           src="/api/media/login-programandoweb"
           alt=""

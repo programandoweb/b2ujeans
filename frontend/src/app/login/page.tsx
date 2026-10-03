@@ -39,48 +39,47 @@ export default function LoginPage() {
     <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,0.9fr)_minmax(520px,1.1fr)]">
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-md">
-          <div className="mb-10">
+          <div className="mb-10 flex justify-center">
             <img
               src="/programandoweb/brand/main-logo-programandoweb.png"
               alt="Gaspronal"
-              className="h-auto max-h-20 w-auto max-w-[280px] object-contain object-left"
+              className="h-auto max-h-28 w-auto max-w-[360px] object-contain"
             />
-            <span className="mt-2 block text-xs text-neutral-500">Panel administrativo</span>
           </div>
 
           <div>
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-500">Acceso seguro</span>
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">Acceso seguro</span>
             <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Inicia sesión</h1>
-            <p className="mt-3 text-sm leading-6 text-neutral-500">Ingresa con las credenciales asignadas para administrar la plataforma.</p>
+            <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Ingresa con las credenciales asignadas para administrar la plataforma.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5" noValidate>
             <label className="block space-y-2">
               <span className="text-sm font-semibold">Correo electrónico</span>
-              <input name="email" type="email" autoComplete="email" required className="min-h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 outline-none transition focus:border-neutral-900 focus:ring-4 focus:ring-neutral-100" />
+              <input name="email" type="email" autoComplete="email" required className="min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 outline-none transition focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--focus-ring)]" />
             </label>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-4">
                 <label htmlFor="password" className="text-sm font-semibold">Contraseña</label>
-                <Link href="/forgot-password" className="text-xs font-semibold text-neutral-600 hover:text-neutral-950">¿Olvidaste tu contraseña?</Link>
+                <Link href="/forgot-password" className="text-xs font-semibold text-[var(--brand)] hover:text-[var(--accent)]">¿Olvidaste tu contraseña?</Link>
               </div>
               <div className="relative">
-                <input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required minLength={8} className="min-h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 pr-12 outline-none transition focus:border-neutral-900 focus:ring-4 focus:ring-neutral-100" />
-                <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-1 top-1 grid size-10 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                <input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required minLength={8} className="min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 outline-none transition focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--focus-ring)]" />
+                <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-1 top-1 grid size-10 place-items-center rounded-lg text-[var(--muted)] hover:bg-[var(--brand-soft)]" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
             </div>
 
             {error ? <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700" role="alert">{error}</p> : null}
 
-            <button disabled={loading} className="min-h-12 w-full rounded-xl bg-neutral-950 px-4 text-sm font-bold text-white transition hover:bg-neutral-800 disabled:opacity-60">{loading ? "Ingresando…" : "Ingresar"}</button>
+            <button disabled={loading} className="min-h-12 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)] disabled:opacity-60">{loading ? "Ingresando…" : "Ingresar"}</button>
           </form>
 
-          <div className="mt-6 flex items-start gap-2 text-xs leading-5 text-neutral-500"><ShieldCheck size={16} className="mt-0.5 shrink-0" /><p>La sesión se conserva mediante cookie HttpOnly y el backend valida el acceso al dashboard.</p></div>
+          <div className="mt-6 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]"><ShieldCheck size={16} className="mt-0.5 shrink-0" /><p>La sesión se conserva mediante cookie HttpOnly y el backend valida el acceso al dashboard.</p></div>
         </div>
       </section>
 
-      <aside className="relative hidden min-h-screen overflow-hidden bg-neutral-950 text-white lg:flex lg:items-end">
+      <aside className="relative hidden min-h-screen overflow-hidden bg-[var(--brand)] text-white lg:flex lg:items-end">
         <img
           src="/api/media/login-programandoweb"
           alt=""

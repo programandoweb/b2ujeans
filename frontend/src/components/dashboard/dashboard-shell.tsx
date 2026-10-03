@@ -54,7 +54,7 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
           <Link
             href="/dashboard/configuracion"
             onClick={() => setOpen(false)}
-            className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium transition ${configurationActive ? "bg-white text-neutral-950 shadow-sm" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
+            className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium transition ${configurationActive ? "bg-white text-[var(--brand)] shadow-sm" : "text-white/80 hover:bg-white/10 hover:text-white"}`}
           >
             <Settings size={19} />
             <span>Configuración</span>

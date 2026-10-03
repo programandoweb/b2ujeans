@@ -81,7 +81,7 @@ export function DeploymentPanel() {
           <h2 className="mt-2 text-xl font-bold">Despliegue desde el servidor</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Ejecuta el script privado del VPS directamente desde Gaspronal. No utiliza GitHub Actions ni consume créditos de ejecución.</p>
         </div>
-        <button onClick={deploy} disabled={!ready || Boolean(active) || starting} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-neutral-950 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-45">
+        <button onClick={deploy} disabled={!ready || Boolean(active) || starting} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--brand-hover)] disabled:cursor-not-allowed disabled:opacity-45">
           <Rocket size={18} />{starting ? "Iniciando…" : active ? "Desplegando…" : "Desplegar ahora"}
         </button>
       </div>
@@ -102,7 +102,7 @@ export function DeploymentPanel() {
         <div className="bg-[var(--surface)] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Fin</p><p className="mt-1 text-sm">{date(latest.finished_at)}</p></div>
         <div className="bg-[var(--surface)] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">Código de salida</p><p className="mt-1 text-sm">{latest.exit_code ?? "—"}</p></div>
       </div>
-      {(latest.output || latest.failure_message) && <div className="p-5">{latest.failure_message && <p className="mb-3 text-sm font-semibold text-red-700">{latest.failure_message}</p>}{latest.output && <pre className="max-h-[420px] overflow-auto rounded-xl bg-neutral-950 p-4 text-xs leading-5 text-neutral-200">{latest.output}</pre>}</div>}
+      {(latest.output || latest.failure_message) && <div className="p-5">{latest.failure_message && <p className="mb-3 text-sm font-semibold text-red-700">{latest.failure_message}</p>}{latest.output && <pre className="max-h-[420px] overflow-auto rounded-xl bg-[var(--brand-strong)] p-4 text-xs leading-5 text-white/90">{latest.output}</pre>}</div>}
     </section>}
 
     <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">

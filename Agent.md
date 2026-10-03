@@ -52,7 +52,9 @@ La modernización se concentra en tecnología, velocidad, UX, SEO, conversión, 
 - No introducir un segundo framework visual.
 - No duplicar estilos locales que deban ser tokens o primitives.
 - Los colores base de la web actual de Gaspronal deben preservarse.
-- Antes de fijar valores HEX/RGB definitivos, se deben obtener de los activos/CSS actuales o del material corporativo. **No inventar colores.**
+- Los colores corporativos oficiales extraídos del arte `LOGO GASPRONAL 2026` son: azul `#025C99` y naranja `#EC7025`.
+- El azul `#025C99` es el color primario de interfaz y navegación; el naranja `#EC7025` funciona como acento de marca, énfasis y estados interactivos complementarios.
+- No inventar ni sustituir estos colores corporativos sin una decisión documentada basada en material oficial posterior.
 - La paleta se centraliza como tokens semánticos de Tailwind/CSS variables.
 
 Ejemplo conceptual, no valores definitivos:
