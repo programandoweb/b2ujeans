@@ -77,11 +77,11 @@ echo "[frontend] Publicando nueva imagen..."
 compose up -d --no-deps frontend
 
 echo "[health] Backend..."
-curl --fail --silent --show-error --max-time 15 http://backend-nginx/api/v1/health
+compose exec -T backend-nginx wget -q -O - http://127.0.0.1/api/v1/health
 echo
 
 echo "[health] Frontend..."
-curl --fail --silent --show-error --max-time 20 http://frontend:3000/login >/dev/null
+compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/login
 
 echo "[deploy] Estado de servicios:"
 compose ps
