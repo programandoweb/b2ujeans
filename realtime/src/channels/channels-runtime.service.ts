@@ -72,6 +72,11 @@ export class ChannelsRuntimeService implements OnModuleInit, OnModuleDestroy {
     const providers = await this.client.providers();
 
     for (const provider of providers) {
+      if (!provider.enabled && this.runtime.has(provider.id)) {
+        await this.disconnect(provider.id, false).catch(() => undefined);
+        continue;
+      }
+
       if (
         provider.enabled &&
         provider.auto_connect &&
@@ -79,6 +84,19 @@ export class ChannelsRuntimeService implements OnModuleInit, OnModuleDestroy {
         !this.runtime.has(provider.id)
       ) {
         void this.connect(provider.id).catch(() => undefined);
+      }
+    }
+
+    const ids = new Set(providers.map((provider) => provider.id));
+    for (const id of [...this.runtime.keys()]) {
+      if (!ids.has(id)) {
+        const current = this.runtime.get(id);
+        if (current?.socket) {
+          current.manualClose = true;
+          current.socket.end(undefined);
+        }
+        this.runtime.delete(id);
+        await fs.rm(resolve(this.sessionsPath, id), { recursive: true, force: true }).catch(() => undefined);
       }
     }
 
