@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Save } from "lucide-react";
+import { FiArrowLeft, FiExternalLink, FiSave, FiBox, FiTag, FiType, FiHash, FiLink2, FiFileText, FiActivity, FiDollarSign, FiCreditCard, FiPackage, FiSearch, FiMessageCircle } from "react-icons/fi";
 import { use, useEffect, useState } from "react";
 
 type Category = { id:number; name:string; slug:string };
@@ -153,10 +153,10 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
   return <div className="w-full max-w-none space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <Link href="/dashboard/catalogo" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium">
-        <ArrowLeft size={16}/>Volver
+        <FiArrowLeft size={16}/>Volver
       </Link>
       {publicUrl&&<a href={`https://www.gaspronal.com${publicUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium">
-        <ExternalLink size={16}/>Ver original
+        <FiExternalLink size={16}/>Ver original
       </a>}
     </div>
 
@@ -167,9 +167,9 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
     </header>
 
     <form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <label className="space-y-2">
-          <span className="text-sm font-medium">Tipo</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiBox className="text-[var(--brand)]"/>Tipo</span>
           <select value={form.type} onChange={e=>setForm({...form,type:e.target.value as CatalogForm["type"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">
             <option value="product">Producto</option>
             <option value="service">Servicio</option>
@@ -177,45 +177,45 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium">Categoría</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiTag className="text-[var(--brand)]"/>Categoría</span>
           <select value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">
             <option value="">Sin categoría</option>
             {categories.map(category=><option key={category.id} value={category.id}>{category.name}</option>)}
           </select>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Nombre</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiType className="text-[var(--brand)]"/>Nombre</span>
           <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium">Referencia / tipo</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiHash className="text-[var(--brand)]"/>Referencia / tipo</span>
           <input value={form.reference} onChange={e=>setForm({...form,reference:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium">Slug</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiLink2 className="text-[var(--brand)]"/>Slug</span>
           <input required value={form.slug} onChange={e=>setForm({...form,slug:slugify(e.target.value)})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Descripción corta</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiFileText className="text-[var(--brand)]"/>Descripción corta</span>
           <textarea value={form.short_description} onChange={e=>setForm({...form,short_description:e.target.value})} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Descripción</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiFileText className="text-[var(--brand)]"/>Descripción</span>
           <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} rows={10} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Aplicaciones</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiActivity className="text-[var(--brand)]"/>Aplicaciones</span>
           <textarea value={form.applications} onChange={e=>setForm({...form,applications:e.target.value})} rows={4} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium">Estado</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiActivity className="text-[var(--brand)]"/>Estado</span>
           <select value={form.status} onChange={e=>setForm({...form,status:e.target.value as CatalogForm["status"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">
             <option value="draft">Borrador</option>
             <option value="published">Publicado</option>
@@ -224,39 +224,39 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium">Precio comercial privado</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiDollarSign className="text-[var(--brand)]"/>Precio comercial privado</span>
           <input type="number" min="0" step="0.01" value={form.commercial_price} onChange={e=>setForm({...form,commercial_price:e.target.value})} placeholder="No visible en la web pública" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
           <span className="block text-xs text-[var(--muted)]">Sólo dashboard y Claudio pueden consultar este valor.</span>
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium">Moneda</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><FiCreditCard className="text-[var(--brand)]"/>Moneda</span>
           <input value={form.price_currency} maxLength={3} onChange={e=>setForm({...form,price_currency:e.target.value.toUpperCase()})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Unidad del precio</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiPackage className="text-[var(--brand)]"/>Unidad del precio</span>
           <input value={form.price_unit} onChange={e=>setForm({...form,price_unit:e.target.value})} placeholder="Ej. unidad, metro, servicio" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">SEO title</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiSearch className="text-[var(--brand)]"/>SEO title</span>
           <input value={form.seo_title} onChange={e=>setForm({...form,seo_title:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">SEO description</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiSearch className="text-[var(--brand)]"/>SEO description</span>
           <textarea value={form.seo_description} onChange={e=>setForm({...form,seo_description:e.target.value})} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
         </label>
 
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Mensaje de WhatsApp</span>
+        <label className="space-y-2 md:col-span-2 xl:col-span-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><FiMessageCircle className="text-[var(--brand)]"/>Mensaje de WhatsApp</span>
           <textarea value={form.whatsapp_message} onChange={e=>setForm({...form,whatsapp_message:e.target.value})} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
         </label>
       </div>
 
       <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 font-semibold text-white">
-        <Save size={17}/>Guardar cambios
+        <FiSave size={17}/>Guardar cambios
       </button>
       {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
     </form>
