@@ -57,10 +57,7 @@ class CatalogController extends Controller
             'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
         ]);
 
-        $gallery = collect($catalogItem->gallery ?? [])
-            ->filter(fn ($image) => is_string($image) && $image !== '')
-            ->values()
-            ->all();
+        $gallery = $this->normalizedGallery($catalogItem);
 
         foreach ($validated['images'] as $image) {
             $extension = strtolower($image->getClientOriginalExtension() ?: $image->extension() ?: 'jpg');
@@ -91,10 +88,7 @@ class CatalogController extends Controller
             'image' => ['required', 'string', 'max:2048'],
         ]);
 
-        $gallery = collect($catalogItem->gallery ?? [])
-            ->filter(fn ($image) => is_string($image) && $image !== '')
-            ->values()
-            ->all();
+        $gallery = $this->normalizedGallery($catalogItem);
 
         abort_unless(in_array($validated['image'], $gallery, true), 422, 'La imagen no pertenece a la galería.');
 
@@ -114,9 +108,7 @@ class CatalogController extends Controller
             'image' => ['required', 'string', 'max:2048'],
         ]);
 
-        $gallery = collect($catalogItem->gallery ?? [])
-            ->filter(fn ($image) => is_string($image) && $image !== '')
-            ->values();
+        $gallery = collect($this->normalizedGallery($catalogItem));
 
         abort_unless($gallery->contains($validated['image']), 422, 'La imagen no pertenece a la galería.');
 
@@ -196,6 +188,19 @@ class CatalogController extends Controller
         abort_if($catalogCategory->items()->exists(), 422, 'La categoría tiene productos o servicios asociados.');
         $catalogCategory->delete();
         return response()->json(['ok' => true]);
+    }
+
+
+    private function normalizedGallery(CatalogItem $catalogItem): array
+    {
+        return collect([
+            $catalogItem->og_image,
+            ...($catalogItem->gallery ?? []),
+        ])
+            ->filter(fn ($image) => is_string($image) && trim($image) !== '')
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function publication(array $data, ?CatalogItem $item = null): array
