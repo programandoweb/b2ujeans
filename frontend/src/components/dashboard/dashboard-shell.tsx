@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bot, BookOpen, Boxes, CornerDownRight, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import { Bot, BookOpen, Boxes, CornerDownRight, FileCheck2, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
@@ -33,6 +33,12 @@ const navItems = [
     href: "/dashboard/agentes",
     label: "Agentes",
     icon: Bot,
+    exact: false,
+  },
+  {
+    href: "/dashboard/comercial/propuestas",
+    label: "Propuestas",
+    icon: FileCheck2,
     exact: false,
   },
   {
