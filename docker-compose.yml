@@ -118,6 +118,9 @@ services:
       CORS_ORIGIN: ${REALTIME_CORS_ORIGIN:-https://gaspronal.programandoweb.net}
       AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
       LARAVEL_API_URL: http://backend-nginx/api/v1
+      BAILEYS_SESSIONS_PATH: /app/data/baileys
+    volumes:
+      - gaspronal_baileys_sessions:/app/data/baileys
     ports:
       - "${REALTIME_PORT:-4100}:4100"
     healthcheck:
@@ -168,6 +171,7 @@ volumes:
   gaspronal_mariadb:
   gaspronal_backend_vendor:
   gaspronal_backend_storage:
+  gaspronal_baileys_sessions:
 
 networks:
   gaspronal:
