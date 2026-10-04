@@ -72,6 +72,7 @@ Route::prefix('v1')->group(function (): void {
         Route::put('catalog/items/{catalogItem}/gallery/primary', [CatalogController::class, 'setPrimaryGalleryImage']);
         Route::delete('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'destroyGalleryImage']);
         Route::get('catalog/categories', [CatalogController::class, 'categories']);
+        Route::get('catalog/categories/{catalogCategory}', [CatalogController::class, 'showCategory']);
         Route::post('catalog/categories', [CatalogController::class, 'storeCategory']);
         Route::put('catalog/categories/{catalogCategory}', [CatalogController::class, 'updateCategory']);
         Route::delete('catalog/categories/{catalogCategory}', [CatalogController::class, 'destroyCategory']);
