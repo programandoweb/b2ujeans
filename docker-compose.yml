@@ -59,6 +59,31 @@ services:
     networks:
       - gaspronal
 
+  scheduler:
+    image: gaspronal/backend:latest
+    container_name: gaspronal-scheduler
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-gaspronal}
+      DB_USERNAME: ${DB_USERNAME:-gaspronal}
+      DB_PASSWORD: ${DB_PASSWORD:-gaspronal_change_me}
+      AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - ./backend:/var/www/html
+      - gaspronal_backend_vendor:/var/www/html/vendor
+      - gaspronal_backend_storage:/var/www/html/storage
+    networks:
+      - gaspronal
+
   backend-nginx:
     image: nginx:1.27-alpine
     container_name: gaspronal-backend-nginx
