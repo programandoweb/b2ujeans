@@ -46,7 +46,7 @@ export default function CatalogPage(){
 
   async function remove(id:number){if(!confirm("¿Eliminar este elemento?"))return;await fetch(`/api/admin/catalog/items/${id}`,{method:"DELETE"});await load();}
 
-  return <div className="mx-auto w-full max-w-7xl space-y-6">
+  return <div className="w-full max-w-none space-y-6">
     <header>
       <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">CRM / CMS</span>
       <h1 className="mt-2 text-3xl font-bold">Productos y servicios</h1>
@@ -57,7 +57,7 @@ export default function CatalogPage(){
       {(["all","product","service"] as const).map(v=><button key={v} onClick={()=>setFilter(v)} className={`rounded-xl border px-4 py-2 text-sm font-semibold ${filter===v?"bg-[var(--brand)] text-white":"bg-[var(--surface)]"}`}>{v==="all"?"Todo":v==="product"?"Productos":"Servicios"}</button>)}
     </div>
 
-    <section className="grid gap-6 xl:grid-cols-[1.3fr_.7fr]">
+    <section className="space-y-6">
       <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
         <div className="border-b border-[var(--border)] px-5 py-4"><h2 className="font-semibold">Catálogo</h2></div>
         <div className="divide-y divide-[var(--border)]">
