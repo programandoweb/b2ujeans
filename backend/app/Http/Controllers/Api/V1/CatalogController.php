@@ -176,9 +176,30 @@ class CatalogController extends Controller
         );
     }
 
-    public function categories(): JsonResponse
+    public function categories(Request $request): JsonResponse
     {
-        return response()->json(['data' => CatalogCategory::query()->withCount('items')->orderBy('name')->get()]);
+        return response()->json(
+            CatalogCategory::query()
+                ->withCount('items')
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = '%'.trim((string) $request->string('search')).'%';
+                    $query->where(function ($searchQuery) use ($search): void {
+                        $searchQuery
+                            ->where('name', 'like', $search)
+                            ->orWhere('slug', 'like', $search)
+                            ->orWhere('description', 'like', $search);
+                    });
+                })
+                ->orderBy('name')
+                ->paginate(min(max($request->integer('per_page', 10), 1), 50))
+        );
+    }
+
+    public function showCategory(CatalogCategory $catalogCategory): JsonResponse
+    {
+        return response()->json([
+            'data' => $catalogCategory->loadCount('items'),
+        ]);
     }
 
     public function storeCategory(Request $request): JsonResponse
