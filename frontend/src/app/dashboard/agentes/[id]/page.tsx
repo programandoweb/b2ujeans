@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Bot, KeyRound, LoaderCircle, PlugZap, Save, Send, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, Bot, KeyRound, LoaderCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, Trash2 } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
 import { connectAgentSocket, type AgentSocket } from "@/lib/agent-socket";
 
@@ -13,6 +13,19 @@ type AgentResponse = {
   agent:Agent;
   message:string;
   status:"completed"|"configuration_required";
+};
+type ResearchState = {
+  run:{
+    status:"idle"|"running"|"paused"|"stopped"|"completed";
+    total_items:number;
+    processed_items:number;
+    successful_items:number;
+    failed_items:number;
+    last_error?:string|null;
+    current_item?:{id:number;name:string;reference?:string|null}|null;
+  };
+  pending_items:number;
+  completed_items:number;
 };
 
 export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }) {
@@ -28,6 +41,9 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const [sending,setSending]=useState(false);
   const [transport,setTransport]=useState<"connecting"|"socket.io"|"rest">("connecting");
   const [socketMessage,setSocketMessage]=useState("");
+  const [research,setResearch]=useState<ResearchState|null>(null);
+  const [researchBusy,setResearchBusy]=useState(false);
+  const [researchMessage,setResearchMessage]=useState("");
   const socketRef=useRef<AgentSocket|null>(null);
   const bottomRef=useRef<HTMLDivElement|null>(null);
 
@@ -112,6 +128,35 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   },[id]);
 
   useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,sending]);
+
+  useEffect(()=>{
+    if(id!=="jorge")return;
+    let active=true;
+
+    async function loadResearch(){
+      const response=await fetch("/api/admin/agents/jorge/research",{cache:"no-store"});
+      const json=await response.json().catch(()=>({}));
+      if(active&&response.ok)setResearch(json.data);
+    }
+
+    void loadResearch();
+    const timer=window.setInterval(()=>void loadResearch(),5000);
+    return ()=>{active=false;window.clearInterval(timer);};
+  },[id]);
+
+  async function researchAction(action:"play"|"pause"|"stop"){
+    setResearchBusy(true);
+    setResearchMessage("");
+    const response=await fetch(`/api/admin/agents/jorge/research/${action}`,{method:"POST"});
+    const json=await response.json().catch(()=>({}));
+    setResearchBusy(false);
+    if(!response.ok){
+      setResearchMessage(json.message??"No fue posible cambiar el estado de Jorge.");
+      return;
+    }
+    setResearch(json.data);
+    setResearchMessage(action==="play"?"Investigación iniciada.":action==="pause"?"Investigación pausada.":"Investigación detenida.");
+  }
 
   async function saveSettings(e:React.FormEvent){
     e.preventDefault();
@@ -242,6 +287,34 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       </div>
 
       <aside className="space-y-5">
+        {id==="jorge"&&<section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center gap-2"><Search size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Investigación del catálogo</h2></div>
+          <p className="text-sm leading-6 text-[var(--muted)]">Jorge recorre uno a uno los productos de la web oficial de Gaspronal, recupera contenido, SEO, metatags e imágenes y los guarda localmente.</p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Estado</span><strong className="mt-1 block capitalize">{research?.run.status??"cargando"}</strong></div>
+            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Progreso</span><strong className="mt-1 block">{research?.run.processed_items??0} / {research?.run.total_items??0}</strong></div>
+            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Completados</span><strong className="mt-1 block">{research?.run.successful_items??0}</strong></div>
+            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Fallidos</span><strong className="mt-1 block">{research?.run.failed_items??0}</strong></div>
+          </div>
+
+          {research?.run.total_items>0&&<div className="h-2 overflow-hidden rounded-full bg-[var(--app-bg)]"><div className="h-full bg-[var(--brand)] transition-all" style={{width:`${Math.min(100,Math.round((research.run.processed_items/research.run.total_items)*100))}%`}}/></div>}
+
+          {research?.run.current_item&&<div className="rounded-xl border border-[var(--border)] p-3 text-sm">
+            <span className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Producto actual</span>
+            <strong className="mt-1 block">{research.run.current_item.name}</strong>
+          </div>}
+
+          <div className="grid grid-cols-3 gap-2">
+            <button type="button" disabled={researchBusy||research?.run.status==="running"} onClick={()=>void researchAction("play")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-3 text-sm font-semibold text-white disabled:opacity-45"><Play size={16}/>Play</button>
+            <button type="button" disabled={researchBusy||research?.run.status!=="running"} onClick={()=>void researchAction("pause")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-45"><Pause size={16}/>Pausa</button>
+            <button type="button" disabled={researchBusy||!["running","paused"].includes(research?.run.status??"")} onClick={()=>void researchAction("stop")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 px-3 text-sm font-semibold text-red-700 disabled:opacity-45"><Square size={16}/>Stop</button>
+          </div>
+
+          {research?.run.last_error&&<p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">{research.run.last_error}</p>}
+          {researchMessage&&<p className="text-xs font-medium text-[var(--brand)]">{researchMessage}</p>}
+        </section>}
+
         <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
           <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Gemini</h2></div>
           <p className="text-sm leading-6 text-[var(--muted)]">La API key se guarda cifrada en Laravel y nunca vuelve a mostrarse en el navegador.</p>
