@@ -35,6 +35,7 @@ export class GeminiService {
     system: string;
     contents: GeminiContent[];
     functions?: GeminiFunctionDeclaration[];
+    googleSearch?: boolean;
   }): Promise<GeminiTurn> {
     const model = encodeURIComponent(input.model || "gemini-2.5-flash");
     const body: Record<string, unknown> = {
@@ -42,9 +43,10 @@ export class GeminiService {
       contents: input.contents,
     };
 
-    if (input.functions?.length) {
-      body.tools = [{ functionDeclarations: input.functions }];
-    }
+    const tools: Record<string, unknown>[] = [];
+    if (input.googleSearch) tools.push({ google_search: {} });
+    if (input.functions?.length) tools.push({ functionDeclarations: input.functions });
+    if (tools.length) body.tools = tools;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: "POST",
