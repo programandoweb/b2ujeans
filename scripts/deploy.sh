@@ -75,8 +75,15 @@ git -c safe.directory="$ROOT" -C "$ROOT" reset --hard origin/main
 AFTER="$(git -c safe.directory="$ROOT" -C "$ROOT" rev-parse HEAD)"
 echo "[deploy] Revisión: $BEFORE -> $AFTER"
 
+echo "[backend] Construyendo imagen PHP..."
+compose build --pull backend
+
+echo "[backend] Publicando backend y scheduler..."
+compose up -d --no-deps backend
+compose up -d --no-deps scheduler
+
 echo "[backend] Verificando contenedor..."
-compose ps backend
+compose ps backend scheduler
 
 echo "[backend] Instalando dependencias PHP..."
 compose exec -T backend composer install \
