@@ -9,9 +9,15 @@ export type AgentDefinition = {
 
 export type AgentSummary = Pick<AgentDefinition, "id" | "name" | "role">;
 
+export type AgentConversationMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 export type AgentMessageInput = {
   message: string;
   requestId?: string;
+  history?: AgentConversationMessage[];
 };
 
 export type AgentResponse = {
