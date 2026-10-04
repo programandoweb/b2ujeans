@@ -168,7 +168,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
 
     const socket=socketRef.current;
     if(transport==="socket.io"&&socket?.connected){
-      socket.emit("agent:message",{agentId:id,message,requestId});
+      socket.emit("agent:message",{agentId:id,message,requestId,history:messages.map(({role,content})=>({role,content}))});
       return;
     }
 
@@ -176,7 +176,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       const response=await fetch(`/api/agents/${id}/messages`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message,requestId}),
+        body:JSON.stringify({message,requestId,history:messages.map(({role,content})=>({role,content}))}),
       });
       const json=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(json.message??"No fue posible consultar el agente.");
