@@ -67,14 +67,14 @@ class InternalAgentCommercialController extends Controller
         $quote = DB::transaction(function () use ($arguments): CommercialQuote {
             $lead = CommercialLead::query()->firstOrCreate(
                 ['email' => strtolower(trim($arguments['email'])), 'whatsapp' => trim($arguments['whatsapp'])],
-                ['name' => trim($arguments['name']), 'source' => 'claudio', 'status' => 'quote_created']
+                ['name' => trim($arguments['name']), 'source' => 'claudio', 'status' => 'quote_draft']
             );
-            $lead->update(['name' => trim($arguments['name']), 'status' => 'quote_created']);
+            $lead->update(['name' => trim($arguments['name']), 'status' => 'quote_draft']);
 
             $quote = CommercialQuote::create([
                 'lead_id' => $lead->id,
                 'number' => 'GAS-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
-                'status' => 'awaiting_human',
+                'status' => 'pending_approval',
                 'currency' => 'COP',
                 'notes' => $arguments['notes'] ?? null,
                 'created_by_agent' => 'claudio',
