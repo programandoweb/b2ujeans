@@ -39,17 +39,30 @@ class InternalAgentKnowledgeController extends Controller
         $query = trim((string) ($arguments['query'] ?? ''));
         abort_if($query === '', 422, 'La consulta es obligatoria.');
 
-        $like = '%'.$query.'%';
+        $stopWords = ['donde', 'cuando', 'como', 'cual', 'cuales', 'para', 'desde', 'hasta', 'sobre', 'esta', 'este', 'estos', 'estas', 'tiene', 'tienen', 'gaspronal'];
+        $terms = collect(preg_split('/\\s+/', Str::lower(Str::ascii($query))) ?: [])
+            ->map(fn ($term) => trim($term, " .,;:¿?¡!()[]{}\"'"))
+            ->filter(fn ($term) => mb_strlen($term) >= 3 && ! in_array($term, $stopWords, true))
+            ->unique()
+            ->take(8)
+            ->values();
+
+        if ($terms->isEmpty()) {
+            $terms = collect([$query]);
+        }
 
         $entries = AgentKnowledgeEntry::query()
             ->where('agent_id', 'claudio')
             ->where('status', 'published')
-            ->where(function ($q) use ($like): void {
-                $q->where('title', 'like', $like)
-                    ->orWhere('question', 'like', $like)
-                    ->orWhere('answer', 'like', $like)
-                    ->orWhere('keywords', 'like', $like)
-                    ->orWhere('category', 'like', $like);
+            ->where(function ($q) use ($terms): void {
+                foreach ($terms as $term) {
+                    $like = '%'.$term.'%';
+                    $q->orWhere('title', 'like', $like)
+                        ->orWhere('question', 'like', $like)
+                        ->orWhere('answer', 'like', $like)
+                        ->orWhere('keywords', 'like', $like)
+                        ->orWhere('category', 'like', $like);
+                }
             })
             ->orderByDesc('confidence')
             ->latest('updated_at')
