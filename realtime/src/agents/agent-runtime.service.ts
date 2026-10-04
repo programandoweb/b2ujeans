@@ -56,20 +56,6 @@ const CLAUDIO_FUNCTIONS: GeminiFunctionDeclaration[] = [
       },
     },
   },
-  {
-    name: "handoff_to_human",
-    description: "Deja el cliente listo para seguimiento humano cuando corresponde.",
-    parameters: {
-      type: "OBJECT",
-      required: ["name", "email", "whatsapp"],
-      properties: {
-        name: { type: "STRING" },
-        email: { type: "STRING" },
-        whatsapp: { type: "STRING" },
-        notes: { type: "STRING" },
-      },
-    },
-  },
 ];
 
 @Injectable()
@@ -142,7 +128,7 @@ export class AgentRuntimeService {
 
       const result = await this.commercial.execute(agent.id, turn.name, turn.args);
       contents.push({
-        role: "function",
+        role: "user",
         parts: [{ functionResponse: { name: turn.name, response: result } }],
       });
     }
