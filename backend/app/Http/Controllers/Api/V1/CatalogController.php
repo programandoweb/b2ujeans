@@ -8,8 +8,10 @@ use App\Models\CatalogCategory;
 use App\Models\CatalogItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CatalogController extends Controller
 {
@@ -46,6 +48,118 @@ class CatalogController extends Controller
     {
         $catalogItem->delete();
         return response()->json(['ok' => true]);
+    }
+
+    public function uploadGallery(Request $request, CatalogItem $catalogItem): JsonResponse
+    {
+        $validated = $request->validate([
+            'images' => ['required', 'array', 'min:1', 'max:12'],
+            'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+        ]);
+
+        $gallery = collect($catalogItem->gallery ?? [])
+            ->filter(fn ($image) => is_string($image) && $image !== '')
+            ->values()
+            ->all();
+
+        foreach ($validated['images'] as $image) {
+            $extension = strtolower($image->getClientOriginalExtension() ?: $image->extension() ?: 'jpg');
+            $filename = Str::uuid().'.'.$extension;
+            $image->storeAs("catalog/{$catalogItem->id}", $filename, 'public');
+            $gallery[] = "/api/catalog-media/{$catalogItem->id}/{$filename}";
+        }
+
+        $catalogItem->gallery = array_values(array_unique($gallery));
+
+        if (!$catalogItem->og_image && count($catalogItem->gallery) > 0) {
+            $catalogItem->og_image = $catalogItem->gallery[0];
+        }
+
+        $catalogItem->save();
+
+        return response()->json([
+            'data' => [
+                'gallery' => $catalogItem->gallery,
+                'og_image' => $catalogItem->og_image,
+            ],
+        ]);
+    }
+
+    public function setPrimaryGalleryImage(Request $request, CatalogItem $catalogItem): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'string', 'max:2048'],
+        ]);
+
+        $gallery = collect($catalogItem->gallery ?? [])
+            ->filter(fn ($image) => is_string($image) && $image !== '')
+            ->values()
+            ->all();
+
+        abort_unless(in_array($validated['image'], $gallery, true), 422, 'La imagen no pertenece a la galería.');
+
+        $catalogItem->update(['og_image' => $validated['image']]);
+
+        return response()->json([
+            'data' => [
+                'gallery' => $gallery,
+                'og_image' => $validated['image'],
+            ],
+        ]);
+    }
+
+    public function destroyGalleryImage(Request $request, CatalogItem $catalogItem): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'string', 'max:2048'],
+        ]);
+
+        $gallery = collect($catalogItem->gallery ?? [])
+            ->filter(fn ($image) => is_string($image) && $image !== '')
+            ->values();
+
+        abort_unless($gallery->contains($validated['image']), 422, 'La imagen no pertenece a la galería.');
+
+        $prefix = "/api/catalog-media/{$catalogItem->id}/";
+        if (str_starts_with($validated['image'], $prefix)) {
+            $filename = basename(substr($validated['image'], strlen($prefix)));
+            Storage::disk('public')->delete("catalog/{$catalogItem->id}/{$filename}");
+        }
+
+        $gallery = $gallery
+            ->reject(fn ($image) => $image === $validated['image'])
+            ->values()
+            ->all();
+
+        $catalogItem->gallery = $gallery;
+        if ($catalogItem->og_image === $validated['image']) {
+            $catalogItem->og_image = $gallery[0] ?? null;
+        }
+        $catalogItem->save();
+
+        return response()->json([
+            'data' => [
+                'gallery' => $catalogItem->gallery,
+                'og_image' => $catalogItem->og_image,
+            ],
+        ]);
+    }
+
+    public function media(CatalogItem $catalogItem, string $filename): StreamedResponse
+    {
+        $filename = basename($filename);
+        $path = "catalog/{$catalogItem->id}/{$filename}";
+
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response(
+            $path,
+            $filename,
+            [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+                'X-Content-Type-Options' => 'nosniff',
+            ]
+        );
     }
 
     public function categories(): JsonResponse
