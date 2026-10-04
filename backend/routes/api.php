@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('health', HealthController::class);
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
+    Route::get('catalog/items/{catalogItem}/media/{filename}', [CatalogController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
     Route::get('internal/communications/providers', [CommunicationProviderController::class, 'internalList']);
@@ -61,6 +62,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('catalog/items', [CatalogController::class, 'store']);
         Route::put('catalog/items/{catalogItem}', [CatalogController::class, 'update']);
         Route::delete('catalog/items/{catalogItem}', [CatalogController::class, 'destroy']);
+        Route::post('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'uploadGallery']);
+        Route::put('catalog/items/{catalogItem}/gallery/primary', [CatalogController::class, 'setPrimaryGalleryImage']);
+        Route::delete('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'destroyGalleryImage']);
         Route::get('catalog/categories', [CatalogController::class, 'categories']);
         Route::post('catalog/categories', [CatalogController::class, 'storeCategory']);
         Route::put('catalog/categories/{catalogCategory}', [CatalogController::class, 'updateCategory']);
