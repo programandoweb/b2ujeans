@@ -298,7 +298,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
             <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Fallidos</span><strong className="mt-1 block">{research?.run.failed_items??0}</strong></div>
           </div>
 
-          {research?.run.total_items>0&&<div className="h-2 overflow-hidden rounded-full bg-[var(--app-bg)]"><div className="h-full bg-[var(--brand)] transition-all" style={{width:`${Math.min(100,Math.round((research.run.processed_items/research.run.total_items)*100))}%`}}/></div>}
+          {research&&research.run.total_items>0&&<div className="h-2 overflow-hidden rounded-full bg-[var(--app-bg)]"><div className="h-full bg-[var(--brand)] transition-all" style={{width:`${Math.min(100,Math.round((research.run.processed_items/research.run.total_items)*100))}%`}}/></div>}
 
           {research?.run.current_item&&<div className="rounded-xl border border-[var(--border)] p-3 text-sm">
             <span className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Producto actual</span>
