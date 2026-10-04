@@ -21,7 +21,29 @@ class CatalogController extends Controller
             CatalogItem::query()
                 ->with('category:id,name,slug')
                 ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')))
-                ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->string('search').'%'))
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = trim((string) $request->string('search'));
+                    $like = '%'.$search.'%';
+                    $normalized = Str::lower(Str::ascii($search));
+
+                    $query->where(function ($searchQuery) use ($like, $normalized): void {
+                        $searchQuery
+                            ->where('name', 'like', $like)
+                            ->orWhere('reference', 'like', $like)
+                            ->orWhere('slug', 'like', $like)
+                            ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery
+                                ->where('name', 'like', $like)
+                                ->orWhere('slug', 'like', $like));
+
+                        if (str_contains('producto', $normalized) || str_contains($normalized, 'producto')) {
+                            $searchQuery->orWhere('type', 'product');
+                        }
+
+                        if (str_contains('servicio', $normalized) || str_contains($normalized, 'servicio')) {
+                            $searchQuery->orWhere('type', 'service');
+                        }
+                    });
+                })
                 ->latest()
                 ->paginate(min(max($request->integer('per_page', 25), 1), 100))
         );
