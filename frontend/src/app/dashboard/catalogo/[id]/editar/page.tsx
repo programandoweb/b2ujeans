@@ -16,6 +16,9 @@ type CatalogForm = {
   description:string;
   applications:string;
   status:"draft"|"published"|"archived";
+  commercial_price:string;
+  price_currency:string;
+  price_unit:string;
   seo_title:string;
   seo_description:string;
   whatsapp_message:string;
@@ -32,6 +35,9 @@ type CatalogItem = {
   description?:string|null;
   applications?:string|null;
   status:"draft"|"published"|"archived";
+  commercial_price?:string|null;
+  price_currency?:string|null;
+  price_unit?:string|null;
   seo_title?:string|null;
   seo_description?:string|null;
   whatsapp_message?:string|null;
@@ -58,6 +64,9 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
     description:"",
     applications:"",
     status:"draft",
+    commercial_price:"",
+    price_currency:"COP",
+    price_unit:"",
     seo_title:"",
     seo_description:"",
     whatsapp_message:"",
@@ -91,6 +100,9 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
         description:item.description??"",
         applications:item.applications??"",
         status:item.status,
+        commercial_price:item.commercial_price??"",
+        price_currency:item.price_currency??"COP",
+        price_unit:item.price_unit??"",
         seo_title:item.seo_title??"",
         seo_description:item.seo_description??"",
         whatsapp_message:item.whatsapp_message??"",
@@ -118,6 +130,9 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
         seo_title:form.seo_title||null,
         seo_description:form.seo_description||null,
         whatsapp_message:form.whatsapp_message||null,
+        commercial_price:form.commercial_price ? Number(form.commercial_price) : null,
+        price_currency:form.price_currency||"COP",
+        price_unit:form.price_unit||null,
       }),
     });
 
@@ -208,7 +223,21 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
           </select>
         </label>
 
-        <div/>
+        <label className="space-y-2">
+          <span className="text-sm font-medium">Precio comercial privado</span>
+          <input type="number" min="0" step="0.01" value={form.commercial_price} onChange={e=>setForm({...form,commercial_price:e.target.value})} placeholder="No visible en la web pública" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
+          <span className="block text-xs text-[var(--muted)]">Sólo dashboard y Claudio pueden consultar este valor.</span>
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-sm font-medium">Moneda</span>
+          <input value={form.price_currency} maxLength={3} onChange={e=>setForm({...form,price_currency:e.target.value.toUpperCase()})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
+        </label>
+
+        <label className="space-y-2 md:col-span-2">
+          <span className="text-sm font-medium">Unidad del precio</span>
+          <input value={form.price_unit} onChange={e=>setForm({...form,price_unit:e.target.value})} placeholder="Ej. unidad, metro, servicio" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
+        </label>
 
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-medium">SEO title</span>
