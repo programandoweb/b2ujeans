@@ -96,9 +96,11 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
       const item:CatalogItem=itemJson.data;
       setCategories(categoriesJson.data??[]);
       setPublicUrl(item.public_url);
-      const normalizedGallery=(item.gallery??[])
-        .map(image=>typeof image==="string"?image:(typeof image==="object"&&image&&"url" in image?String((image as {url?:unknown}).url??""):""))
-        .filter(Boolean);
+      const normalizedGallery=Array.from(new Set([
+        item.og_image??"",
+        ...(item.gallery??[])
+          .map(image=>typeof image==="string"?image:(typeof image==="object"&&image&&"url" in image?String((image as {url?:unknown}).url??""):"")),
+      ].filter(Boolean)));
       setGallery(normalizedGallery);
       setPrimaryImage(item.og_image??normalizedGallery[0]??"");
       setForm({
