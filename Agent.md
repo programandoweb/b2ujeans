@@ -297,6 +297,17 @@ La analítica no debe bloquear la navegación ni degradar Core Web Vitals.
 - SVG propios deben almacenarse como assets organizados o convertirse en componentes solo cuando necesiten manipulación dinámica; no dispersarlos entre rutas.
 - Los assets del backend destinados a correos o recursos servidos por Laravel deben permanecer bajo `backend/public/programandoweb/`, organizados por propósito y con rutas documentadas.
 
+### Lineamientos obligatorios del dashboard administrativo
+
+- Las rutas administrativas de listado deben ocupar el 100% del ancho útil disponible después del sidebar; evitar `max-w-*` que limite artificialmente el contenido.
+- Los formularios de creación y edición deben vivir en rutas dedicadas, no embebidos dentro de la pantalla de listado, salvo una excepción funcional explícitamente aprobada.
+- Patrón recomendado: listado en la ruta índice, creación en `/nuevo` y edición en `/{id}/editar`.
+- Los formularios administrativos deben usar una grilla responsive y aprovechar el ancho disponible; en desktop se permiten múltiples columnas cuando mejore la densidad sin sacrificar legibilidad.
+- Cuando el formulario mezcle inputs/selects con áreas de texto extensas, priorizar una composición de dos columnas principales: controles estructurados a la izquierda y `textarea`/contenido largo a la derecha; en móvil deben apilarse.
+- La iconografía de formularios y acciones administrativas debe ser consistente y semántica, usando `react-icons` como librería preferida del dashboard. No mezclar familias visuales dentro de una misma pantalla.
+- Las entidades administrativas comparables deben presentarse como tablas o listados compactos; reservar cards para KPIs, resúmenes o agrupaciones con significado propio.
+- Mantener siempre mobile-first: 1 columna en móvil y escalado progresivo a tablet/desktop sin overflow horizontal.
+
 ## 13. Rendimiento
 
 El sitio debe priorizar rendimiento real en móvil.
