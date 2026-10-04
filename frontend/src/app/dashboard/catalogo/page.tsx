@@ -2,97 +2,302 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ExternalLink, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import {
+  FiBox,
+  FiChevronLeft,
+  FiChevronRight,
+  FiEdit2,
+  FiExternalLink,
+  FiFilter,
+  FiPlus,
+  FiTag,
+  FiTrash2,
+} from "react-icons/fi";
 
-type Category={id:number;name:string;slug:string};
-type Item={id:number;type:"product"|"service";name:string;slug:string;reference?:string|null;status:string;public_url:string;category?:Category|null};
-type CatalogForm={type:"product"|"service";name:string;reference:string;slug:string;category_id:string;short_description:string;description:string;status:"draft"|"published"|"archived"};
+type Category = { id:number; name:string; slug:string };
+type Item = {
+  id:number;
+  type:"product"|"service";
+  name:string;
+  slug:string;
+  reference?:string|null;
+  status:string;
+  public_url:string;
+  category?:Category|null;
+};
 
-const initial:CatalogForm={type:"product",name:"",reference:"",slug:"",category_id:"",short_description:"",description:"",status:"draft"};
+type PaginationMeta = {
+  current_page:number;
+  last_page:number;
+  per_page:number;
+  total:number;
+  from:number|null;
+  to:number|null;
+};
 
-function slugify(v:string){return v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
+const statusLabel:Record<string,string>={
+  draft:"Borrador",
+  published:"Publicado",
+  archived:"Archivado",
+};
 
 export default function CatalogPage(){
   const [items,setItems]=useState<Item[]>([]);
-  const [categories,setCategories]=useState<Category[]>([]);
   const [filter,setFilter]=useState<"all"|"product"|"service">("all");
-  const [form,setForm]=useState<CatalogForm>(initial);
-  const [categoryName,setCategoryName]=useState("");
+  const [page,setPage]=useState(1);
+  const [meta,setMeta]=useState<PaginationMeta>({
+    current_page:1,last_page:1,per_page:25,total:0,from:null,to:null,
+  });
+  const [loading,setLoading]=useState(true);
   const [message,setMessage]=useState("");
 
-  async function load(){
-    const suffix=filter==="all"?"":`?type=${filter}`;
-    const [a,b]=await Promise.all([fetch("/api/admin/catalog/items"+suffix),fetch("/api/admin/catalog/categories")]);
-    const aj=await a.json(); const bj=await b.json();
-    setItems(aj.data??[]); setCategories(bj.data??[]);
+  async function load(targetPage=page){
+    setLoading(true);
+    setMessage("");
+
+    const params=new URLSearchParams({
+      page:String(targetPage),
+      per_page:"25",
+    });
+    if(filter!=="all")params.set("type",filter);
+
+    const response=await fetch(`/api/admin/catalog/items?${params.toString()}`,{cache:"no-store"});
+    const json=await response.json().catch(()=>({}));
+    setLoading(false);
+
+    if(!response.ok){
+      setMessage(json.message??"No fue posible cargar el catálogo.");
+      return;
+    }
+
+    setItems(json.data??[]);
+    setMeta({
+      current_page:Number(json.current_page??targetPage),
+      last_page:Number(json.last_page??1),
+      per_page:Number(json.per_page??25),
+      total:Number(json.total??0),
+      from:json.from??null,
+      to:json.to??null,
+    });
+    setPage(Number(json.current_page??targetPage));
   }
 
-  useEffect(()=>{void load();},[filter]);
+  useEffect(()=>{void load(1);},[filter]);
 
-  async function createItem(e:React.FormEvent){
-    e.preventDefault(); setMessage("");
-    const payload={...form,category_id:form.category_id?Number(form.category_id):null,reference:form.reference||null,short_description:form.short_description||null,description:form.description||null};
-    const r=await fetch("/api/admin/catalog/items",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    const j=await r.json();
-    if(!r.ok){setMessage(j.message??"No fue posible guardar.");return;}
-    setForm(initial); setMessage("Guardado correctamente."); await load();
+  async function remove(id:number){
+    if(!confirm("¿Eliminar este elemento?"))return;
+
+    const response=await fetch(`/api/admin/catalog/items/${id}`,{method:"DELETE"});
+    if(!response.ok){
+      const json=await response.json().catch(()=>({}));
+      setMessage(json.message??"No fue posible eliminar el elemento.");
+      return;
+    }
+
+    const targetPage=items.length===1&&page>1?page-1:page;
+    await load(targetPage);
   }
 
-  async function addCategory(e:React.FormEvent){
-    e.preventDefault();
-    const r=await fetch("/api/admin/catalog/categories",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:categoryName,slug:slugify(categoryName),is_active:true})});
-    if(r.ok){setCategoryName("");await load();}
+  function goToPage(nextPage:number){
+    if(nextPage<1||nextPage>meta.last_page||nextPage===page)return;
+    void load(nextPage);
   }
 
-  async function remove(id:number){if(!confirm("¿Eliminar este elemento?"))return;await fetch(`/api/admin/catalog/items/${id}`,{method:"DELETE"});await load();}
+  const pageNumbers=Array.from(
+    {length:Math.min(5,meta.last_page)},
+    (_,index)=>{
+      if(meta.last_page<=5)return index+1;
+      const start=Math.min(Math.max(page-2,1),meta.last_page-4);
+      return start+index;
+    }
+  );
 
   return <div className="w-full max-w-none space-y-6">
-    <header>
-      <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">CRM / CMS</span>
-      <h1 className="mt-2 text-3xl font-bold">Productos y servicios</h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">Un único catálogo con tipo producto o servicio, conservando las rutas históricas.</p>
+    <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <div>
+        <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">CRM / CMS</span>
+        <h1 className="mt-2 flex items-center gap-3 text-3xl font-bold">
+          <FiBox className="text-[var(--brand)]" aria-hidden="true"/>
+          Productos y servicios
+        </h1>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Catálogo administrativo de productos y servicios, conservando las rutas históricas.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 lg:justify-end">
+        <Link
+          href="/dashboard/catalogo/categorias"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold"
+        >
+          <FiTag size={17}/>Categorías
+        </Link>
+        <Link
+          href="/dashboard/catalogo/nuevo"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white"
+        >
+          <FiPlus size={17}/>Nuevo producto o servicio
+        </Link>
+      </div>
     </header>
 
-    <div className="flex flex-wrap gap-2">
-      {(["all","product","service"] as const).map(v=><button key={v} onClick={()=>setFilter(v)} className={`rounded-xl border px-4 py-2 text-sm font-semibold ${filter===v?"bg-[var(--brand)] text-white":"bg-[var(--surface)]"}`}>{v==="all"?"Todo":v==="product"?"Productos":"Servicios"}</button>)}
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
+          <FiFilter/>Filtrar:
+        </span>
+        {(["all","product","service"] as const).map(value=>(
+          <button
+            key={value}
+            type="button"
+            onClick={()=>setFilter(value)}
+            className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+              filter===value
+                ?"border-[var(--brand)] bg-[var(--brand)] text-white"
+                :"border-[var(--border)] bg-[var(--surface)] hover:border-[var(--brand)]"
+            }`}
+          >
+            {value==="all"?"Todos":value==="product"?"Productos":"Servicios"}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-sm text-[var(--muted)]">
+        {meta.total>0
+          ? `Mostrando ${meta.from}–${meta.to} de ${meta.total}`
+          : "0 registros"}
+      </p>
     </div>
 
-    <section className="space-y-6">
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-        <div className="border-b border-[var(--border)] px-5 py-4"><h2 className="font-semibold">Catálogo</h2></div>
-        <div className="divide-y divide-[var(--border)]">
-          {items.map(item=><div key={item.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2"><strong>{item.name}</strong><span className="rounded-full bg-[var(--brand-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--brand)]">{item.type==="product"?"Producto":"Servicio"}</span></div>
-              <p className="mt-1 truncate text-sm text-[var(--muted)]">{item.public_url}</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">{item.category?.name??"Sin categoría"} · {item.status}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 sm:justify-end"><a href={`https://www.gaspronal.com${item.public_url}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ExternalLink size={16}/>Ver original</a><Link href={`/dashboard/catalogo/${item.id}/editar`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><Pencil size={16}/>Editar</Link><button onClick={()=>remove(item.id)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-red-600"><Trash2 size={16}/>Eliminar</button></div>
-          </div>)}
-          {!items.length&&<p className="px-5 py-10 text-center text-sm text-[var(--muted)]">Aún no hay elementos.</p>}
+    <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[900px] border-collapse text-left">
+          <thead className="border-b border-[var(--border)] bg-[var(--app-bg)]">
+            <tr className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">
+              <th className="px-5 py-4">Nombre</th>
+              <th className="px-5 py-4">Tipo</th>
+              <th className="px-5 py-4">Referencia</th>
+              <th className="px-5 py-4">Categoría</th>
+              <th className="px-5 py-4">Estado</th>
+              <th className="px-5 py-4 text-right">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-[var(--border)]">
+            {loading&&(
+              <tr>
+                <td colSpan={6} className="px-5 py-10 text-center text-sm text-[var(--muted)]">
+                  Cargando catálogo…
+                </td>
+              </tr>
+            )}
+
+            {!loading&&items.map(item=>(
+              <tr key={item.id} className="transition hover:bg-[var(--app-bg)]">
+                <td className="px-5 py-4">
+                  <strong className="block text-sm">{item.name}</strong>
+                  <span className="mt-1 block max-w-md truncate text-xs text-[var(--muted)]">{item.public_url}</span>
+                </td>
+                <td className="px-5 py-4">
+                  <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--brand)]">
+                    {item.type==="product"?"Producto":"Servicio"}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-sm">{item.reference||"—"}</td>
+                <td className="px-5 py-4 text-sm">{item.category?.name??"Sin categoría"}</td>
+                <td className="px-5 py-4">
+                  <span className="text-sm font-medium">{statusLabel[item.status]??item.status}</span>
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex justify-end gap-2">
+                    <a
+                      href={`https://www.gaspronal.com${item.public_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                      title="Ver original"
+                      aria-label="Ver original"
+                    >
+                      <FiExternalLink size={16}/>
+                    </a>
+                    <Link
+                      href={`/dashboard/catalogo/${item.id}/editar`}
+                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                      title="Editar"
+                      aria-label="Editar"
+                    >
+                      <FiEdit2 size={16}/>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={()=>void remove(item.id)}
+                      className="grid size-10 place-items-center rounded-xl border border-red-200 text-red-600 transition hover:bg-red-50"
+                      title="Eliminar"
+                      aria-label="Eliminar"
+                    >
+                      <FiTrash2 size={16}/>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+
+            {!loading&&items.length===0&&(
+              <tr>
+                <td colSpan={6} className="px-5 py-12 text-center text-sm text-[var(--muted)]">
+                  No hay productos o servicios para este filtro.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {!loading&&meta.last_page>1&&(
+        <div className="flex flex-col gap-3 border-t border-[var(--border)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-[var(--muted)]">
+            Página {meta.current_page} de {meta.last_page}
+          </p>
+
+          <nav className="flex flex-wrap items-center gap-2" aria-label="Paginación del catálogo">
+            <button
+              type="button"
+              onClick={()=>goToPage(page-1)}
+              disabled={page<=1}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <FiChevronLeft/>Anterior
+            </button>
+
+            {pageNumbers.map(number=>(
+              <button
+                key={number}
+                type="button"
+                onClick={()=>goToPage(number)}
+                aria-current={number===page?"page":undefined}
+                className={`grid size-10 place-items-center rounded-xl border text-sm font-semibold ${
+                  number===page
+                    ?"border-[var(--brand)] bg-[var(--brand)] text-white"
+                    :"border-[var(--border)] bg-[var(--surface)]"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={()=>goToPage(page+1)}
+              disabled={page>=meta.last_page}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Siguiente<FiChevronRight/>
+            </button>
+          </nav>
         </div>
-      </div>
-
-      <div className="space-y-5">
-        <form onSubmit={createItem} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-          <div className="flex items-center gap-2"><Plus size={18}/><h2 className="font-semibold">Nuevo elemento</h2></div>
-          <select value={form.type} onChange={e=>setForm({...form,type:e.target.value as CatalogForm["type"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="product">Producto</option><option value="service">Servicio</option></select>
-          <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value,slug:slugify(e.target.value)})} placeholder="Nombre" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-          <input value={form.reference} onChange={e=>setForm({...form,reference:e.target.value})} placeholder="Referencia / tipo" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-          <input required value={form.slug} onChange={e=>setForm({...form,slug:slugify(e.target.value)})} placeholder="slug" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-          <select value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="">Sin categoría</option>{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>
-          <textarea value={form.short_description} onChange={e=>setForm({...form,short_description:e.target.value})} placeholder="Descripción corta" rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
-          <select value={form.status} onChange={e=>setForm({...form,status:e.target.value as CatalogForm["status"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select>
-          <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white"><Save size={17}/>Guardar</button>
-        </form>
-
-        <form onSubmit={addCategory} className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-          <h2 className="font-semibold">Categorías</h2>
-          <div className="flex gap-2"><input required value={categoryName} onChange={e=>setCategoryName(e.target.value)} placeholder="Nueva categoría" className="min-h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-transparent px-3"/><button className="rounded-xl bg-[var(--brand)] px-4 text-white"><Plus size={18}/></button></div>
-          <div className="flex flex-wrap gap-2">{categories.map(c=><span key={c.id} className="rounded-full border border-[var(--border)] px-3 py-1 text-xs">{c.name}</span>)}</div>
-        </form>
-      </div>
+      )}
     </section>
-    {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
+
+    {message&&<p className="text-sm font-medium text-red-700">{message}</p>}
   </div>;
 }
