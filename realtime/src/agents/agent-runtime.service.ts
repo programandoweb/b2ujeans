@@ -4,12 +4,31 @@ import { AgentRegistryService } from "./agent-registry.service";
 import { GeminiService, type GeminiContent, type GeminiFunctionDeclaration } from "./gemini.service";
 import { LaravelAgentSettingsClient } from "./laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./laravel-commercial.client";
+import { LaravelKnowledgeClient } from "./laravel-knowledge.client";
 import type { AgentMessageInput, AgentResponse } from "./agent.types";
 
 const CLAUDIO_FUNCTIONS: GeminiFunctionDeclaration[] = [
   {
+    name: "knowledge_search",
+    description: "Consulta la base de conocimiento verificada de Gaspronal. Debes usarla antes de responder ubicación, horarios, políticas, empresa, procesos o información institucional.",
+    parameters: {
+      type: "OBJECT",
+      required: ["query"],
+      properties: { query: { type: "STRING", description: "Pregunta o tema que necesitas verificar." } },
+    },
+  },
+  {
+    name: "register_unanswered_question",
+    description: "Registra una pregunta de Gaspronal que no pudiste responder con evidencia suficiente. Úsala antes de decir que no tienes la información.",
+    parameters: {
+      type: "OBJECT",
+      required: ["question"],
+      properties: { question: { type: "STRING" } },
+    },
+  },
+  {
     name: "catalog_search",
-    description: "Busca productos o servicios publicados con precio comercial privado. Úsala antes de hablar de precios.",
+    description: "Busca productos o servicios publicados con precio comercial privado. Úsala antes de hablar de productos o precios.",
     parameters: {
       type: "OBJECT",
       properties: { query: { type: "STRING", description: "Nombre, referencia o necesidad del cliente." } },
@@ -58,6 +77,41 @@ const CLAUDIO_FUNCTIONS: GeminiFunctionDeclaration[] = [
   },
 ];
 
+const SOFIA_FUNCTIONS: GeminiFunctionDeclaration[] = [
+  {
+    name: "unresolved_questions",
+    description: "Lista las preguntas que Claudio no pudo responder y que necesitan investigación o curaduría.",
+    parameters: { type: "OBJECT", properties: {} },
+  },
+  {
+    name: "knowledge_search",
+    description: "Consulta el conocimiento ya publicado para Claudio y evita duplicados.",
+    parameters: {
+      type: "OBJECT",
+      required: ["query"],
+      properties: { query: { type: "STRING" } },
+    },
+  },
+  {
+    name: "knowledge_upsert",
+    description: "Publica conocimiento verificado para el RAG de Claudio. Usa una fuente verificable y no publiques datos dudosos.",
+    parameters: {
+      type: "OBJECT",
+      required: ["title", "answer"],
+      properties: {
+        title: { type: "STRING" },
+        question: { type: "STRING" },
+        answer: { type: "STRING" },
+        category: { type: "STRING" },
+        keywords: { type: "STRING" },
+        source_url: { type: "STRING" },
+        confidence: { type: "INTEGER" },
+        question_id: { type: "INTEGER" },
+      },
+    },
+  },
+];
+
 @Injectable()
 export class AgentRuntimeService {
   constructor(
@@ -65,6 +119,7 @@ export class AgentRuntimeService {
     private readonly settings: LaravelAgentSettingsClient,
     private readonly gemini: GeminiService,
     private readonly commercial: LaravelCommercialClient,
+    private readonly knowledge: LaravelKnowledgeClient,
   ) {}
 
   async execute(agentId: string, input: AgentMessageInput): Promise<AgentResponse> {
@@ -93,7 +148,7 @@ export class AgentRuntimeService {
       "\nResponde siempre en español salvo que el usuario solicite otro idioma.",
     ].join("\n").trim();
 
-    if (agent.id !== "claudio") {
+    if (!["claudio", "sofia"].includes(agent.id)) {
       const answer = await this.gemini.generate({
         apiKey: credentials.api_key,
         model: credentials.model,
@@ -111,13 +166,16 @@ export class AgentRuntimeService {
       { role: "user", parts: [{ text: message }] },
     ];
 
-    for (let attempt = 0; attempt < 6; attempt++) {
+    const functions = agent.id === "claudio" ? CLAUDIO_FUNCTIONS : SOFIA_FUNCTIONS;
+
+    for (let attempt = 0; attempt < 8; attempt++) {
       const turn = await this.gemini.generateTurn({
         apiKey: credentials.api_key,
         model: credentials.model,
         system,
         contents,
-        functions: CLAUDIO_FUNCTIONS,
+        functions,
+        googleSearch: agent.id === "sofia",
       });
 
       contents.push(turn.content);
@@ -126,14 +184,20 @@ export class AgentRuntimeService {
         return this.response(requestId, agent, turn.text);
       }
 
-      const result = await this.commercial.execute(agent.id, turn.name, turn.args);
+      let result: unknown;
+      if (agent.id === "claudio" && ["catalog_search", "create_quote", "create_appointment", "handoff_to_human"].includes(turn.name)) {
+        result = await this.commercial.execute(agent.id, turn.name, turn.args);
+      } else {
+        result = await this.knowledge.execute(agent.id, turn.name, turn.args);
+      }
+
       contents.push({
         role: "user",
         parts: [{ functionResponse: { name: turn.name, response: result } }],
       });
     }
 
-    throw new Error("Claudio excedió el límite de operaciones de herramienta para este mensaje.");
+    throw new Error(`${agent.name} excedió el límite de operaciones de herramienta para este mensaje.`);
   }
 
   private response(requestId: string, agent: { id: string; name: string; role: string }, message: string): AgentResponse {
