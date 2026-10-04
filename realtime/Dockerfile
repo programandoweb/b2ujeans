@@ -3,6 +3,7 @@ ARG NODE_VERSION=22
 
 FROM node:${NODE_VERSION}-alpine AS build
 WORKDIR /app
+RUN apk add --no-cache git
 COPY package.json ./
 RUN npm install --no-audit --no-fund
 COPY nest-cli.json tsconfig.json ./
@@ -13,6 +14,7 @@ RUN npm run build
 FROM node:${NODE_VERSION}-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production PORT=4100 AGENTS_PATH=/app/agents
+RUN apk add --no-cache git
 COPY package.json ./
 RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --from=build /app/dist ./dist
