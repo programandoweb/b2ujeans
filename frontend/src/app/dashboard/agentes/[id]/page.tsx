@@ -236,7 +236,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
 
   const name=agent?.name??id.charAt(0).toUpperCase()+id.slice(1);
 
-  return <div className="mx-auto w-full max-w-7xl space-y-6">
+  return <div className="w-full max-w-none space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <Link href="/dashboard/agentes" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-medium">
         <ArrowLeft size={16}/>Agentes
