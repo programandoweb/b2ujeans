@@ -7,6 +7,7 @@ import { AgentRuntimeService } from "./agents/agent-runtime.service";
 import { GeminiService } from "./agents/gemini.service";
 import { LaravelAgentSettingsClient } from "./agents/laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./agents/laravel-commercial.client";
+import { LaravelKnowledgeClient } from "./agents/laravel-knowledge.client";
 import { HealthController } from "./health.controller";
 import { ChannelsController } from "./channels/channels.controller";
 import { ChannelsRuntimeService } from "./channels/channels-runtime.service";
@@ -22,6 +23,7 @@ import { LaravelChannelsClient } from "./channels/laravel-channels.client";
     GeminiService,
     LaravelAgentSettingsClient,
     LaravelCommercialClient,
+    LaravelKnowledgeClient,
     LaravelChannelsClient,
     ChannelsRuntimeService,
   ],
