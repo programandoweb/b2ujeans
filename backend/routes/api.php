@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\InternalAgentCommercialController;
 use App\Http\Controllers\Api\V1\CommercialQuoteController;
 use App\Http\Controllers\Api\V1\CommercialAppointmentController;
 use App\Http\Controllers\Api\V1\JorgeResearchController;
+use App\Http\Controllers\Api\V1\CommunicationProviderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -18,6 +19,8 @@ Route::prefix('v1')->group(function (): void {
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
+    Route::get('internal/communications/providers', [CommunicationProviderController::class, 'internalList']);
+    Route::post('internal/communications/outbound-log', [CommunicationProviderController::class, 'internalLog']);
 
     Route::prefix('auth')->group(function (): void {
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -36,6 +39,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
         Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
+
+        Route::get('communications/providers', [CommunicationProviderController::class, 'index']);
+        Route::post('communications/providers', [CommunicationProviderController::class, 'store']);
+        Route::put('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'update']);
+        Route::delete('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'destroy']);
 
         Route::get('commercial/quotes', [CommercialQuoteController::class, 'index']);
         Route::get('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'show']);
