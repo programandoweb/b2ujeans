@@ -7,12 +7,15 @@ use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\SeoRedirectController;
 use App\Http\Controllers\Api\V1\DeploymentController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\InternalAgentCommercialController;
+use App\Http\Controllers\Api\V1\CommercialQuoteController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
     Route::get('health', HealthController::class);
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
+    Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
 
     Route::prefix('auth')->group(function (): void {
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -31,6 +34,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
         Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
+
+        Route::get('commercial/quotes', [CommercialQuoteController::class, 'index']);
+        Route::get('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'show']);
+        Route::put('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'update']);
+        Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve']);
 
         Route::get('catalog/items', [CatalogController::class, 'index']);
         Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show']);
