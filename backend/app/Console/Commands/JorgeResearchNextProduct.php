@@ -23,8 +23,7 @@ class JorgeResearchNextProduct extends Command
 
         $item = CatalogItem::query()
             ->where('type', 'product')
-            ->whereIn('legacy_research_status', ['pending', 'failed'])
-            ->orderByRaw("CASE WHEN legacy_research_status = 'pending' THEN 0 ELSE 1 END")
+            ->where('legacy_research_status', 'pending')
             ->orderBy('id')
             ->first();
 
