@@ -78,12 +78,11 @@ echo "[deploy] Revisión: $BEFORE -> $AFTER"
 echo "[backend] Construyendo imagen PHP..."
 compose build --pull backend
 
-echo "[backend] Publicando backend y scheduler..."
+echo "[backend] Publicando backend..."
 compose up -d --no-deps backend
-compose up -d --no-deps scheduler
 
 echo "[backend] Verificando contenedor..."
-compose ps backend scheduler
+compose ps backend
 
 echo "[backend] Instalando dependencias PHP..."
 compose exec -T backend composer install \
@@ -105,6 +104,9 @@ compose exec -T backend php artisan optimize
 echo "[backend] Corrigiendo permisos persistentes..."
 compose exec -T -u root backend sh -lc \
   'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache'
+
+echo "[scheduler] Publicando scheduler de agentes..."
+compose up -d --no-deps scheduler
 
 echo "[nginx] Validando y recargando configuración..."
 compose exec -T backend-nginx nginx -t
