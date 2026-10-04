@@ -31,17 +31,20 @@ class JorgeProductResearchService
 
         $title = $this->firstText($xpath, '//h1|//h2') ?: $item->name;
         $description = $this->extractDescription($xpath);
+        $specifications = $this->extractSpecifications($description);
         $meta = $this->extractMeta($xpath, $sourceUrl);
         $images = $this->extractImages($xpath, $sourceUrl, $item);
         $gallery = $this->downloadImages($images, $item->id);
+        $meta['source_images'] = $images;
 
         $seoTitle = $meta['title'] ?? $title;
         $seoDescription = $meta['description'] ?? null;
         $ogImage = $gallery[0] ?? null;
 
         $item->update([
-            'name' => $title ?: $item->name,
             'description' => $description ?: $item->description,
+            'short_description' => ($meta['description'] ?? null) ?: $item->short_description,
+            'specifications' => $specifications ?: $item->specifications,
             'seo_title' => $seoTitle ?: $item->seo_title,
             'seo_description' => $seoDescription ?: $item->seo_description,
             'og_image' => $ogImage ?: $item->og_image,
@@ -182,6 +185,27 @@ class JorgeProductResearchService
         return $parts ? implode("\n\n", array_slice(array_values(array_unique($parts)), 0, 12)) : null;
     }
 
+    private function extractSpecifications(?string $description): array
+    {
+        if (! $description) return [];
+
+        $specifications = [];
+        foreach (preg_split('/\R+/', $description) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '' || ! str_contains($line, ':')) continue;
+
+            [$key, $value] = array_pad(explode(':', $line, 2), 2, null);
+            $key = trim((string) $key);
+            $value = trim((string) $value);
+
+            if ($key !== '' && $value !== '' && mb_strlen($key) <= 100) {
+                $specifications[$key] = $value;
+            }
+        }
+
+        return $specifications;
+    }
+
     private function extractImages(\DOMXPath $xpath, string $sourceUrl, CatalogItem $item): array
     {
         $images = [];
@@ -195,10 +219,14 @@ class JorgeProductResearchService
             $alt = $this->normalize((string) $node->getAttribute('alt'));
             $haystack = $this->normalize($url.' '.$alt);
 
+            if (preg_match('/logo|favicon|facebook|instagram|whatsapp|icon|banner|maps?/i', $haystack)) {
+                continue;
+            }
+
             if (
-                str_contains($url, '/uploads/')
-                || str_contains($url, '/productos/')
-                || $this->similarity($needle, $haystack) >= 0.25
+                str_contains($url, '/productos/')
+                || $this->similarity($needle, $haystack) >= 0.20
+                || ($alt !== '' && $this->similarity($this->normalize($item->name), $alt) >= 0.35)
             ) {
                 $images[$url] = $url;
             }
@@ -224,15 +252,16 @@ class JorgeProductResearchService
             $contentType = strtolower((string) $response->header('Content-Type'));
             if (! str_starts_with($contentType, 'image/')) continue;
 
-            $extension = match (true) {
-                str_contains($contentType, 'png') => 'png',
-                str_contains($contentType, 'webp') => 'webp',
-                str_contains($contentType, 'gif') => 'gif',
-                default => 'jpg',
-            };
+            $image = @imagecreatefromstring($response->body());
+            if ($image === false) continue;
 
-            $filename = $index === 0 ? "image.{$extension}" : 'image-'.($index + 1).".{$extension}";
-            file_put_contents($directory.'/'.$filename, $response->body());
+            $filename = $index === 0 ? 'image.jpg' : 'image-'.($index + 1).'.jpg';
+            $target = $directory.'/'.$filename;
+
+            imageinterlace($image, true);
+            imagejpeg($image, $target, 88);
+            imagedestroy($image);
+
             $saved[] = "/images/uploads/agente/{$productId}/{$filename}";
         }
 
