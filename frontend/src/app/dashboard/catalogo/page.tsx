@@ -49,8 +49,9 @@ export default function CatalogPage(){
   const [search,setSearch]=useState("");
   const [appliedSearch,setAppliedSearch]=useState("");
   const [page,setPage]=useState(1);
+  const [perPage,setPerPage]=useState(10);
   const [meta,setMeta]=useState<PaginationMeta>({
-    current_page:1,last_page:1,per_page:25,total:0,from:null,to:null,
+    current_page:1,last_page:1,per_page:10,total:0,from:null,to:null,
   });
   const [loading,setLoading]=useState(true);
   const [message,setMessage]=useState("");
@@ -61,7 +62,7 @@ export default function CatalogPage(){
 
     const params=new URLSearchParams({
       page:String(targetPage),
-      per_page:"25",
+      per_page:String(perPage),
     });
     if(filter!=="all")params.set("type",filter);
     if(appliedSearch.trim())params.set("search",appliedSearch.trim());
@@ -79,7 +80,7 @@ export default function CatalogPage(){
     setMeta({
       current_page:Number(json.current_page??targetPage),
       last_page:Number(json.last_page??1),
-      per_page:Number(json.per_page??25),
+      per_page:Number(json.per_page??perPage),
       total:Number(json.total??0),
       from:json.from??null,
       to:json.to??null,
@@ -87,7 +88,7 @@ export default function CatalogPage(){
     setPage(Number(json.current_page??targetPage));
   }
 
-  useEffect(()=>{void load(1);},[filter,appliedSearch]);
+  useEffect(()=>{void load(1);},[filter,appliedSearch,perPage]);
 
   function submitSearch(e:React.FormEvent){
     e.preventDefault();
@@ -208,11 +209,26 @@ export default function CatalogPage(){
           ))}
         </div>
 
-        <p className="text-sm text-[var(--muted)]">
-          {meta.total>0
-            ? `Mostrando ${meta.from}–${meta.to} de ${meta.total}`
-            : "0 registros"}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)]">
+            Mostrar
+            <select
+              value={perPage}
+              onChange={e=>setPerPage(Number(e.target.value))}
+              className="min-h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--app-fg)] outline-none focus:border-[var(--brand)]"
+              aria-label="Registros por página"
+            >
+              {[10,20,30,40,50].map(value=><option key={value} value={value}>{value}</option>)}
+            </select>
+            por página
+          </label>
+
+          <p className="text-sm text-[var(--muted)]">
+            {meta.total>0
+              ? `Mostrando ${meta.from}–${meta.to} de ${meta.total}`
+              : "0 registros"}
+          </p>
+        </div>
       </div>
     </div>
 
