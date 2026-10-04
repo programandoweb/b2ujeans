@@ -15,10 +15,12 @@ RUN apk add --no-cache \
     docker-cli \
     docker-cli-compose \
     icu-dev \
+    libxml2-dev \
     libzip-dev \
     oniguruma-dev \
     && docker-php-ext-install -j$(nproc) \
         bcmath \
+        dom \
         intl \
         mbstring \
         opcache \
