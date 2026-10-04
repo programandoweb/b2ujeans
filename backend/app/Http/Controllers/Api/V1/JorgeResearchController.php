@@ -30,6 +30,11 @@ class JorgeResearchController extends Controller
 
     public function play(): JsonResponse
     {
+        CatalogItem::query()
+            ->where('type', 'product')
+            ->where('legacy_research_status', 'processing')
+            ->update(['legacy_research_status' => 'pending']);
+
         $run = AgentResearchRun::query()->firstOrCreate(['agent_id' => 'jorge']);
 
         $run->update([
