@@ -35,6 +35,8 @@ return new class extends Migration {
             $table->decimal('total', 14, 2)->default(0);
             $table->text('notes')->nullable();
             $table->string('created_by_agent', 80)->default('claudio');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });
 
