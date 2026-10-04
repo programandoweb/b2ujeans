@@ -8,15 +8,23 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
 
   const { path } = await context.params;
   const url = new URL(request.url);
-  const body = ["GET", "HEAD"].includes(request.method) ? undefined : await request.text();
+  const hasBody = !["GET", "HEAD"].includes(request.method);
+  const contentType = request.headers.get("content-type") ?? "";
+
+  let body: BodyInit | undefined;
+  if (hasBody) {
+    body = contentType.includes("multipart/form-data")
+      ? await request.formData()
+      : await request.text();
+  }
 
   const response = await backendFetch("/" + path.join("/") + url.search, {
     method: request.method,
     headers: { Authorization: `Bearer ${token}` },
-    body: body || undefined,
+    body,
   });
 
-  return new NextResponse(await response.text(), {
+  return new NextResponse(await response.arrayBuffer(), {
     status: response.status,
     headers: { "Content-Type": response.headers.get("content-type") ?? "application/json" },
   });
