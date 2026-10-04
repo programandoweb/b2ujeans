@@ -1,10 +1,23 @@
 "use client";
 
-import { Mail, MessageCircle, PlugZap, Plus, RefreshCw, Save, Send, Trash2, Unplug } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiEdit2,
+  FiMail,
+  FiMessageCircle,
+  FiPlus,
+  FiRefreshCw,
+  FiSend,
+  FiTrash2,
+  FiWifi,
+  FiWifiOff,
+} from "react-icons/fi";
 
-type Channel = "whatsapp" | "email";
-type Provider = {
+type Channel="whatsapp"|"email";
+type Provider={
   id:string;
   name:string;
   channel:Channel;
@@ -16,294 +29,321 @@ type Provider = {
   settings:Record<string,unknown>;
   has_credentials:boolean;
 };
-type RuntimeProvider = Provider & {
+type RuntimeProvider=Provider&{
   runtime_status:"disconnected"|"connecting"|"qr_pending"|"connected"|"ready"|"error";
   phone_number?:string;
   display_name?:string;
-  qr_data_url?:string;
   last_error?:string;
 };
-
-const emptyForm={
-  name:"",
-  channel:"whatsapp" as Channel,
-  priority:100,
-  is_fallback:false,
-  enabled:true,
-  auto_connect:true,
-  host:"",
-  port:587,
-  secure:false,
-  from:"",
-  user:"",
-  password:"",
+type PaginationMeta={
+  current_page:number;
+  last_page:number;
+  per_page:number;
+  total:number;
+  from:number|null;
+  to:number|null;
 };
 
 export default function ChannelsPage(){
   const [providers,setProviders]=useState<Provider[]>([]);
   const [runtime,setRuntime]=useState<RuntimeProvider[]>([]);
-  const [form,setForm]=useState(emptyForm);
+  const [page,setPage]=useState(1);
+  const [meta,setMeta]=useState<PaginationMeta>({
+    current_page:1,last_page:1,per_page:25,total:0,from:null,to:null,
+  });
   const [loading,setLoading]=useState(true);
-  const [saving,setSaving]=useState(false);
   const [message,setMessage]=useState("");
 
-  async function load(){
+  async function load(targetPage=page){
+    setLoading(true);
+    setMessage("");
+
     const [providersResponse,runtimeResponse]=await Promise.all([
-      fetch("/api/admin/communications/providers",{cache:"no-store"}),
+      fetch(`/api/admin/communications/providers?page=${targetPage}&per_page=25`,{cache:"no-store"}),
       fetch("/api/channels",{cache:"no-store"}),
     ]);
+
     const providersJson=await providersResponse.json().catch(()=>({}));
     const runtimeJson=await runtimeResponse.json().catch(()=>({}));
-    if(providersResponse.ok)setProviders(providersJson.data??[]);
-    if(runtimeResponse.ok)setRuntime(runtimeJson.data??[]);
+
+    if(!providersResponse.ok){
+      setMessage(providersJson.message??"No fue posible cargar los canales.");
+      setLoading(false);
+      return;
+    }
+
+    setProviders(providersJson.data??[]);
+    setRuntime(runtimeResponse.ok?(runtimeJson.data??[]):[]);
+    setMeta({
+      current_page:Number(providersJson.current_page??targetPage),
+      last_page:Number(providersJson.last_page??1),
+      per_page:Number(providersJson.per_page??25),
+      total:Number(providersJson.total??0),
+      from:providersJson.from??null,
+      to:providersJson.to??null,
+    });
+    setPage(Number(providersJson.current_page??targetPage));
     setLoading(false);
   }
 
   useEffect(()=>{
-    void load();
-    const timer=window.setInterval(()=>void load(),4000);
+    void load(1);
+    const timer=window.setInterval(()=>void load(page),10000);
     return ()=>window.clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
-  async function createProvider(e:React.FormEvent){
-    e.preventDefault();
-    setSaving(true);
-    setMessage("");
+  const runtimeMap=useMemo(()=>new Map(runtime.map(item=>[String(item.id),item])),[runtime]);
 
-    const email=form.channel==="email";
-    const payload:Record<string,unknown>={
-      name:form.name.trim(),
-      channel:form.channel,
-      driver:email?"smtp":"baileys",
-      priority:Number(form.priority),
-      is_fallback:form.is_fallback,
-      auto_connect:form.auto_connect,
-      enabled:form.enabled,
-      settings:email?{
-        host:form.host.trim(),
-        port:Number(form.port),
-        secure:form.secure,
-        from:form.from.trim(),
-      }:{},
-    };
-    if(email)payload.credentials={user:form.user.trim(),password:form.password};
-
-    const response=await fetch("/api/admin/communications/providers",{
+  async function runtimeAction(provider:Provider,action:"connect"|"disconnect"){
+    const response=await fetch(`/api/channels/${provider.id}/${action}`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(payload),
+      body:JSON.stringify({logout:false}),
     });
     const json=await response.json().catch(()=>({}));
-    setSaving(false);
-
     if(!response.ok){
-      setMessage(json.message??"No fue posible crear el proveedor.");
+      setMessage(json.message??"No fue posible cambiar el estado del canal.");
       return;
     }
-
-    setForm(emptyForm);
-    setMessage("Proveedor creado correctamente.");
-    await load();
+    await load(page);
   }
 
-  const runtimeMap=useMemo(()=>new Map(runtime.map(item=>[item.id,item])),[runtime]);
-
-  return <div className="w-full max-w-none space-y-6">
-    <header>
-      <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Comunicaciones</span>
-      <h1 className="mt-1 text-3xl font-bold">Canales</h1>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">
-        Registra múltiples proveedores de WhatsApp y Email. Los envíos intentan primero los proveedores principales por prioridad y luego los marcados como fallback.
-      </p>
-    </header>
-
-    <section className="space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold">Proveedores registrados</h2>
-            <p className="text-sm text-[var(--muted)]">{providers.length} proveedor(es)</p>
-          </div>
-          <button type="button" onClick={()=>void load()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold">
-            <RefreshCw size={16}/>Actualizar
-          </button>
-        </div>
-
-        {loading&&<div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm text-[var(--muted)]">Cargando canales…</div>}
-        {!loading&&!providers.length&&<div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-8 text-center text-sm text-[var(--muted)]">Aún no hay proveedores registrados.</div>}
-
-        {providers.map(provider=><ProviderEditor key={provider.id} provider={provider} runtime={runtimeMap.get(provider.id)} onChanged={load}/>)}
-      </div>
-
-      <form onSubmit={createProvider} className="h-fit space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-        <div className="flex items-center gap-2"><Plus size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Nuevo proveedor</h2></div>
-
-        <label className="block space-y-2">
-          <span className="text-sm font-medium">Canal</span>
-          <select value={form.channel} onChange={e=>setForm(current=>({...current,channel:e.target.value as Channel}))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">
-            <option value="whatsapp">WhatsApp · Baileys</option>
-            <option value="email">Email · SMTP</option>
-          </select>
-        </label>
-
-        <label className="block space-y-2">
-          <span className="text-sm font-medium">Nombre</span>
-          <input required value={form.name} onChange={e=>setForm(current=>({...current,name:e.target.value}))} placeholder={form.channel==="whatsapp"?"WhatsApp Comercial":"SMTP Principal"} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-        </label>
-
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block space-y-2">
-            <span className="text-sm font-medium">Prioridad</span>
-            <input type="number" min={1} value={form.priority} onChange={e=>setForm(current=>({...current,priority:Number(e.target.value)}))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-          </label>
-          <label className="flex items-end gap-2 pb-3 text-sm font-medium">
-            <input type="checkbox" checked={form.is_fallback} onChange={e=>setForm(current=>({...current,is_fallback:e.target.checked}))}/>Fallback
-          </label>
-        </div>
-
-        {form.channel==="email"&&<div className="space-y-3 rounded-xl bg-[var(--app-bg)] p-4">
-          <div className="grid gap-3 sm:grid-cols-[1fr_100px]">
-            <input required value={form.host} onChange={e=>setForm(current=>({...current,host:e.target.value}))} placeholder="smtp.gmail.com" className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-            <input required type="number" value={form.port} onChange={e=>setForm(current=>({...current,port:Number(e.target.value)}))} placeholder="587" className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-          </div>
-          <input required type="email" value={form.from} onChange={e=>setForm(current=>({...current,from:e.target.value}))} placeholder="Email remitente" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-          <input required value={form.user} onChange={e=>setForm(current=>({...current,user:e.target.value}))} placeholder="Usuario SMTP" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-          <input required type="password" autoComplete="new-password" value={form.password} onChange={e=>setForm(current=>({...current,password:e.target.value}))} placeholder="Contraseña / App password" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.secure} onChange={e=>setForm(current=>({...current,secure:e.target.checked}))}/>TLS directo / secure</label>
-        </div>}
-
-        <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={form.enabled} onChange={e=>setForm(current=>({...current,enabled:e.target.checked}))}/>Habilitado</label>
-        {form.channel==="whatsapp"&&<label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={form.auto_connect} onChange={e=>setForm(current=>({...current,auto_connect:e.target.checked}))}/>Reconectar automáticamente</label>}
-
-        <button disabled={saving} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white disabled:opacity-50">
-          <Save size={17}/>{saving?"Guardando…":"Crear proveedor"}
-        </button>
-        {message&&<p className="text-xs leading-5 text-[var(--muted)]">{message}</p>}
-      </form>
-    </section>
-  </div>;
-}
-
-function ProviderEditor({provider,runtime,onChanged}:{provider:Provider;runtime?:RuntimeProvider;onChanged:()=>Promise<void>}){
-  const settings=provider.settings??{};
-  const [name,setName]=useState(provider.name);
-  const [priority,setPriority]=useState(provider.priority);
-  const [fallback,setFallback]=useState(provider.is_fallback);
-  const [enabled,setEnabled]=useState(provider.enabled);
-  const [autoConnect,setAutoConnect]=useState(provider.auto_connect);
-  const [host,setHost]=useState(String(settings.host??""));
-  const [port,setPort]=useState(Number(settings.port??587));
-  const [secure,setSecure]=useState(Boolean(settings.secure??false));
-  const [from,setFrom]=useState(String(settings.from??""));
-  const [user,setUser]=useState("");
-  const [password,setPassword]=useState("");
-  const [busy,setBusy]=useState(false);
-  const [message,setMessage]=useState("");
-
-  const status=runtime?.runtime_status??(provider.enabled&&provider.driver==="smtp"?"ready":"disconnected");
-
-  async function save(){
-    setBusy(true);setMessage("");
-    const payload:Record<string,unknown>={
-      name,channel:provider.channel,driver:provider.driver,
-      priority:Number(priority),is_fallback:fallback,enabled,auto_connect:autoConnect,
-      settings:provider.driver==="smtp"?{host,port:Number(port),secure,from}:{},
-    };
-    if(provider.driver==="smtp"&&(user.trim()||password))payload.credentials={user:user.trim(),password};
-
-    const response=await fetch(`/api/admin/communications/providers/${provider.id}`,{
-      method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),
-    });
-    const json=await response.json().catch(()=>({}));
-    setBusy(false);
-    if(!response.ok){setMessage(json.message??"No fue posible guardar.");return;}
-    setUser("");setPassword("");setMessage("Configuración guardada.");await onChanged();
-  }
-
-  async function runtimeAction(action:"connect"|"disconnect",logout=false){
-    setBusy(true);setMessage("");
-    const response=await fetch(`/api/channels/${provider.id}/${action}`,{
-      method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({logout}),
-    });
-    const json=await response.json().catch(()=>({}));
-    setBusy(false);
-    if(!response.ok){setMessage(json.message??"No fue posible cambiar la conexión.");return;}
-    setMessage(action==="connect"?"Conexión iniciada.":"Proveedor desconectado.");await onChanged();
-  }
-
-  async function test(){
-    const recipient=window.prompt(provider.channel==="whatsapp"?"Número destino con indicativo, por ejemplo 573001234567":"Email destino");
+  async function test(provider:Provider){
+    const recipient=window.prompt(
+      provider.channel==="whatsapp"
+        ?"Número destino con indicativo, por ejemplo 573001234567"
+        :"Email destino"
+    );
     if(!recipient)return;
+
     const text=window.prompt("Mensaje de prueba","Prueba de canal Gaspronal");
     if(!text)return;
-    const subject=provider.channel==="email"?window.prompt("Asunto","Prueba Gaspronal")??"Prueba Gaspronal":undefined;
 
-    setBusy(true);setMessage("");
+    const subject=provider.channel==="email"
+      ? window.prompt("Asunto","Prueba Gaspronal")??"Prueba Gaspronal"
+      : undefined;
+
     const response=await fetch(`/api/channels/${provider.id}/test`,{
-      method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({recipient,text,subject}),
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({recipient,text,subject}),
     });
     const json=await response.json().catch(()=>({}));
-    setBusy(false);
     setMessage(response.ok?"Mensaje de prueba enviado.":json.message??"Falló el envío de prueba.");
   }
 
-  async function remove(){
+  async function remove(provider:Provider){
     if(!confirm(`¿Eliminar el proveedor "${provider.name}"?`))return;
-    setBusy(true);
+
     if(provider.driver==="baileys"){
       await fetch(`/api/channels/${provider.id}/disconnect`,{
-        method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({logout:true}),
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({logout:true}),
       }).catch(()=>undefined);
     }
+
     const response=await fetch(`/api/admin/communications/providers/${provider.id}`,{method:"DELETE"});
-    setBusy(false);
-    if(!response.ok){const json=await response.json().catch(()=>({}));setMessage(json.message??"No fue posible eliminar.");return;}
-    await onChanged();
+    if(!response.ok){
+      const json=await response.json().catch(()=>({}));
+      setMessage(json.message??"No fue posible eliminar el proveedor.");
+      return;
+    }
+
+    const targetPage=providers.length===1&&page>1?page-1:page;
+    await load(targetPage);
   }
 
-  return <article className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-    <div className="flex flex-wrap items-start justify-between gap-3">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">{provider.channel==="whatsapp"?<MessageCircle size={20}/>:<Mail size={20}/>}</div>
-        <div className="min-w-0">
-          <input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold outline-none"/>
-          <p className="text-xs text-[var(--muted)]">{provider.channel==="whatsapp"?"WhatsApp · Baileys":"Email · SMTP"} · {fallback?"Fallback":"Principal"}</p>
-        </div>
+  function goToPage(nextPage:number){
+    if(nextPage<1||nextPage>meta.last_page||nextPage===page)return;
+    void load(nextPage);
+  }
+
+  const pageNumbers=Array.from(
+    {length:Math.min(5,meta.last_page)},
+    (_,index)=>{
+      if(meta.last_page<=5)return index+1;
+      const start=Math.min(Math.max(page-2,1),meta.last_page-4);
+      return start+index;
+    }
+  );
+
+  return <div className="w-full max-w-none space-y-6">
+    <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <div>
+        <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Comunicaciones</span>
+        <h1 className="mt-2 flex items-center gap-3 text-3xl font-bold">
+          <FiMessageCircle className="text-[var(--brand)]"/>
+          Canales
+        </h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">
+          Proveedores de WhatsApp y Email usados por la plataforma y los agentes.
+        </p>
       </div>
-      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status==="connected"||status==="ready"?"bg-emerald-50 text-emerald-700":status==="qr_pending"||status==="connecting"?"bg-amber-50 text-amber-800":status==="error"?"bg-red-50 text-red-700":"bg-slate-100 text-slate-600"}`}>{status}</span>
+
+      <div className="flex flex-wrap gap-2 lg:justify-end">
+        <button
+          type="button"
+          onClick={()=>void load(page)}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold"
+        >
+          <FiRefreshCw/>Actualizar
+        </button>
+        <Link
+          href="/dashboard/canales/nuevo"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white"
+        >
+          <FiPlus/>Nuevo canal
+        </Link>
+      </div>
+    </header>
+
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm text-[var(--muted)]">
+        {meta.total>0?`Mostrando ${meta.from}–${meta.to} de ${meta.total}`:"0 registros"}
+      </p>
     </div>
 
-    <div className="grid gap-3 sm:grid-cols-4">
-      <label className="space-y-1"><span className="text-xs text-[var(--muted)]">Prioridad</span><input type="number" min={1} value={priority} onChange={e=>setPriority(Number(e.target.value))} className="min-h-10 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/></label>
-      <label className="flex items-center gap-2 pt-5 text-sm"><input type="checkbox" checked={fallback} onChange={e=>setFallback(e.target.checked)}/>Fallback</label>
-      <label className="flex items-center gap-2 pt-5 text-sm"><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/>Habilitado</label>
-      {provider.driver==="baileys"&&<label className="flex items-center gap-2 pt-5 text-sm"><input type="checkbox" checked={autoConnect} onChange={e=>setAutoConnect(e.target.checked)}/>Auto conectar</label>}
-    </div>
+    <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[980px] border-collapse text-left">
+          <thead className="border-b border-[var(--border)] bg-[var(--app-bg)]">
+            <tr className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">
+              <th className="px-5 py-4">Proveedor</th>
+              <th className="px-5 py-4">Canal</th>
+              <th className="px-5 py-4">Prioridad</th>
+              <th className="px-5 py-4">Modo</th>
+              <th className="px-5 py-4">Estado</th>
+              <th className="px-5 py-4 text-right">Acciones</th>
+            </tr>
+          </thead>
 
-    {provider.driver==="smtp"&&<div className="grid gap-3 rounded-xl bg-[var(--app-bg)] p-4 sm:grid-cols-2">
-      <input value={host} onChange={e=>setHost(e.target.value)} placeholder="Host SMTP" className="min-h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-      <input type="number" value={port} onChange={e=>setPort(Number(e.target.value))} placeholder="Puerto" className="min-h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-      <input type="email" value={from} onChange={e=>setFrom(e.target.value)} placeholder="Remitente" className="min-h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={secure} onChange={e=>setSecure(e.target.checked)}/>Secure</label>
-      <input value={user} onChange={e=>setUser(e.target.value)} placeholder={provider.has_credentials?"Nuevo usuario (opcional)":"Usuario SMTP"} className="min-h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-      <input type="password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder={provider.has_credentials?"Nueva contraseña (opcional)":"Contraseña SMTP"} className="min-h-10 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3"/>
-    </div>}
+          <tbody className="divide-y divide-[var(--border)]">
+            {loading&&<tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-[var(--muted)]">Cargando canales…</td></tr>}
 
-    {runtime?.qr_data_url&&<div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
-      <p className="mb-3 text-sm font-semibold text-amber-900">Escanea este QR desde WhatsApp → Dispositivos vinculados</p>
-      <img src={runtime.qr_data_url} alt="QR de vinculación WhatsApp" className="mx-auto size-64 max-w-full rounded-lg bg-white p-2"/>
-    </div>}
+            {!loading&&providers.map(provider=>{
+              const runtimeProvider=runtimeMap.get(String(provider.id));
+              const status=runtimeProvider?.runtime_status??(provider.enabled&&provider.driver==="smtp"?"ready":"disconnected");
+              const connected=status==="connected"||status==="ready";
 
-    {runtime?.phone_number&&<p className="text-sm text-[var(--muted)]">Número conectado: <strong className="text-[var(--app-fg)]">+{runtime.phone_number}</strong>{runtime.display_name?` · ${runtime.display_name}`:""}</p>}
-    {runtime?.last_error&&<p className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">{runtime.last_error}</p>}
+              return <tr key={provider.id} className="transition hover:bg-[var(--app-bg)]">
+                <td className="px-5 py-4">
+                  <strong className="block text-sm">{provider.name}</strong>
+                  <span className="mt-1 block text-xs text-[var(--muted)]">{provider.driver.toUpperCase()}</span>
+                </td>
+                <td className="px-5 py-4">
+                  <span className="inline-flex items-center gap-2 text-sm font-medium">
+                    {provider.channel==="whatsapp"?<FiMessageCircle className="text-[var(--brand)]"/>:<FiMail className="text-[var(--brand)]"/>}
+                    {provider.channel==="whatsapp"?"WhatsApp":"Email"}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-sm">{provider.priority}</td>
+                <td className="px-5 py-4 text-sm">{provider.is_fallback?"Fallback":"Principal"}</td>
+                <td className="px-5 py-4">
+                  <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    connected
+                      ?"bg-emerald-50 text-emerald-700"
+                      :status==="error"
+                        ?"bg-red-50 text-red-700"
+                        :"bg-slate-100 text-slate-600"
+                  }`}>
+                    {connected?<FiWifi/>:<FiWifiOff/>}
+                    {status}
+                  </span>
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={()=>void runtimeAction(provider,connected?"disconnect":"connect")}
+                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                      title={connected?"Desconectar":"Conectar"}
+                      aria-label={connected?"Desconectar":"Conectar"}
+                    >
+                      {connected?<FiWifiOff/>:<FiWifi/>}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={()=>void test(provider)}
+                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                      title="Probar canal"
+                      aria-label="Probar canal"
+                    >
+                      <FiSend/>
+                    </button>
+                    <Link
+                      href={`/dashboard/canales/${provider.id}/editar`}
+                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                      title="Editar"
+                      aria-label="Editar"
+                    >
+                      <FiEdit2/>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={()=>void remove(provider)}
+                      className="grid size-10 place-items-center rounded-xl border border-red-200 text-red-600 transition hover:bg-red-50"
+                      title="Eliminar"
+                      aria-label="Eliminar"
+                    >
+                      <FiTrash2/>
+                    </button>
+                  </div>
+                </td>
+              </tr>;
+            })}
 
-    <div className="flex flex-wrap gap-2">
-      <button type="button" disabled={busy} onClick={()=>void save()} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[var(--brand)] px-3 text-sm font-semibold text-white disabled:opacity-50"><Save size={15}/>Guardar</button>
-      <button type="button" disabled={busy} onClick={()=>void runtimeAction("connect")} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-50"><PlugZap size={15}/>Conectar</button>
-      {provider.driver==="baileys"&&<button type="button" disabled={busy} onClick={()=>void runtimeAction("disconnect",false)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-50"><Unplug size={15}/>Desconectar</button>}
-      <button type="button" disabled={busy} onClick={()=>void test()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-50"><Send size={15}/>Probar</button>
-      <button type="button" disabled={busy} onClick={()=>void remove()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-200 px-3 text-sm font-semibold text-red-700 disabled:opacity-50"><Trash2 size={15}/>Eliminar</button>
-    </div>
-    {message&&<p className="text-xs text-[var(--muted)]">{message}</p>}
-  </article>;
+            {!loading&&providers.length===0&&(
+              <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-[var(--muted)]">No hay canales configurados.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {!loading&&meta.last_page>1&&(
+        <div className="flex flex-col gap-3 border-t border-[var(--border)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-[var(--muted)]">Página {meta.current_page} de {meta.last_page}</p>
+
+          <nav className="flex flex-wrap items-center gap-2" aria-label="Paginación de canales">
+            <button
+              type="button"
+              onClick={()=>goToPage(page-1)}
+              disabled={page<=1}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-40"
+            >
+              <FiChevronLeft/>Anterior
+            </button>
+
+            {pageNumbers.map(number=>(
+              <button
+                key={number}
+                type="button"
+                onClick={()=>goToPage(number)}
+                aria-current={number===page?"page":undefined}
+                className={`grid size-10 place-items-center rounded-xl border text-sm font-semibold ${
+                  number===page
+                    ?"border-[var(--brand)] bg-[var(--brand)] text-white"
+                    :"border-[var(--border)]"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={()=>goToPage(page+1)}
+              disabled={page>=meta.last_page}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-40"
+            >
+              Siguiente<FiChevronRight/>
+            </button>
+          </nav>
+        </div>
+      )}
+    </section>
+
+    {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
+  </div>;
 }
