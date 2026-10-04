@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Bot, KeyRound, LoaderCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, Trash2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Bot, CheckCircle2, HelpCircle, KeyRound, LoaderCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, Trash2, XCircle } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
 import { connectAgentSocket, type AgentSocket } from "@/lib/agent-socket";
 
@@ -27,6 +27,14 @@ type ResearchState = {
   pending_items:number;
   completed_items:number;
 };
+type UnansweredQuestion = {
+  id:number;
+  question:string;
+  times_asked:number;
+  status:"pending"|"answered"|"discarded";
+  last_asked_at?:string|null;
+  created_at:string;
+};
 
 export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }) {
   const { id } = use(params);
@@ -44,6 +52,10 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const [research,setResearch]=useState<ResearchState|null>(null);
   const [researchBusy,setResearchBusy]=useState(false);
   const [researchMessage,setResearchMessage]=useState("");
+  const [unanswered,setUnanswered]=useState<UnansweredQuestion[]>([]);
+  const [unansweredLoading,setUnansweredLoading]=useState(false);
+  const [unansweredMessage,setUnansweredMessage]=useState("");
+  const [answers,setAnswers]=useState<Record<number,string>>({});
   const socketRef=useRef<AgentSocket|null>(null);
   const bottomRef=useRef<HTMLDivElement|null>(null);
 
@@ -144,6 +156,27 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
     return ()=>{active=false;window.clearInterval(timer);};
   },[id]);
 
+  useEffect(()=>{
+    if(id!=="claudio")return;
+    let active=true;
+
+    async function loadUnanswered(){
+      setUnansweredLoading(true);
+      const response=await fetch("/api/admin/agents/claudio/unanswered-questions?status=pending&per_page=50",{cache:"no-store"});
+      const json=await response.json().catch(()=>({}));
+      if(!active)return;
+      setUnansweredLoading(false);
+      if(response.ok){
+        setUnanswered(json.data??[]);
+      }else{
+        setUnansweredMessage(json.message??"No fue posible cargar las preguntas pendientes.");
+      }
+    }
+
+    void loadUnanswered();
+    return ()=>{active=false;};
+  },[id]);
+
   async function researchAction(action:"play"|"pause"|"stop"){
     setResearchBusy(true);
     setResearchMessage("");
@@ -156,6 +189,58 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
     }
     setResearch(json.data);
     setResearchMessage(action==="play"?"Investigación iniciada.":action==="pause"?"Investigación pausada.":"Investigación detenida.");
+  }
+
+  async function refreshUnanswered(){
+    const response=await fetch("/api/admin/agents/claudio/unanswered-questions?status=pending&per_page=50",{cache:"no-store"});
+    const json=await response.json().catch(()=>({}));
+    if(response.ok)setUnanswered(json.data??[]);
+  }
+
+  async function answerQuestion(question:UnansweredQuestion){
+    const answer=(answers[question.id]??"").trim();
+    if(!answer)return;
+
+    setUnansweredMessage("");
+    const response=await fetch(`/api/admin/agents/claudio/unanswered-questions/${question.id}/answer`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({answer,category:"preguntas frecuentes"}),
+    });
+    const json=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      setUnansweredMessage(json.message??"No fue posible guardar la respuesta.");
+      return;
+    }
+
+    setAnswers(current=>{
+      const next={...current};
+      delete next[question.id];
+      return next;
+    });
+    setUnansweredMessage("Respuesta incorporada al RAG de Claudio.");
+    await refreshUnanswered();
+  }
+
+  async function discardQuestion(question:UnansweredQuestion){
+    if(!confirm("¿Descartar esta pregunta del aprendizaje de Claudio?"))return;
+
+    setUnansweredMessage("");
+    const response=await fetch(`/api/admin/agents/claudio/unanswered-questions/${question.id}/discard`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({reason:"Descartada desde el perfil de Claudio."}),
+    });
+    const json=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      setUnansweredMessage(json.message??"No fue posible descartar la pregunta.");
+      return;
+    }
+
+    setUnansweredMessage("Pregunta descartada.");
+    await refreshUnanswered();
   }
 
   async function saveSettings(e:React.FormEvent){
@@ -287,6 +372,59 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       </div>
 
       <aside className="space-y-5">
+        {id==="claudio"&&<section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2"><HelpCircle size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Preguntas pendientes del RAG</h2></div>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Preguntas reales que Claudio no respondió por falta de evidencia. Respóndelas para entrenar su base de conocimiento o descártalas.</p>
+            </div>
+            <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-bold text-[var(--brand)]">{unanswered.length}</span>
+          </div>
+
+          {unansweredLoading&&<p className="text-sm text-[var(--muted)]">Cargando preguntas…</p>}
+          {!unansweredLoading&&unanswered.length===0&&<div className="rounded-xl border border-dashed border-[var(--border)] p-5 text-center">
+            <BookOpen size={24} className="mx-auto text-[var(--brand)]"/>
+            <p className="mt-2 text-sm font-medium">No hay preguntas pendientes.</p>
+          </div>}
+
+          <div className="max-h-[520px] space-y-3 overflow-y-auto pr-1">
+            {unanswered.map(question=><article key={question.id} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-semibold leading-6">{question.question}</p>
+                <span className="shrink-0 rounded-full bg-[var(--app-bg)] px-2 py-1 text-[11px] font-bold text-[var(--muted)]">{question.times_asked}×</span>
+              </div>
+
+              <textarea
+                value={answers[question.id]??""}
+                onChange={e=>setAnswers(current=>({...current,[question.id]:e.target.value}))}
+                placeholder="Escribe la respuesta verificada que Claudio podrá utilizar…"
+                rows={4}
+                className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3 text-sm"
+              />
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={!(answers[question.id]??"").trim()}
+                  onClick={()=>void answerQuestion(question)}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[var(--brand)] px-3 text-sm font-semibold text-white disabled:opacity-45"
+                >
+                  <CheckCircle2 size={16}/>Guardar en RAG
+                </button>
+                <button
+                  type="button"
+                  onClick={()=>void discardQuestion(question)}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold text-[var(--muted)]"
+                >
+                  <XCircle size={16}/>Descartar
+                </button>
+              </div>
+            </article>)}
+          </div>
+
+          {unansweredMessage&&<p className="text-xs font-medium text-[var(--brand)]">{unansweredMessage}</p>}
+        </section>}
+
         {id==="jorge"&&<section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
           <div className="flex items-center gap-2"><Search size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Investigación del catálogo</h2></div>
           <p className="text-sm leading-6 text-[var(--muted)]">Jorge recorre uno a uno los productos de la web oficial de Gaspronal, recupera contenido, SEO, metatags e imágenes y los guarda localmente.</p>
