@@ -6,6 +6,7 @@
   "license": "proprietary",
   "require": {
     "php": "^8.2",
+    "ext-dom": "*",
     "ext-pdo": "*",
     "ext-pdo_mysql": "*",
     "dedoc/scramble": "^0.13.43",
