@@ -27,7 +27,7 @@ export default function AgentsPage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  return <div className="mx-auto w-full max-w-7xl space-y-7">
+  return <div className="w-full max-w-none space-y-7">
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div>
         <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Inteligencia artificial</span>
