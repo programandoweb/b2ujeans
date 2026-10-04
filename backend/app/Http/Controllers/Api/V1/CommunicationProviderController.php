@@ -11,17 +11,25 @@ use Illuminate\Validation\Rule;
 
 class CommunicationProviderController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json([
-            'data' => CommunicationProvider::query()
-                ->orderBy('channel')
-                ->orderBy('is_fallback')
-                ->orderBy('priority')
-                ->orderBy('name')
-                ->get()
-                ->map(fn (CommunicationProvider $provider) => $this->safeProvider($provider)),
-        ]);
+        $paginator = CommunicationProvider::query()
+            ->orderBy('channel')
+            ->orderBy('is_fallback')
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->paginate(min(max($request->integer('per_page', 25), 1), 100));
+
+        $paginator->setCollection(
+            $paginator->getCollection()->map(fn (CommunicationProvider $provider) => $this->safeProvider($provider))
+        );
+
+        return response()->json($paginator);
+    }
+
+    public function show(CommunicationProvider $communicationProvider): JsonResponse
+    {
+        return response()->json(['data' => $this->safeProvider($communicationProvider)]);
     }
 
     public function store(Request $request): JsonResponse
