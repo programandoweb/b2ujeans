@@ -35,9 +35,9 @@ export default function NotesPage(){
 
   async function remove(id:number){if(!confirm("¿Eliminar esta publicación?"))return;await fetch(`/api/admin/content/posts/${id}`,{method:"DELETE"});await load();}
 
-  return <div className="mx-auto w-full max-w-7xl space-y-6">
+  return <div className="w-full max-w-none space-y-6">
     <header><span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Contenido</span><h1 className="mt-2 text-3xl font-bold">Gaspro-notas</h1><p className="mt-2 text-sm text-[var(--muted)]">CMS editorial bajo la taxonomía histórica <strong>/2019/gaspro-notas</strong>.</p></header>
-    <section className="grid gap-6 xl:grid-cols-[1.3fr_.7fr]">
+    <section className="space-y-6">
       <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
         <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4"><FileText size={18}/><h2 className="font-semibold">Publicaciones</h2></div>
         <div className="divide-y divide-[var(--border)]">{posts.map(post=><div key={post.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center"><div className="min-w-0"><strong>{post.title}</strong><p className="mt-1 truncate text-sm text-[var(--muted)]">{post.public_url}</p><p className="mt-1 text-xs text-[var(--muted)]">{post.category?.name??"Sin categoría"} · {post.status}</p></div><div className="flex flex-wrap gap-2 sm:justify-end"><a href={`https://www.gaspronal.com${post.public_url}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ExternalLink size={16}/>Ver original</a><Link href={`/dashboard/gaspro-notas/${post.id}/editar`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><Pencil size={16}/>Editar</Link><button onClick={()=>remove(post.id)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm text-red-600"><Trash2 size={16}/>Eliminar</button></div></div>)}{!posts.length&&<p className="px-5 py-10 text-center text-sm text-[var(--muted)]">Aún no hay publicaciones.</p>}</div>
