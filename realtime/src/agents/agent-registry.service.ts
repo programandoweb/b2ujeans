@@ -22,11 +22,13 @@ export class AgentRegistryService implements OnModuleInit {
 
       const id = entry.name.toLowerCase();
       const dir = join(root, entry.name);
-      const [prompt, memory, tools] = await Promise.all([
+      const [prompt, memory, baseTools, skills] = await Promise.all([
         fs.readFile(join(dir, "Agent.md"), "utf8"),
         fs.readFile(join(dir, "Memory.md"), "utf8").catch(() => ""),
         fs.readFile(join(dir, "Tools.md"), "utf8").catch(() => ""),
+        this.readSkills(join(dir, "skills")),
       ]);
+      const tools = [baseTools, skills].filter(Boolean).join("\n\n");
 
       const name = prompt.match(/^#\s+([^\n]+)/m)?.[1]?.trim() ?? entry.name;
       const role = prompt.match(/^##\s+Rol\s*\n+([^\n]+)/mi)?.[1]?.trim() ?? "Agente Gaspronal";
@@ -35,6 +37,19 @@ export class AgentRegistryService implements OnModuleInit {
     }
 
     this.logger.log("Agentes Gaspronal cargados: " + [...this.agents.keys()].join(", "));
+  }
+
+  private async readSkills(skillsDir: string): Promise<string> {
+    const entries = await fs.readdir(skillsDir, { withFileTypes: true }).catch(() => []);
+    const files = entries
+      .filter(entry => entry.isFile() && entry.name.toLowerCase().endsWith(".md"))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const contents = await Promise.all(
+      files.map(file => fs.readFile(join(skillsDir, file.name), "utf8").catch(() => "")),
+    );
+
+    return contents.filter(Boolean).join("\n\n");
   }
 
   get(id: string): AgentDefinition | undefined {
