@@ -132,7 +132,7 @@ class JorgeProductResearchService
             if ($href === '') continue;
 
             $absolute = $this->absoluteUrl($href, self::BASE);
-            if (! str_contains($absolute, $path)) continue;
+            if (! $this->isOfficialHost($absolute) || ! str_contains($absolute, $path)) continue;
 
             $links[$absolute] = trim(preg_replace('/\s+/', ' ', $node->textContent) ?? '');
         }
@@ -216,6 +216,8 @@ class JorgeProductResearchService
             if ($src === '') continue;
 
             $url = $this->absoluteUrl($src, $sourceUrl);
+            if (! $this->isOfficialHost($url)) continue;
+
             $alt = $this->normalize((string) $node->getAttribute('alt'));
             $haystack = $this->normalize($url.' '.$alt);
 
@@ -294,6 +296,12 @@ class JorgeProductResearchService
         $path = isset($parts['path']) ? rtrim(dirname($parts['path']), '/') : '';
 
         return ($parts['scheme'] ?? 'https').'://'.($parts['host'] ?? 'www.gaspronal.com').$path.'/'.$url;
+    }
+
+    private function isOfficialHost(string $url): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        return in_array($host, ['gaspronal.com', 'www.gaspronal.com'], true);
     }
 
     private function normalize(string $value): string
