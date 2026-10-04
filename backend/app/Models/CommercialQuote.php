@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CommercialQuote extends Model
 {
-    protected $fillable = ['lead_id', 'number', 'status', 'currency', 'subtotal', 'total', 'notes', 'created_by_agent'];
+    protected $fillable = ['lead_id', 'number', 'status', 'currency', 'subtotal', 'total', 'notes', 'created_by_agent', 'approved_by', 'approved_at'];
 
     protected function casts(): array
     {
-        return ['subtotal' => 'decimal:2', 'total' => 'decimal:2'];
+        return ['subtotal' => 'decimal:2', 'total' => 'decimal:2', 'approved_at' => 'datetime'];
     }
 
     public function lead(): BelongsTo { return $this->belongsTo(CommercialLead::class, 'lead_id'); }
