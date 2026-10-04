@@ -147,10 +147,10 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
   }
 
   if(loading){
-    return <div className="mx-auto w-full max-w-5xl py-8 text-sm text-[var(--muted)]">Cargando producto…</div>;
+    return <div className="w-full max-w-none py-8 text-sm text-[var(--muted)]">Cargando producto…</div>;
   }
 
-  return <div className="mx-auto w-full max-w-5xl space-y-6">
+  return <div className="w-full max-w-none space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <Link href="/dashboard/catalogo" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium">
         <ArrowLeft size={16}/>Volver
