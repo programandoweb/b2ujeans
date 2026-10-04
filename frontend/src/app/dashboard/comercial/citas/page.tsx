@@ -28,7 +28,7 @@ export default function CommercialAppointmentsPage(){
 
  useEffect(()=>{void load();},[]);
 
- return <div className="mx-auto w-full max-w-7xl space-y-6">
+ return <div className="w-full max-w-none space-y-6">
   <div className="flex flex-wrap items-end justify-between gap-3">
    <header>
     <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Comercial</span>
