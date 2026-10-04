@@ -74,7 +74,11 @@ class CommercialQuoteController extends Controller
         abort_unless($commercialQuote->status === 'pending_approval', 422, 'La propuesta no está pendiente de aprobación.');
 
         DB::transaction(function () use ($commercialQuote): void {
-            $commercialQuote->update(['status' => 'approved']);
+            $commercialQuote->update([
+                'status' => 'approved',
+                'approved_by' => auth('api')->id(),
+                'approved_at' => now(),
+            ]);
             $commercialQuote->lead()->update([
                 'status' => 'awaiting_human',
                 'human_followup_at' => now(),
