@@ -7,7 +7,7 @@ export type GeminiFunctionDeclaration = {
 };
 
 export type GeminiContent = {
-  role: "user" | "model" | "function";
+  role: "user" | "model";
   parts: Array<Record<string, unknown>>;
 };
 
