@@ -8,10 +8,13 @@ import { GeminiService } from "./agents/gemini.service";
 import { LaravelAgentSettingsClient } from "./agents/laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./agents/laravel-commercial.client";
 import { HealthController } from "./health.controller";
+import { ChannelsController } from "./channels/channels.controller";
+import { ChannelsRuntimeService } from "./channels/channels-runtime.service";
+import { LaravelChannelsClient } from "./channels/laravel-channels.client";
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
-  controllers: [HealthController, AgentController],
+  controllers: [HealthController, AgentController, ChannelsController],
   providers: [
     AgentGateway,
     AgentRegistryService,
@@ -19,6 +22,8 @@ import { HealthController } from "./health.controller";
     GeminiService,
     LaravelAgentSettingsClient,
     LaravelCommercialClient,
+    LaravelChannelsClient,
+    ChannelsRuntimeService,
   ],
 })
 export class AppModule {}
