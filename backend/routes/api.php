@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\DeploymentController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InternalAgentCommercialController;
 use App\Http\Controllers\Api\V1\CommercialQuoteController;
+use App\Http\Controllers\Api\V1\CommercialAppointmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -39,6 +40,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'show']);
         Route::put('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'update']);
         Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve']);
+        Route::get('commercial/appointments', [CommercialAppointmentController::class, 'index']);
 
         Route::get('catalog/items', [CatalogController::class, 'index']);
         Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show']);
