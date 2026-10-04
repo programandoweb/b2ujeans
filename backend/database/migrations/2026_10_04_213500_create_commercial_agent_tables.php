@@ -29,7 +29,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('lead_id')->constrained('commercial_leads')->cascadeOnDelete();
             $table->string('number', 40)->unique();
-            $table->string('status', 50)->default('awaiting_human')->index();
+            $table->string('status', 50)->default('pending_approval')->index();
             $table->string('currency', 3)->default('COP');
             $table->decimal('subtotal', 14, 2)->default(0);
             $table->decimal('total', 14, 2)->default(0);
