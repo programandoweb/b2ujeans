@@ -13,9 +13,29 @@ use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(Post::query()->with('category:id,name,slug')->latest()->paginate(25));
+        return response()->json(
+            Post::query()
+                ->with('category:id,name,slug')
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = trim((string) $request->string('search'));
+                    $like = '%'.$search.'%';
+
+                    $query->where(function ($searchQuery) use ($like): void {
+                        $searchQuery
+                            ->where('title', 'like', $like)
+                            ->orWhere('slug', 'like', $like)
+                            ->orWhere('excerpt', 'like', $like)
+                            ->orWhere('content', 'like', $like)
+                            ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery
+                                ->where('name', 'like', $like)
+                                ->orWhere('slug', 'like', $like));
+                    });
+                })
+                ->latest()
+                ->paginate(min(max($request->integer('per_page', 25), 1), 100))
+        );
     }
 
     public function show(Post $post): JsonResponse
