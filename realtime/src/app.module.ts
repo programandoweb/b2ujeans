@@ -6,11 +6,19 @@ import { AgentRegistryService } from "./agents/agent-registry.service";
 import { AgentRuntimeService } from "./agents/agent-runtime.service";
 import { GeminiService } from "./agents/gemini.service";
 import { LaravelAgentSettingsClient } from "./agents/laravel-agent-settings.client";
+import { LaravelCommercialClient } from "./agents/laravel-commercial.client";
 import { HealthController } from "./health.controller";
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
   controllers: [HealthController, AgentController],
-  providers: [AgentGateway, AgentRegistryService, AgentRuntimeService, GeminiService, LaravelAgentSettingsClient],
+  providers: [
+    AgentGateway,
+    AgentRegistryService,
+    AgentRuntimeService,
+    GeminiService,
+    LaravelAgentSettingsClient,
+    LaravelCommercialClient,
+  ],
 })
 export class AppModule {}
