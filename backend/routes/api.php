@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\SeoRedirectController;
 use App\Http\Controllers\Api\V1\DeploymentController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InternalAgentCommercialController;
 use App\Http\Controllers\Api\V1\CommercialQuoteController;
@@ -36,6 +37,7 @@ Route::prefix('v1')->group(function (): void {
     });
 
     Route::middleware(['auth:api', 'role:admin'])->group(function (): void {
+        Route::get('dashboard/metrics', DashboardController::class);
         Route::get('deployments', [DeploymentController::class, 'index']);
         Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
         Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
