@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
 
         Route::get('communications/providers', [CommunicationProviderController::class, 'index']);
+        Route::get('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'show']);
         Route::post('communications/providers', [CommunicationProviderController::class, 'store']);
         Route::put('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'update']);
         Route::delete('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'destroy']);
