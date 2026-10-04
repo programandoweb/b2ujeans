@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bot, BookOpen, Boxes, CornerDownRight, FileCheck2, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import { Bot, BookOpen, Boxes, CalendarDays, CornerDownRight, FileCheck2, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
@@ -39,6 +39,12 @@ const navItems = [
     href: "/dashboard/comercial/propuestas",
     label: "Propuestas",
     icon: FileCheck2,
+    exact: false,
+  },
+  {
+    href: "/dashboard/comercial/citas",
+    label: "Citas",
+    icon: CalendarDays,
     exact: false,
   },
   {
