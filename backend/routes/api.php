@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InternalAgentCommercialController;
 use App\Http\Controllers\Api\V1\CommercialQuoteController;
 use App\Http\Controllers\Api\V1\CommercialAppointmentController;
+use App\Http\Controllers\Api\V1\JorgeResearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -41,6 +42,11 @@ Route::prefix('v1')->group(function (): void {
         Route::put('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'update']);
         Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve']);
         Route::get('commercial/appointments', [CommercialAppointmentController::class, 'index']);
+
+        Route::get('agents/jorge/research', [JorgeResearchController::class, 'show']);
+        Route::post('agents/jorge/research/play', [JorgeResearchController::class, 'play']);
+        Route::post('agents/jorge/research/pause', [JorgeResearchController::class, 'pause']);
+        Route::post('agents/jorge/research/stop', [JorgeResearchController::class, 'stop']);
 
         Route::get('catalog/items', [CatalogController::class, 'index']);
         Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show']);
