@@ -56,7 +56,6 @@ class CommunicationProviderController extends Controller
         $this->authorizeInternal($request);
 
         $providers = CommunicationProvider::query()
-            ->where('enabled', true)
             ->orderBy('channel')
             ->orderBy('is_fallback')
             ->orderBy('priority')
