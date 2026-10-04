@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AgentSettingController;
+use App\Http\Controllers\Api\V1\AgentKnowledgeController;
+use App\Http\Controllers\Api\V1\InternalAgentKnowledgeController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\SeoRedirectController;
@@ -21,6 +23,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('catalog/items/{catalogItem}/media/{filename}', [CatalogController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
+    Route::post('internal/agents/{agent}/knowledge-tools', [InternalAgentKnowledgeController::class, 'execute']);
     Route::get('internal/communications/providers', [CommunicationProviderController::class, 'internalList']);
     Route::post('internal/communications/outbound-log', [CommunicationProviderController::class, 'internalLog']);
 
