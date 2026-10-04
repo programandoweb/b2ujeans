@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Save } from "lucide-react";
+import { FiArrowLeft, FiExternalLink, FiSave, FiType, FiLink2, FiTag, FiActivity, FiSearch, FiFileText } from "react-icons/fi";
 import { use, useEffect, useState } from "react";
 
 type Category = { id:number; name:string; slug:string };
@@ -102,12 +102,12 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
     setMessage("Publicación actualizada correctamente.");
   }
 
-  if(loading) return <div className="mx-auto w-full max-w-5xl py-8 text-sm text-[var(--muted)]">Cargando publicación…</div>;
+  if(loading) return <div className="w-full max-w-none py-8 text-sm text-[var(--muted)]">Cargando publicación…</div>;
 
-  return <div className="mx-auto w-full max-w-5xl space-y-6">
+  return <div className="w-full max-w-none space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <Link href="/dashboard/gaspro-notas" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ArrowLeft size={16}/>Volver</Link>
-      {publicUrl&&<a href={`https://www.gaspronal.com${publicUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ExternalLink size={16}/>Ver original</a>}
+      <Link href="/dashboard/gaspro-notas" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><FiArrowLeft size={16}/>Volver</Link>
+      {publicUrl&&<a href={`https://www.gaspronal.com${publicUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><FiExternalLink size={16}/>Ver original</a>}
     </div>
 
     <header>
@@ -117,19 +117,47 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
     </header>
 
     <form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-2 md:col-span-2"><span className="text-sm font-medium">Título</span><input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/></label>
-        <label className="space-y-2"><span className="text-sm font-medium">Slug</span><input required value={form.slug} onChange={e=>setForm({...form,slug:slugify(e.target.value)})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/></label>
-        <label className="space-y-2"><span className="text-sm font-medium">Categoría</span><select required value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">{categories.map(category=><option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-        <label className="space-y-2 md:col-span-2"><span className="text-sm font-medium">Resumen</span><textarea value={form.excerpt} onChange={e=>setForm({...form,excerpt:e.target.value})} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/></label>
-        <label className="space-y-2 md:col-span-2"><span className="text-sm font-medium">Contenido</span><textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} rows={12} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/></label>
-        <label className="space-y-2"><span className="text-sm font-medium">Estado</span><select value={form.status} onChange={e=>setForm({...form,status:e.target.value as PostForm["status"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></label>
-        <div/>
-        <label className="space-y-2 md:col-span-2"><span className="text-sm font-medium">SEO title</span><input value={form.seo_title} onChange={e=>setForm({...form,seo_title:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/></label>
-        <label className="space-y-2 md:col-span-2"><span className="text-sm font-medium">SEO description</span><textarea value={form.seo_description} onChange={e=>setForm({...form,seo_description:e.target.value})} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/></label>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid content-start gap-4 md:grid-cols-2">
+          <label className="space-y-2 md:col-span-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiType className="text-[var(--brand)]"/>Título</span>
+            <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiLink2 className="text-[var(--brand)]"/>Slug</span>
+            <input required value={form.slug} onChange={e=>setForm({...form,slug:slugify(e.target.value)})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiTag className="text-[var(--brand)]"/>Categoría</span>
+            <select required value={form.category_id} onChange={e=>setForm({...form,category_id:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3">{categories.map(category=><option key={category.id} value={category.id}>{category.name}</option>)}</select>
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiActivity className="text-[var(--brand)]"/>Estado</span>
+            <select value={form.status} onChange={e=>setForm({...form,status:e.target.value as PostForm["status"]})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select>
+          </label>
+          <label className="space-y-2 md:col-span-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiSearch className="text-[var(--brand)]"/>SEO title</span>
+            <input value={form.seo_title} onChange={e=>setForm({...form,seo_title:e.target.value})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
+          </label>
+        </div>
+
+        <div className="grid content-start gap-4">
+          <label className="space-y-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiFileText className="text-[var(--brand)]"/>Resumen</span>
+            <textarea value={form.excerpt} onChange={e=>setForm({...form,excerpt:e.target.value})} rows={4} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiFileText className="text-[var(--brand)]"/>Contenido</span>
+            <textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} rows={14} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
+          </label>
+          <label className="space-y-2">
+            <span className="flex items-center gap-2 text-sm font-medium"><FiSearch className="text-[var(--brand)]"/>SEO description</span>
+            <textarea value={form.seo_description} onChange={e=>setForm({...form,seo_description:e.target.value})} rows={4} className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3"/>
+          </label>
+        </div>
       </div>
 
-      <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 font-semibold text-white"><Save size={17}/>Guardar cambios</button>
+      <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 font-semibold text-white"><FiSave size={17}/>Guardar cambios</button>
       {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
     </form>
   </div>;
