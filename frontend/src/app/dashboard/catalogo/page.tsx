@@ -10,8 +10,10 @@ import {
   FiExternalLink,
   FiFilter,
   FiPlus,
+  FiSearch,
   FiTag,
   FiTrash2,
+  FiX,
 } from "react-icons/fi";
 
 type Category = { id:number; name:string; slug:string };
@@ -44,6 +46,8 @@ const statusLabel:Record<string,string>={
 export default function CatalogPage(){
   const [items,setItems]=useState<Item[]>([]);
   const [filter,setFilter]=useState<"all"|"product"|"service">("all");
+  const [search,setSearch]=useState("");
+  const [appliedSearch,setAppliedSearch]=useState("");
   const [page,setPage]=useState(1);
   const [meta,setMeta]=useState<PaginationMeta>({
     current_page:1,last_page:1,per_page:25,total:0,from:null,to:null,
@@ -60,6 +64,7 @@ export default function CatalogPage(){
       per_page:"25",
     });
     if(filter!=="all")params.set("type",filter);
+    if(appliedSearch.trim())params.set("search",appliedSearch.trim());
 
     const response=await fetch(`/api/admin/catalog/items?${params.toString()}`,{cache:"no-store"});
     const json=await response.json().catch(()=>({}));
@@ -82,7 +87,17 @@ export default function CatalogPage(){
     setPage(Number(json.current_page??targetPage));
   }
 
-  useEffect(()=>{void load(1);},[filter]);
+  useEffect(()=>{void load(1);},[filter,appliedSearch]);
+
+  function submitSearch(e:React.FormEvent){
+    e.preventDefault();
+    setAppliedSearch(search.trim());
+  }
+
+  function clearSearch(){
+    setSearch("");
+    setAppliedSearch("");
+  }
 
   async function remove(id:number){
     if(!confirm("¿Eliminar este elemento?"))return;
@@ -141,32 +156,64 @@ export default function CatalogPage(){
       </div>
     </header>
 
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
-          <FiFilter/>Filtrar:
-        </span>
-        {(["all","product","service"] as const).map(value=>(
-          <button
-            key={value}
-            type="button"
-            onClick={()=>setFilter(value)}
-            className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-              filter===value
-                ?"border-[var(--brand)] bg-[var(--brand)] text-white"
-                :"border-[var(--border)] bg-[var(--surface)] hover:border-[var(--brand)]"
-            }`}
-          >
-            {value==="all"?"Todos":value==="product"?"Productos":"Servicios"}
-          </button>
-        ))}
-      </div>
+    <div className="space-y-3">
+      <form onSubmit={submitSearch} className="flex flex-col gap-2 lg:flex-row">
+        <div className="relative min-w-0 flex-1">
+          <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" aria-hidden="true"/>
+          <input
+            value={search}
+            onChange={e=>setSearch(e.target.value)}
+            placeholder="Buscar por referencia, categoría, título, producto o servicio..."
+            className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] pl-10 pr-10 text-sm outline-none transition focus:border-[var(--brand)]"
+          />
+          {search&&(
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-[var(--muted)] hover:bg-[var(--app-bg)] hover:text-[var(--app-fg)]"
+              aria-label="Limpiar búsqueda"
+              title="Limpiar búsqueda"
+            >
+              <FiX/>
+            </button>
+          )}
+        </div>
 
-      <p className="text-sm text-[var(--muted)]">
-        {meta.total>0
-          ? `Mostrando ${meta.from}–${meta.to} de ${meta.total}`
-          : "0 registros"}
-      </p>
+        <button
+          type="submit"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white"
+        >
+          <FiSearch/>Buscar
+        </button>
+      </form>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
+            <FiFilter/>Filtrar:
+          </span>
+          {(["all","product","service"] as const).map(value=>(
+            <button
+              key={value}
+              type="button"
+              onClick={()=>setFilter(value)}
+              className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+                filter===value
+                  ?"border-[var(--brand)] bg-[var(--brand)] text-white"
+                  :"border-[var(--border)] bg-[var(--surface)] hover:border-[var(--brand)]"
+              }`}
+            >
+              {value==="all"?"Todos":value==="product"?"Productos":"Servicios"}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-sm text-[var(--muted)]">
+          {meta.total>0
+            ? `Mostrando ${meta.from}–${meta.to} de ${meta.total}`
+            : "0 registros"}
+        </p>
+      </div>
     </div>
 
     <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
