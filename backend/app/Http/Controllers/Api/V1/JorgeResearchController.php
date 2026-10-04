@@ -22,7 +22,7 @@ class JorgeResearchController extends Controller
         return response()->json([
             'data' => [
                 'run' => $run,
-                'pending_items' => CatalogItem::query()->where('type', 'product')->whereIn('legacy_research_status', ['pending', 'failed'])->count(),
+                'pending_items' => CatalogItem::query()->where('type', 'product')->where('legacy_research_status', 'pending')->count(),
                 'completed_items' => CatalogItem::query()->where('type', 'product')->where('legacy_research_status', 'completed')->count(),
             ],
         ]);
