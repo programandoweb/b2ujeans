@@ -108,7 +108,7 @@ export default function ChannelsPage(){
 
   const runtimeMap=useMemo(()=>new Map(runtime.map(item=>[item.id,item])),[runtime]);
 
-  return <div className="mx-auto w-full max-w-7xl space-y-6">
+  return <div className="w-full max-w-none space-y-6">
     <header>
       <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Comunicaciones</span>
       <h1 className="mt-1 text-3xl font-bold">Canales</h1>
@@ -117,7 +117,7 @@ export default function ChannelsPage(){
       </p>
     </header>
 
-    <section className="grid gap-6 xl:grid-cols-[1.2fr_.8fr]">
+    <section className="space-y-6">
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
