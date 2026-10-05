@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\JorgeResearchController;
 use App\Http\Controllers\Api\V1\CommunicationProviderController;
 use App\Http\Controllers\Api\V1\AiProviderController;
 use App\Http\Controllers\Api\V1\UserAccessController;
+use App\Http\Controllers\Api\V1\HeroSlideController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -27,6 +28,8 @@ Route::prefix('v1')->group(function (): void {
     Route::get('catalog/public/use-cases', [CatalogController::class, 'publicUseCases']);
     Route::get('catalog/public/items/{slug}', [CatalogController::class, 'publicShow']);
     Route::get('catalog/public/categories', [CatalogController::class, 'publicCategories']);
+    Route::get('heroes/public', [HeroSlideController::class, 'publicIndex']);
+    Route::get('heroes/media/{heroSlide}/{filename}', [HeroSlideController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('catalog/items/{catalogItem}/media/{filename}', [CatalogController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
@@ -97,6 +100,12 @@ Route::prefix('v1')->group(function (): void {
         Route::post('catalog/categories', [CatalogController::class, 'storeCategory'])->middleware('permission:catalog.manage');
         Route::put('catalog/categories/{catalogCategory}', [CatalogController::class, 'updateCategory'])->middleware('permission:catalog.manage');
         Route::delete('catalog/categories/{catalogCategory}', [CatalogController::class, 'destroyCategory'])->middleware('permission:catalog.manage');
+
+        Route::get('heroes', [HeroSlideController::class, 'index'])->middleware('permission:heroes.view');
+        Route::post('heroes', [HeroSlideController::class, 'store'])->middleware('permission:heroes.manage');
+        Route::put('heroes/{heroSlide}', [HeroSlideController::class, 'update'])->middleware('permission:heroes.manage');
+        Route::delete('heroes/{heroSlide}', [HeroSlideController::class, 'destroy'])->middleware('permission:heroes.manage');
+        Route::post('heroes/{heroSlide}/image', [HeroSlideController::class, 'uploadImage'])->middleware('permission:heroes.manage');
 
         Route::get('content/posts', [PostController::class, 'index'])->middleware('permission:content.view');
         Route::get('content/posts/{post}', [PostController::class, 'show'])->middleware('permission:content.view');
