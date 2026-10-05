@@ -17,6 +17,7 @@ export async function POST() {
 
   const response = NextResponse.json({ ok: true });
   response.cookies.delete("gaspronal_access_token");
+  response.cookies.delete("gaspronal_impersonator_token");
 
   return response;
 }
