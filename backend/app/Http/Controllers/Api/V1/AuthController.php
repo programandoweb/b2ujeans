@@ -7,12 +7,17 @@ use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Services\PasswordResetService;
+use App\Services\WhatsAppOtpService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly PasswordResetService $passwordResetService) {}
+    public function __construct(
+        private readonly PasswordResetService $passwordResetService,
+        private readonly WhatsAppOtpService $whatsAppOtpService,
+    ) {}
 
     public function login(LoginRequest $request): JsonResponse
     {
@@ -22,6 +27,44 @@ class AuthController extends Controller
         if (! $token = $guard->attempt($request->validated())) {
             return response()->json(['message' => 'Credenciales inválidas.'], 401);
         }
+
+        return $this->tokenResponse($guard, $token);
+    }
+
+    public function whatsappStatus(): JsonResponse
+    {
+        return response()->json(['enabled' => $this->whatsAppOtpService->isAvailable()]);
+    }
+
+    public function requestWhatsAppPin(Request $request): JsonResponse
+    {
+        $data = $request->validate(['whatsapp' => ['required', 'string', 'max:30']]);
+        $this->whatsAppOtpService->requestPin($data['whatsapp']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Si el número está registrado, recibirás un código de acceso por WhatsApp.',
+        ]);
+    }
+
+    public function verifyWhatsAppPin(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'whatsapp' => ['required', 'string', 'max:30'],
+            'pin' => ['required', 'digits:4'],
+        ]);
+
+        $user = $this->whatsAppOtpService->verifyPin($data['whatsapp'], $data['pin']);
+
+        if (! $user) {
+            return response()->json([
+                'message' => 'El código es inválido, expiró o superó el número máximo de intentos.',
+            ], 422);
+        }
+
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+        $token = $guard->login($user);
 
         return $this->tokenResponse($guard, $token);
     }
@@ -62,6 +105,7 @@ class AuthController extends Controller
                 'id' => $user?->id,
                 'name' => $user?->name,
                 'email' => $user?->email,
+                'whatsapp' => $user?->whatsapp,
                 'roles' => $user?->getRoleNames()->values() ?? [],
                 'permissions' => $user?->getAllPermissions()->pluck('name')->values() ?? [],
             ],
