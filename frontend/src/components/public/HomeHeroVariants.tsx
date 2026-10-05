@@ -17,7 +17,7 @@ const heroBackgroundOne =
 const heroBackgroundTwo =
   "https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web-2.jpg?1791214773955";
 
-type FullHeroSlide = {
+export type FullHeroSlide = {
   src: string;
   position?: string;
   eyebrow: string;
@@ -29,6 +29,7 @@ type FullHeroSlide = {
   secondaryLabel: string;
   secondaryHref: string;
   cards: Array<[string, string]>;
+  intervalMs?: number;
 };
 
 function HeroBackground({
@@ -64,12 +65,12 @@ function FullHeroCarousel({
   useEffect(() => {
     if (reduceMotion || slides.length < 2) return;
 
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setActive((current) => (current + 1) % slides.length);
-    }, 3000);
+    }, slides[active]?.intervalMs ?? 3000);
 
-    return () => window.clearInterval(timer);
-  }, [reduceMotion, slides.length]);
+    return () => window.clearTimeout(timer);
+  }, [active, reduceMotion, slides]);
 
   const slide = slides[active];
 
@@ -218,9 +219,11 @@ function ProposalSelector({ option }: { option: number }) {
 export default function HomeHeroVariants({
   option,
   publicBackendUrl,
+  managedSlides,
 }: {
   option: number;
   publicBackendUrl: string;
+  managedSlides?: Record<number, FullHeroSlide[]>;
 }) {
   const selector = <ProposalSelector option={option} />;
   const industrialImage =
@@ -398,11 +401,11 @@ export default function HomeHeroVariants({
   ];
 
   if (option === 2) {
-    return <FullHeroCarousel option={2} slides={option2Slides} />;
+    return <FullHeroCarousel option={2} slides={managedSlides?.[2]?.length ? managedSlides[2] : option2Slides} />;
   }
 
   if (option === 3) {
-    return <FullHeroCarousel option={3} slides={option3Slides} />;
+    return <FullHeroCarousel option={3} slides={managedSlides?.[3]?.length ? managedSlides[3] : option3Slides} />;
   }
 
   if (option === 4) {
@@ -455,7 +458,7 @@ export default function HomeHeroVariants({
   }
 
   if (option === 5) {
-    return <FullHeroCarousel option={5} slides={option5Slides} />;
+    return <FullHeroCarousel option={5} slides={managedSlides?.[5]?.length ? managedSlides[5] : option5Slides} />;
   }
 
   return (
