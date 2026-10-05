@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Bot, CheckCircle2, HelpCircle, KeyRound, LoaderCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, Trash2, XCircle } from "lucide-react";
+import { ArrowLeft, BookOpen, Bot, CheckCircle2, HelpCircle, KeyRound, LoaderCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, XCircle } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
 import { connectAgentSocket, type AgentSocket } from "@/lib/agent-socket";
 
@@ -54,8 +54,6 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const { id } = use(params);
   const [agent,setAgent]=useState<Agent|null>(null);
   const [settings,setSettings]=useState<Settings|null>(null);
-  const [model,setModel]=useState("gemini-2.5-flash");
-  const [apiKey,setApiKey]=useState("");
   const [aiModels,setAiModels]=useState<AiModelOption[]>([]);
   const [primaryAiModelId,setPrimaryAiModelId]=useState("");
   const [fallbackAiModelId,setFallbackAiModelId]=useState("");
@@ -96,7 +94,6 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
 
       if(settingsResponse.ok&&settingsJson.data){
         setSettings(settingsJson.data);
-        setModel(settingsJson.data.model??"gemini-2.5-flash");
         setPrimaryAiModelId(settingsJson.data.primary_ai_model_id?String(settingsJson.data.primary_ai_model_id):"");
         setFallbackAiModelId(settingsJson.data.fallback_ai_model_id?String(settingsJson.data.fallback_ai_model_id):"");
       }
@@ -273,15 +270,10 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
     setSaving(true);
     setSettingsMessage("");
 
-    const usesCentralModels=id!=="sofia";
-    const payload:Record<string,unknown>=usesCentralModels
-      ? {
-          primary_ai_model_id:primaryAiModelId?Number(primaryAiModelId):null,
-          fallback_ai_model_id:fallbackAiModelId?Number(fallbackAiModelId):null,
-        }
-      : {provider:"gemini",model};
-
-    if(!usesCentralModels&&apiKey.trim())payload.api_key=apiKey.trim();
+    const payload:Record<string,unknown>={
+      primary_ai_model_id:primaryAiModelId?Number(primaryAiModelId):null,
+      fallback_ai_model_id:fallbackAiModelId?Number(fallbackAiModelId):null,
+    };
 
     const response=await fetch(`/api/agents/${id}/settings`,{
       method:"PUT",
@@ -297,27 +289,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
     }
 
     setSettings(json.data);
-    setApiKey("");
-    setSettingsMessage(id!=="sofia"
-      ?"Modelos del agente actualizados."
-      :"Configuración guardada. La API key quedó cifrada en Laravel.");
-  }
-
-  async function removeApiKey(){
-    if(!confirm("¿Eliminar la API key de Gemini de este agente?"))return;
-    const response=await fetch(`/api/agents/${id}/settings`,{
-      method:"PUT",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({api_key:null,model,provider:"gemini"}),
-    });
-    const json=await response.json().catch(()=>({}));
-    if(response.ok){
-      setSettings(json.data);
-      setApiKey("");
-      setSettingsMessage("API key eliminada.");
-    }else{
-      setSettingsMessage(json.message??"No fue posible eliminar la API key.");
-    }
+    setSettingsMessage("Modelos del agente actualizados.");
   }
 
   async function send(e:React.FormEvent){
@@ -487,82 +459,56 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           {researchMessage&&<p className="text-xs font-medium text-[var(--brand)]">{researchMessage}</p>}
         </section>}
 
-        {id!=="sofia"?(
-          <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-            <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Modelo de IA</h2></div>
-            <p className="text-sm leading-6 text-[var(--muted)]">
-              El agente intenta primero el modelo principal. Si el proveedor o el modelo falla, utiliza automáticamente el fallback.
-            </p>
+        <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Modelo de IA</h2></div>
+          <p className="text-sm leading-6 text-[var(--muted)]">
+            El agente intenta primero el modelo principal. Si falla, utiliza automáticamente el fallback.
+          </p>
 
-            <label className="block space-y-2">
-              <span className="text-sm font-medium">Modelo principal</span>
-              <select
-                value={primaryAiModelId}
-                onChange={e=>{
-                  setPrimaryAiModelId(e.target.value);
-                  if(e.target.value===fallbackAiModelId)setFallbackAiModelId("");
-                }}
-                className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"
-              >
-                <option value="">Selecciona un modelo</option>
-                {aiModels.map(item=><option key={item.id} value={item.id}>
-                  {item.name} · {item.provider?.name??"Sin proveedor"} · {item.model_identifier}
-                </option>)}
-              </select>
-            </label>
+          <label className="block space-y-2">
+            <span className="text-sm font-medium">Modelo principal</span>
+            <select
+              value={primaryAiModelId}
+              onChange={e=>{
+                setPrimaryAiModelId(e.target.value);
+                if(e.target.value===fallbackAiModelId)setFallbackAiModelId("");
+              }}
+              className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"
+            >
+              <option value="">Selecciona un modelo</option>
+              {aiModels.map(item=><option key={item.id} value={item.id}>
+                {item.name} · {item.provider?.name??"Sin proveedor"} · {item.model_identifier}
+              </option>)}
+            </select>
+          </label>
 
-            <label className="block space-y-2">
-              <span className="text-sm font-medium">Modelo fallback</span>
-              <select
-                value={fallbackAiModelId}
-                onChange={e=>setFallbackAiModelId(e.target.value)}
-                className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"
-              >
-                <option value="">Sin fallback</option>
-                {aiModels.filter(item=>String(item.id)!==primaryAiModelId).map(item=><option key={item.id} value={item.id}>
-                  {item.name} · {item.provider?.name??"Sin proveedor"} · {item.model_identifier}
-                </option>)}
-              </select>
-            </label>
+          <label className="block space-y-2">
+            <span className="text-sm font-medium">Modelo fallback</span>
+            <select
+              value={fallbackAiModelId}
+              onChange={e=>setFallbackAiModelId(e.target.value)}
+              className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"
+            >
+              <option value="">Sin fallback</option>
+              {aiModels.filter(item=>String(item.id)!==primaryAiModelId).map(item=><option key={item.id} value={item.id}>
+                {item.name} · {item.provider?.name??"Sin proveedor"} · {item.model_identifier}
+              </option>)}
+            </select>
+          </label>
 
-            <div className="flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--app-bg)] p-3 text-xs leading-5 text-[var(--muted)]">
-              <ShieldCheck size={16} className="mt-0.5 shrink-0 text-[var(--brand)]"/>
-              Las API keys se administran centralmente en Proveedores IA y no se almacenan nuevamente en este agente.
-            </div>
+          <div className="flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--app-bg)] p-3 text-xs leading-5 text-[var(--muted)]">
+            <ShieldCheck size={16} className="mt-0.5 shrink-0 text-[var(--brand)]"/>
+            Las credenciales pertenecen al proveedor central. El agente no almacena API keys propias.
+          </div>
 
-            <Link href="/dashboard/ia" className="inline-flex text-sm font-semibold text-[var(--brand)] hover:underline">
-              Administrar proveedores y modelos
-            </Link>
+          <Link href="/dashboard/ia" className="inline-flex text-sm font-semibold text-[var(--brand)] hover:underline">
+            Administrar proveedores y modelos
+          </Link>
 
-            <button disabled={saving} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white disabled:opacity-50"><Save size={17}/>{saving?"Guardando…":"Guardar modelos"}</button>
+          <button disabled={saving} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white disabled:opacity-50"><Save size={17}/>{saving?"Guardando…":"Guardar modelos"}</button>
 
-            {settingsMessage&&<p className="text-xs leading-5 text-[var(--muted)]">{settingsMessage}</p>}
-          </form>
-        ):(
-          <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-            <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Gemini</h2></div>
-            <p className="text-sm leading-6 text-[var(--muted)]">La API key se guarda cifrada en Laravel y nunca vuelve a mostrarse en el navegador.</p>
-
-            <div className={`flex items-center gap-2 rounded-xl border p-3 text-xs font-semibold ${settings?.has_api_key?"border-emerald-200 bg-emerald-50 text-emerald-700":"border-amber-200 bg-amber-50 text-amber-800"}`}>
-              <ShieldCheck size={16}/>{settings?.has_api_key?"API key configurada":"API key pendiente"}
-            </div>
-
-            <label className="block space-y-2">
-              <span className="text-sm font-medium">API key de Gemini</span>
-              <input type="password" autoComplete="off" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder={settings?.has_api_key?"•••••••••••••••• (guardada)":"Pega aquí tu API key"} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-            </label>
-
-            <label className="block space-y-2">
-              <span className="text-sm font-medium">Modelo</span>
-              <input value={model} onChange={e=>setModel(e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
-            </label>
-
-            <button disabled={saving} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white disabled:opacity-50"><Save size={17}/>{saving?"Guardando…":"Guardar configuración"}</button>
-
-            {settings?.has_api_key&&<button type="button" onClick={removeApiKey} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700"><Trash2 size={16}/>Eliminar API key</button>}
-            {settingsMessage&&<p className="text-xs leading-5 text-[var(--muted)]">{settingsMessage}</p>}
-          </form>
-        )}
+          {settingsMessage&&<p className="text-xs leading-5 text-[var(--muted)]">{settingsMessage}</p>}
+        </form>
       </aside>
     </section>
   </div>;
