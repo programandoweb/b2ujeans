@@ -92,6 +92,21 @@ const CLAUDIO_FUNCTIONS: GeminiFunctionDeclaration[] = [
       },
     },
   },
+  {
+    name: "register_customer",
+    description: "Registra o actualiza al cliente en users con rol cliente únicamente después de que haya entregado nombre, correo, WhatsApp y haya aceptado expresamente el tratamiento de datos.",
+    parameters: {
+      type: "OBJECT",
+      required: ["name", "email", "whatsapp", "accepts_data_processing"],
+      properties: {
+        name: { type: "STRING" },
+        email: { type: "STRING" },
+        whatsapp: { type: "STRING", description: "Formato internacional E.164, por ejemplo +573115000926." },
+        accepts_data_processing: { type: "BOOLEAN" },
+        policy_version: { type: "STRING" },
+      },
+    },
+  },
 ];
 
 const SOFIA_FUNCTIONS: GeminiFunctionDeclaration[] = [
@@ -354,7 +369,7 @@ export class AgentRuntimeService {
   ): Promise<unknown> {
     if (
       agentId === "claudio"
-      && ["catalog_search", "create_quote", "create_appointment", "handoff_to_human"].includes(name)
+      && ["catalog_search", "create_quote", "create_appointment", "handoff_to_human", "register_customer"].includes(name)
     ) {
       return this.commercial.execute(agentId, name, args);
     }
