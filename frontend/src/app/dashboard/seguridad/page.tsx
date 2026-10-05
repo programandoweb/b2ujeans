@@ -241,7 +241,7 @@ export default function SecurityPage() {
           </div>
           <div className="mt-6">
             <h3 className="mb-3 text-sm font-bold">Roles</h3>
-            <div className="flex flex-wrap gap-3">{roles.map(role=><label key={role.id} className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm"><input type="checkbox" checked={editingUser.roles.includes(role.name)} onChange={()=>toggle(role.name,editingUser.roles,v=>setEditingUser({...editingUser,roles:v}))}/>{role.name}</label>)}</div>
+            <div className="flex flex-wrap gap-3">{roles.filter(role => role.name !== "root" || editingUser.roles.includes("root")).map(role=><label key={role.id} className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm"><input type="checkbox" checked={editingUser.roles.includes(role.name)} disabled={role.name === "root"} onChange={()=>toggle(role.name,editingUser.roles,v=>setEditingUser({...editingUser,roles:v}))}/>{role.name}</label>)}</div>
           </div>
           <PermissionGrid grouped={grouped} selected={editingUser.permissions} onToggle={(p)=>toggle(p,editingUser.permissions,v=>setEditingUser({...editingUser,permissions:v}))}/>
           <div className="mt-6 flex justify-end gap-2"><button onClick={()=>setEditingUser(null)} className="min-h-11 rounded-xl border border-[var(--border)] px-4 text-sm font-semibold">Cancelar</button><button onClick={()=>void saveUser()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white"><Save size={17}/>Guardar</button></div>
