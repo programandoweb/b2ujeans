@@ -1,15 +1,505 @@
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Building2,
+  Check,
+  ChefHat,
+  Flame,
+  Gauge,
+  Hammer,
+  Menu,
+  Phone,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+  Wind,
+} from "lucide-react";
+
+const whatsappHref =
+  "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
+
+const services = [
+  {
+    icon: Hammer,
+    title: "Fabricación industrial",
+    description:
+      "Equipos en acero inoxidable diseñados para restaurantes, panaderías, comidas rápidas y procesos de alimentos.",
+  },
+  {
+    icon: Flame,
+    title: "Redes de gas",
+    description:
+      "Instalación de redes de gas propano y natural para aplicaciones comerciales, industriales y residenciales.",
+  },
+  {
+    icon: Wind,
+    title: "Extracción industrial",
+    description:
+      "Montaje de sistemas de extracción para cocinas y espacios que exigen evacuación eficiente de humos.",
+  },
+  {
+    icon: Wrench,
+    title: "Servicio técnico",
+    description:
+      "Mantenimiento, reparación e instalación de equipos a gas domésticos e industriales.",
+  },
+];
+
+const categories = [
+  { icon: ChefHat, name: "Estufas industriales", detail: "Alto rendimiento para operación continua" },
+  { icon: Gauge, name: "Freidoras", detail: "Control térmico y recuperación rápida" },
+  { icon: Flame, name: "Hornos industriales", detail: "Soluciones para producción y cocción" },
+  { icon: Wind, name: "Campanas extractoras", detail: "Extracción para cocinas profesionales" },
+  { icon: Settings, name: "Equipos mixtos", detail: "Múltiples procesos en una sola estación" },
+  { icon: Building2, name: "Mesas y mesones", detail: "Superficies robustas en acero inoxidable" },
+];
+
+const advantages = [
+  "Desarrollo de equipos especiales a medida",
+  "Acero inoxidable para aplicaciones de alimentos",
+  "Soluciones para gas natural y propano",
+  "Asesoría técnica desde la necesidad hasta la operación",
+];
+
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <div className="my-auto">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em]">Gaspronal</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-          Base tecnológica de la nueva plataforma Gaspronal
-        </h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-600 sm:text-lg">
-          Next.js 16, Tailwind CSS y Laravel 12 sobre PHP 8.2.
-        </p>
+    <main className="min-h-screen overflow-hidden bg-white text-[var(--foreground)]">
+      <div className="bg-[var(--brand)] text-white">
+        <div className="mx-auto flex min-h-9 max-w-[1440px] items-center justify-center px-4 text-center text-[11px] font-semibold tracking-[0.12em] sm:text-xs">
+          FABRICACIÓN · SERVICIO TÉCNICO · GAS · EXTRACCIÓN INDUSTRIAL
+        </div>
       </div>
+
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-[78px] max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
+          <Link href="/" aria-label="Gaspronal - Inicio" className="shrink-0">
+            <Image
+              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
+              alt="Gaspronal Industrias y Servicios"
+              width={220}
+              height={78}
+              priority
+              className="h-auto w-[170px] sm:w-[205px]"
+            />
+          </Link>
+
+          <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-700 lg:flex">
+            <Link className="transition hover:text-[var(--brand)]" href="#productos">
+              Productos
+            </Link>
+            <Link className="transition hover:text-[var(--brand)]" href="#servicios">
+              Servicios
+            </Link>
+            <Link className="transition hover:text-[var(--brand)]" href="#ingenieria">
+              A medida
+            </Link>
+            <Link className="transition hover:text-[var(--brand)]" href="#nosotros">
+              Gaspronal
+            </Link>
+            <Link className="transition hover:text-[var(--brand)]" href="#contacto">
+              Contacto
+            </Link>
+          </nav>
+
+          <div className="hidden items-center gap-3 lg:flex">
+            <a
+              href="tel:+573045527575"
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+            >
+              <Phone size={17} />
+              304 552 7575
+            </a>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--accent)] px-5 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
+            >
+              Hablar con un asesor
+              <ArrowRight size={17} />
+            </a>
+          </div>
+
+          <details className="group relative lg:hidden">
+            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-slate-200 text-slate-800 [&::-webkit-details-marker]:hidden">
+              <Menu size={22} />
+              <span className="sr-only">Abrir navegación</span>
+            </summary>
+            <div className="absolute right-0 top-14 w-[min(88vw,340px)] rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl">
+              <nav className="grid gap-1 text-sm font-semibold">
+                <a href="#productos" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Productos</a>
+                <a href="#servicios" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Servicios</a>
+                <a href="#ingenieria" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Equipos a medida</a>
+                <a href="#nosotros" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Gaspronal</a>
+                <a href="#contacto" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Contacto</a>
+              </nav>
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] px-4 text-sm font-bold text-white"
+              >
+                Solicitar asesoría <ArrowRight size={17} />
+              </a>
+            </div>
+          </details>
+        </div>
+      </header>
+
+      <section className="relative border-b border-slate-200 bg-[#f7fafc]">
+        <div className="mx-auto grid max-w-[1440px] items-stretch lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
+          <div className="flex items-center px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/15 bg-white px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm">
+                <Sparkles size={15} />
+                Ingeniería para cocinas y procesos industriales
+              </div>
+
+              <h1 className="mt-7 max-w-[850px] text-[clamp(3.1rem,7vw,7.4rem)] font-black leading-[0.9] tracking-[-0.065em] text-[#102d42]">
+                Equipos que están hechos para{" "}
+                <span className="text-[var(--brand)]">trabajar.</span>
+              </h1>
+
+              <p className="mt-7 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+                Diseñamos, fabricamos, instalamos y mantenemos soluciones para cocinas profesionales,
+                producción de alimentos, redes de gas y extracción industrial.
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="#productos"
+                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)]"
+                >
+                  Conocer soluciones
+                  <ArrowRight size={18} />
+                </a>
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-slate-800 transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                >
+                  Cuéntanos tu proyecto
+                </a>
+              </div>
+
+              <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-2">
+                {advantages.slice(0, 2).map((item) => (
+                  <div key={item} className="flex items-start gap-3 text-sm font-semibold text-slate-700">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
+                      <Check size={14} strokeWidth={3} />
+                    </span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative min-h-[520px] overflow-hidden bg-[#0d2b40] lg:min-h-full">
+            <div className="absolute inset-x-0 top-0 h-2 bg-[var(--accent)]" />
+            <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full border-[60px] border-white/5" />
+            <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border-[70px] border-white/5" />
+
+            <div className="relative flex h-full min-h-[520px] flex-col justify-between p-6 sm:p-10 lg:p-12">
+              <div className="flex items-start justify-between gap-4">
+                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white/75">
+                  Gaspronal · Industria
+                </span>
+                <ShieldCheck className="text-[var(--accent)]" size={34} />
+              </div>
+
+              <div className="my-12">
+                <p className="max-w-xl text-4xl font-black leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+                  Acero, calor y precisión para operaciones que no pueden parar.
+                </p>
+                <p className="mt-6 max-w-lg text-base leading-7 text-slate-300">
+                  Desde una estación de cocción hasta una solución especial fabricada según tu necesidad.
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ["AISI 304", "Acero inoxidable"],
+                  ["Gas", "Natural y propano"],
+                  ["A medida", "Diseño especial"],
+                ].map(([value, label]) => (
+                  <div key={value} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
+                    <strong className="block text-xl font-black text-white">{value}</strong>
+                    <span className="mt-1 block text-xs font-medium text-slate-300">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
+          {[
+            ["Fabricación", "Equipos industriales"],
+            ["Ingeniería", "Soluciones a medida"],
+            ["Instalación", "Redes y extracción"],
+            ["Soporte", "Mantenimiento técnico"],
+          ].map(([title, text]) => (
+            <div key={title} className="px-5 py-7 sm:px-7">
+              <strong className="block text-sm font-black text-[#102d42]">{title}</strong>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">{text}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="servicios" className="scroll-mt-28 bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Qué hacemos</p>
+              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+                Una solución completa, no solo un equipo.
+              </h2>
+              <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
+                Gaspronal integra fabricación, gas, extracción y soporte técnico para resolver necesidades
+                reales de operación.
+              </p>
+            </div>
+
+            <div className="grid gap-px overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-200 sm:grid-cols-2">
+              {services.map((service) => {
+                const Icon = service.icon;
+                return (
+                  <article key={service.title} className="bg-white p-7 sm:p-8">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                      <Icon size={23} />
+                    </div>
+                    <h3 className="mt-6 text-xl font-black tracking-[-0.02em] text-[#102d42]">{service.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{service.description}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="productos" className="scroll-mt-28 bg-[#f4f8fb] py-20 sm:py-28">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Catálogo Gaspronal</p>
+              <h2 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+                Equipamiento pensado para producción real.
+              </h2>
+            </div>
+            <span className="inline-flex w-fit items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">
+              Catálogo público en construcción
+            </span>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category, index) => {
+              const Icon = category.icon;
+              return (
+                <article
+                  key={category.name}
+                  className={"group relative min-h-[260px] overflow-hidden rounded-[2rem] border p-7 transition duration-300 hover:-translate-y-1 hover:shadow-xl " +
+                    (index === 0
+                      ? "border-[var(--brand)] bg-[var(--brand)] text-white"
+                      : "border-slate-200 bg-white text-[#102d42]")}
+                >
+                  <div className="flex items-start justify-between gap-5">
+                    <div
+                      className={"flex h-12 w-12 items-center justify-center rounded-2xl " +
+                        (index === 0 ? "bg-white/10 text-white" : "bg-[var(--brand-soft)] text-[var(--brand)]")}
+                    >
+                      <Icon size={23} />
+                    </div>
+                    <ArrowRight
+                      size={22}
+                      className={"transition group-hover:translate-x-1 " + (index === 0 ? "text-white/70" : "text-slate-400")}
+                    />
+                  </div>
+                  <div className="absolute inset-x-7 bottom-7">
+                    <p className={"text-xs font-bold uppercase tracking-[0.14em] " + (index === 0 ? "text-white/60" : "text-slate-400")}>
+                      Línea de producto
+                    </p>
+                    <h3 className="mt-2 text-2xl font-black tracking-[-0.03em]">{category.name}</h3>
+                    <p className={"mt-2 text-sm leading-6 " + (index === 0 ? "text-white/75" : "text-slate-500")}>
+                      {category.detail}
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <p className="mt-7 text-sm leading-6 text-slate-500">
+            El catálogo histórico incluye además carros para comidas y bebidas, baño maría, marmitas,
+            fábricas de arepas, asadores, planchas y equipos para panadería.
+          </p>
+        </div>
+      </section>
+
+      <section id="ingenieria" className="scroll-mt-28 bg-[#0d2b40] py-20 text-white sm:py-28">
+        <div className="mx-auto grid max-w-[1440px] gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff9a5b]">Desarrollo especial</p>
+            <h2 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.05em] sm:text-6xl">
+              Si el equipo que necesitas no existe, lo desarrollamos contigo.
+            </h2>
+          </div>
+          <div className="lg:pt-10">
+            <p className="text-base leading-7 text-slate-300 sm:text-lg">
+              Gaspronal desarrolla equipos especiales en acero inoxidable a partir de las necesidades de
+              operación de cada negocio: arepas, panadería, restaurantes, comidas rápidas y otros procesos
+              de la industria de alimentos.
+            </p>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
+            >
+              Hablemos de tu proyecto
+              <ArrowRight size={18} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="nosotros" className="scroll-mt-28 bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+          <div className="grid overflow-hidden rounded-[2.25rem] border border-slate-200 lg:grid-cols-2">
+            <div className="p-7 sm:p-10 lg:p-14">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspronal</p>
+              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+                Tecnología aplicada a la operación.
+              </h2>
+              <p className="mt-6 text-base leading-7 text-slate-600">
+                La experiencia de Gaspronal conecta diseño, fabricación, instalación y mantenimiento para
+                entregar soluciones integrales relacionadas con gas propano, gas natural y equipos
+                industriales.
+              </p>
+              <div className="mt-8 grid gap-3">
+                {advantages.map((item) => (
+                  <div key={item} className="flex items-start gap-3 text-sm font-semibold text-slate-700">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
+                      <Check size={14} strokeWidth={3} />
+                    </span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex min-h-[420px] flex-col justify-between bg-[#f4f8fb] p-7 sm:p-10 lg:p-14">
+              <div>
+                <span className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[var(--brand)] shadow-sm">
+                  Caso de aplicación
+                </span>
+                <h3 className="mt-6 text-3xl font-black tracking-[-0.035em] text-[#102d42] sm:text-4xl">
+                  Diseño de cocina, fabricación y extracción trabajando como un solo proyecto.
+                </h3>
+              </div>
+              <div className="mt-10 border-l-4 border-[var(--accent)] pl-5">
+                <p className="text-sm leading-6 text-slate-600">
+                  El sitio histórico documenta proyectos donde Gaspronal ha integrado diseño de cocina,
+                  equipos industriales en acero inoxidable y sistemas de extracción.
+                </p>
+                <p className="mt-4 text-sm font-black text-[#102d42]">Gaspro-notas · Casos de éxito</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contacto" className="scroll-mt-28 border-t border-slate-200 bg-[#f7fafc] py-20 sm:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Contacto</p>
+              <h2 className="mt-4 max-w-xl text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+                Empecemos por entender qué necesitas producir.
+              </h2>
+              <p className="mt-5 max-w-lg text-base leading-7 text-slate-600">
+                Un asesor puede orientarte sobre equipos, fabricación especial, redes de gas, instalación o
+                servicio técnico.
+              </p>
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
+              >
+                Solicitar asesoría
+                <ArrowRight size={18} />
+              </a>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <article className="rounded-[2rem] border border-slate-200 bg-white p-7">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">Medellín, Antioquia</p>
+                <h3 className="mt-4 text-xl font-black text-[#102d42]">Sede Gaspronal</h3>
+                <p className="mt-4 text-sm leading-6 text-slate-600">
+                  Carrera 45 No. 40-61<br />
+                  Sector El Palo con Los Huesos
+                </p>
+                <div className="mt-6 space-y-2 text-sm font-semibold text-slate-700">
+                  <a className="block hover:text-[var(--brand)]" href="tel:+573045527575">Ventas: 304 552 7575</a>
+                  <a className="block hover:text-[var(--brand)]" href="tel:+573165251351">Servicio técnico: 316 525 1351</a>
+                  <a className="block break-all hover:text-[var(--brand)]" href="mailto:servicioalcliente@gaspronal.com">
+                    servicioalcliente@gaspronal.com
+                  </a>
+                </div>
+              </article>
+
+              <article className="rounded-[2rem] border border-slate-200 bg-white p-7">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">Caucasia, Antioquia</p>
+                <h3 className="mt-4 text-xl font-black text-[#102d42]">Almacén industrial</h3>
+                <p className="mt-4 text-sm leading-6 text-slate-600">
+                  Carrera 9 No. 22-40<br />
+                  Barrio Kennedy
+                </p>
+                <p className="mt-6 text-sm leading-6 text-slate-500">
+                  Atención de lunes a sábado. Consulta disponibilidad y horario antes de desplazarte.
+                </p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-[#092235] text-white">
+        <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_auto] lg:px-10">
+          <div>
+            <Image
+              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
+              alt="Gaspronal"
+              width={220}
+              height={78}
+              className="h-auto w-[180px] brightness-0 invert"
+            />
+            <p className="mt-5 max-w-xl text-sm leading-6 text-slate-300">
+              Soluciones industriales en fabricación de equipos, gas, extracción y servicio técnico.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-x-10 gap-y-3 text-sm font-semibold text-slate-300">
+            <a className="hover:text-white" href="#productos">Productos</a>
+            <a className="hover:text-white" href="#servicios">Servicios</a>
+            <a className="hover:text-white" href="#ingenieria">A medida</a>
+            <a className="hover:text-white" href="#contacto">Contacto</a>
+          </div>
+        </div>
+        <div className="border-t border-white/10">
+          <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-4 py-5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10">
+            <span>© {new Date().getFullYear()} Gaspronal Industrias y Servicios S.A.S.</span>
+            <span>Medellín · Colombia</span>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
