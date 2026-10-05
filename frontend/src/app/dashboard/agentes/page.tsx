@@ -10,7 +10,6 @@ import {
   FiCpu,
   FiCheckCircle,
   FiChevronRight,
-  FiCpu,
   FiHelpCircle,
   FiMessageCircle,
   FiRefreshCw,
