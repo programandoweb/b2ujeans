@@ -136,11 +136,12 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           setSocketMessage("Socket.IO no disponible; REST fallback activo.");
         });
         socket.on("agent:progress",(payload:{requestId?:string;agentId?:string;message?:string})=>{
-          if(!active||!payload?.message)return;
+          const progressMessage=payload?.message;
+          if(!active||typeof progressMessage!=="string"||!progressMessage.trim())return;
           setMessages(current=>[...current,{
             id:crypto.randomUUID(),
             role:"assistant",
-            content:payload.message,
+            content:progressMessage,
             progress:true,
           }]);
         });
