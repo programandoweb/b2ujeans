@@ -125,7 +125,7 @@ class UserAccessController extends Controller
     public function destroyRole(Role $role): JsonResponse
     {
         abort_if(in_array($role->name, ['root', 'admin'], true), 422, 'Este rol está protegido.');
-        abort_if($role->users()->exists(), 422, 'No puedes eliminar un rol asignado a usuarios.');
+        abort_if(DB::table('model_has_roles')->where('role_id', $role->id)->exists(), 422, 'No puedes eliminar un rol asignado a usuarios.');
 
         $role->delete();
 
