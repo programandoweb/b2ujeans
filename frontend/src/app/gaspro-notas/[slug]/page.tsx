@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import PublicHeader from "@/components/public/PublicHeader";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://gaspronal.programandoweb.net").replace(/\/$/, "");
 const whatsappHref =
   "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
 
@@ -18,6 +19,7 @@ type Post = {
   seo_title?:string|null;
   seo_description?:string|null;
   published_at?:string|null;
+  updated_at?:string|null;
 };
 
 async function getPost(slug:string):Promise<Post|null>{
@@ -34,16 +36,68 @@ async function getPost(slug:string):Promise<Post|null>{
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
   const {slug}=await params;
   const post=await getPost(slug);
-  if(!post)return{};
-  const image=post.og_image||post.featured_image||undefined;
+  if(!post)return{robots:{index:false,follow:false}};
+
+  const title=post.seo_title||post.title;
+  const description=post.seo_description||post.excerpt||"Contenido técnico y soluciones industriales de Gaspronal.";
+  const canonical=`${siteUrl}/gaspro-notas/${post.slug}`;
+  const imageVersion=encodeURIComponent(post.updated_at||post.published_at||"1");
+  const socialImage=`${canonical}/opengraph-image?v=${imageVersion}`;
+
   return{
-    title:post.seo_title||post.title,
-    description:post.seo_description||post.excerpt||undefined,
+    title,
+    description,
+    alternates:{canonical},
+    authors:[{name:"Gaspronal Industrias y Servicios S.A.S."}],
+    creator:"Gaspronal Industrias y Servicios S.A.S.",
+    publisher:"Gaspronal Industrias y Servicios S.A.S.",
+    category:"Industria, gastronomía y soluciones a gas",
+    keywords:[
+      "Gaspronal",
+      "equipos industriales",
+      "gas natural",
+      "gas propano",
+      "acero inoxidable",
+      "cocinas industriales",
+      "servicio técnico",
+      "extracción industrial",
+    ],
+    robots:{
+      index:true,
+      follow:true,
+      googleBot:{
+        index:true,
+        follow:true,
+        "max-image-preview":"large",
+        "max-snippet":-1,
+        "max-video-preview":-1,
+      },
+    },
     openGraph:{
-      title:post.seo_title||post.title,
-      description:post.seo_description||post.excerpt||undefined,
+      title,
+      description,
+      url:canonical,
+      siteName:"Gaspronal",
+      locale:"es_CO",
       type:"article",
-      images:image?[image]:undefined,
+      publishedTime:post.published_at||undefined,
+      modifiedTime:post.updated_at||post.published_at||undefined,
+      authors:["Gaspronal Industrias y Servicios S.A.S."],
+      section:"Gaspro-notas",
+      tags:["equipos industriales","gas","acero inoxidable","gastronomía","Gaspronal"],
+      images:[{
+        url:socialImage,
+        width:1200,
+        height:630,
+        alt:`${post.title} · Gaspro-notas Gaspronal`,
+        type:"image/png",
+      }],
+    },
+    twitter:{
+      card:"summary_large_image",
+      title,
+      description,
+      images:[socialImage],
     },
   };
 }
@@ -54,8 +108,38 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
   if(!post)notFound();
 
   const gallery=Array.from(new Set([post.featured_image||"",...(post.gallery||[])].filter(Boolean)));
+  const canonical=`${siteUrl}/gaspro-notas/${post.slug}`;
+  const socialImage=`${canonical}/opengraph-image?v=${encodeURIComponent(post.updated_at||post.published_at||"1")}`;
+  const structuredData={
+    "@context":"https://schema.org",
+    "@type":"Article",
+    headline:post.title,
+    description:post.seo_description||post.excerpt||undefined,
+    image:[socialImage,...gallery.map(image=>/^https?:\/\//i.test(image)?image:`${siteUrl}${image.startsWith("/")?image:`/${image}`}`)],
+    datePublished:post.published_at||undefined,
+    dateModified:post.updated_at||post.published_at||undefined,
+    mainEntityOfPage:{"@type":"WebPage","@id":canonical},
+    author:{"@type":"Organization",name:"Gaspronal Industrias y Servicios S.A.S.",url:siteUrl},
+    publisher:{
+      "@type":"Organization",
+      name:"Gaspronal Industrias y Servicios S.A.S.",
+      url:siteUrl,
+      logo:{"@type":"ImageObject",url:`${siteUrl}/programandoweb/brand/logo-gaspronal-2026-transparente.png`},
+    },
+  };
+  const breadcrumbs={
+    "@context":"https://schema.org",
+    "@type":"BreadcrumbList",
+    itemListElement:[
+      {"@type":"ListItem",position:1,name:"Inicio",item:siteUrl},
+      {"@type":"ListItem",position:2,name:"Gaspro-notas",item:`${siteUrl}/gaspro-notas`},
+      {"@type":"ListItem",position:3,name:post.title,item:canonical},
+    ],
+  };
 
   return <main className="min-h-screen bg-white text-[var(--foreground)]">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumbs)}}/>
     <PublicHeader whatsappHref={whatsappHref}/>
 
     <article className="mx-auto max-w-[1100px] px-4 py-12 sm:px-6 sm:py-16 lg:px-10">
