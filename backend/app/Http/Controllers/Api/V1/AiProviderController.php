@@ -90,16 +90,14 @@ class AiProviderController extends Controller
             ->get();
 
         foreach ($providers as $provider) {
-            $hasActiveModels = $provider->models()->where('is_active', true)->exists();
-
-            if ($hasActiveModels) {
-                continue;
-            }
-
             $result = $this->testConnection($provider);
 
             if (($result['ok'] ?? false) === true) {
-                $this->syncOpenAiCompatibleModels($provider, $result['models'] ?? []);
+                $synced = $this->syncOpenAiCompatibleModels($provider, $result['models'] ?? []);
+
+                if ($synced === 0) {
+                    $this->ensureAutomaticModel($provider);
+                }
 
                 $provider->forceFill([
                     'health_status' => 'healthy',
@@ -107,6 +105,8 @@ class AiProviderController extends Controller
                     'health_message' => $result['message'] ?? 'Conexión verificada correctamente.',
                 ])->save();
             } else {
+                $this->ensureAutomaticModel($provider);
+
                 $provider->forceFill([
                     'health_status' => 'unhealthy',
                     'health_checked_at' => now(),
@@ -224,6 +224,27 @@ class AiProviderController extends Controller
             'credential_keys' => array_keys($credentials),
             'models_count' => isset($provider->models_count) ? (int) $provider->models_count : null,
         ];
+    }
+
+    private function ensureAutomaticModel(AiProvider $provider): AiModel
+    {
+        return AiModel::query()->updateOrCreate(
+            [
+                'ai_provider_id' => $provider->id,
+                'model_identifier' => '__auto__',
+            ],
+            [
+                'code' => $provider->code.'-auto',
+                'name' => $provider->name.' · Modelo cargado',
+                'priority' => 10,
+                'capabilities' => ['text'],
+                'settings' => [
+                    'source' => 'provider_auto',
+                    'resolve_model_at_runtime' => true,
+                ],
+                'is_active' => true,
+            ],
+        );
     }
 
     private function syncOpenAiCompatibleModels(AiProvider $provider, array $identifiers): int
