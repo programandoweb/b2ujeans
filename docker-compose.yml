@@ -38,7 +38,7 @@ services:
       DB_USERNAME: ${DB_USERNAME:-gaspronal}
       DB_PASSWORD: ${DB_PASSWORD:-gaspronal_change_me}
       DEPLOYMENT_ENABLED: "true"
-      DEPLOYMENT_SCRIPT: /var/www/gaspronal.programandoweb.net/scripts/deploy.sh
+      DEPLOYMENT_SCRIPT: /var/www/gaspronal.programandoweb.net/autodeploy.sh
       DEPLOYMENT_USE_SUDO: "true"
       DEPLOYMENT_TIMEOUT: ${DEPLOYMENT_TIMEOUT:-1800}
       AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
