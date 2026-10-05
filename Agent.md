@@ -481,3 +481,8 @@ El agente `lucia` utiliza `extensions/gaspronal-browser-collector` para recolect
 - Lucía emite progreso operativo en tiempo real mediante el evento Socket.IO `agent:progress`; el dashboard debe mostrar cada paso como un item independiente del chat sin incluir esos items en el historial enviado al modelo.
 - El progreso debe cubrir como mínimo: inicio, apertura de la extensión, respuesta del recolector con resumen cuantitativo, persistencia de cada fuente, planificación editorial, generación y persistencia individual de cada una de las cinco imágenes, redacción y guardado final del borrador.
 - Cuando `NEXT_PUBLIC_REALTIME_URL` no está configurado, el frontend usa el mismo origen del dashboard para Socket.IO; el proxy público debe enrutar `/socket.io/` al servicio realtime en el puerto 4100.
+- Las Gaspro-notas administrables usan dos tabs en edición: **Formulario** y **Galería**, replicando el patrón del catálogo.
+- La galería de un post se persiste en `posts.gallery`; la imagen marcada como principal actualiza simultáneamente `featured_image` y `og_image`.
+- Las cinco imágenes generadas por Lucía deben quedar asociadas a la galería del post creado, no únicamente a la trazabilidad interna.
+- Las imágenes de posts se sirven por `/api/post-media/{post}/{filename}`; las nuevas cargas manuales y las imágenes generadas por Lucía se copian a almacenamiento público de posts.
+- La migración de backfill debe incorporar a la galería las imágenes de corridas de Lucía ya completadas cuando sus archivos originales aún existan.
