@@ -1,0 +1,128 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Models\HeroSlide;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class HeroSlideController extends Controller
+{
+    public function publicIndex(): JsonResponse
+    {
+        return response()->json([
+            'data' => HeroSlide::query()
+                ->where('is_active', true)
+                ->orderBy('option')
+                ->orderBy('sort_order')
+                ->get()
+                ->groupBy('option')
+                ->map(fn ($slides) => $slides->values()),
+        ]);
+    }
+
+    public function index(): JsonResponse
+    {
+        return response()->json([
+            'data' => HeroSlide::query()
+                ->orderBy('option')
+                ->orderBy('sort_order')
+                ->get(),
+        ]);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $data = $this->validated($request);
+        return response()->json(['data' => HeroSlide::create($data)], 201);
+    }
+
+    public function update(Request $request, HeroSlide $heroSlide): JsonResponse
+    {
+        $heroSlide->update($this->validated($request));
+        return response()->json(['data' => $heroSlide->fresh()]);
+    }
+
+    public function destroy(HeroSlide $heroSlide): JsonResponse
+    {
+        $this->deleteOwnedImage($heroSlide->image_url);
+        $heroSlide->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function uploadImage(Request $request, HeroSlide $heroSlide): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+        ]);
+
+        $this->deleteOwnedImage($heroSlide->image_url);
+
+        $file = $validated['image'];
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
+        $filename = Str::uuid().'.'.$extension;
+        $file->storeAs("heroes/{$heroSlide->id}", $filename, 'public');
+
+        $heroSlide->update([
+            'image_url' => "/api/v1/heroes/media/{$heroSlide->id}/{$filename}",
+        ]);
+
+        return response()->json(['data' => $heroSlide->fresh()]);
+    }
+
+    public function media(HeroSlide $heroSlide, string $filename): StreamedResponse
+    {
+        $filename = basename($filename);
+        $path = "heroes/{$heroSlide->id}/{$filename}";
+
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response($path, $filename, [
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    private function validated(Request $request): array
+    {
+        return $request->validate([
+            'option' => ['required', 'integer', 'between:1,5'],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
+            'is_active' => ['nullable', 'boolean'],
+            'interval_ms' => ['nullable', 'integer', 'between:1000,15000'],
+            'image_url' => ['required', 'string', 'max:2048'],
+            'background_position' => ['nullable', 'string', 'max:80'],
+            'eyebrow' => ['nullable', 'string', 'max:180'],
+            'title' => ['required', 'string', 'max:220'],
+            'accent' => ['nullable', 'string', 'max:220'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'primary_label' => ['nullable', 'string', 'max:120'],
+            'primary_href' => ['nullable', 'string', 'max:2048'],
+            'secondary_label' => ['nullable', 'string', 'max:120'],
+            'secondary_href' => ['nullable', 'string', 'max:2048'],
+            'cards' => ['nullable', 'array', 'max:3'],
+            'cards.*.title' => ['required_with:cards', 'string', 'max:120'],
+            'cards.*.text' => ['required_with:cards', 'string', 'max:300'],
+        ]);
+    }
+
+    private function deleteOwnedImage(?string $url): void
+    {
+        if (! $url || ! str_starts_with($url, '/api/v1/heroes/media/')) {
+            return;
+        }
+
+        $parts = explode('/', trim($url, '/'));
+        $id = $parts[4] ?? null;
+        $filename = $parts[5] ?? null;
+
+        if ($id && $filename) {
+            Storage::disk('public')->delete("heroes/{$id}/".basename($filename));
+        }
+    }
+}
