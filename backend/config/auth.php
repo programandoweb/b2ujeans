@@ -23,4 +23,19 @@ return [
         ],
     ],
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Temporary direct recovery bypass
+    |--------------------------------------------------------------------------
+    |
+    | SECURITY TODO: remove this temporary mechanism as soon as the password
+    | recovery incident is closed. Never commit the temporary password.
+    |
+    */
+    'temporary_direct_recovery' => [
+        'enabled' => (bool) env('AUTH_TEMP_DIRECT_RECOVERY_ENABLED', false),
+        'email' => env('AUTH_TEMP_DIRECT_RECOVERY_EMAIL'),
+        'password' => env('AUTH_TEMP_DIRECT_RECOVERY_PASSWORD'),
+    ],
 ];
