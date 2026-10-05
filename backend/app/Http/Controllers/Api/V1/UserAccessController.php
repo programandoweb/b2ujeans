@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\PasswordResetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Throwable;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -81,6 +83,23 @@ class UserAccessController extends Controller
         $user->syncPermissions($data['permissions'] ?? []);
 
         return response()->json(['data' => $this->userPayload($user->load(['roles', 'permissions']))]);
+    }
+
+    public function inviteUser(User $user, PasswordResetService $passwordResetService): JsonResponse
+    {
+        try {
+            $passwordResetService->sendInvitation($user);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'message' => 'No fue posible enviar la invitación. Verifica la configuración de correo e inténtalo nuevamente.',
+            ], 503);
+        }
+
+        return response()->json([
+            'message' => "Invitación enviada correctamente a {$user->email}.",
+        ]);
     }
 
     public function destroyUser(Request $request, User $user): JsonResponse
