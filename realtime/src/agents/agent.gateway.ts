@@ -50,7 +50,7 @@ export class AgentGateway implements OnGatewayConnection {
   ): Promise<void> {
     try {
       this.authorize(client);
-      const result = await this.runtime.execute(String(payload.agentId ?? ""), payload);
+      const result = await this.runtime.execute(String(payload.agentId ?? ""), payload, progress => client.emit("agent:progress", progress));
       client.emit("agent:response", result);
     } catch (error) {
       client.emit("agent:error", { message: error instanceof Error ? error.message : String(error) });
