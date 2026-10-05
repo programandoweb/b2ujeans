@@ -10,7 +10,6 @@ import {
   FiBot,
   FiCheckCircle,
   FiChevronRight,
-  FiClock,
   FiCpu,
   FiHelpCircle,
   FiMessageCircle,
@@ -18,7 +17,6 @@ import {
   FiSearch,
   FiShield,
   FiTrendingUp,
-  FiZap,
 } from "react-icons/fi";
 
 type Agent={id:string;name:string;role:string};
