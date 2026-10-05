@@ -87,6 +87,7 @@ Route::prefix('v1')->group(function (): void {
         Route::put('content/post-categories/{postCategory}', [PostController::class, 'updateCategory']);
 
         Route::get('seo/redirects', [SeoRedirectController::class, 'index']);
+        Route::get('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'show']);
         Route::post('seo/redirects', [SeoRedirectController::class, 'store']);
         Route::put('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'update']);
         Route::delete('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'destroy']);
