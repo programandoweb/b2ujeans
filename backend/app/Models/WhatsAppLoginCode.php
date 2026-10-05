@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WhatsAppLoginCode extends Model
 {
+    protected $table = 'whatsapp_login_codes';
+
     protected $fillable = ['user_id', 'phone', 'code_hash', 'expires_at', 'attempts', 'used_at'];
 
     protected $hidden = ['code_hash'];
