@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,24 +22,22 @@ class DatabaseSeeder extends Seeder
         $email = trim((string) env('ADMIN_EMAIL', ''));
         $password = (string) env('ADMIN_PASSWORD', '');
 
-        if ($email === '' || $password === '') {
-            return;
+        if ($email !== '' && $password !== '') {
+            User::query()->updateOrCreate(
+                ['email' => $email],
+                [
+                    'name' => env('ADMIN_NAME', 'Administrador Gaspronal'),
+                    'password' => Hash::make($password),
+                ],
+            );
         }
 
-        $user = User::query()->updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => env('ADMIN_NAME', 'Administrador Gaspronal'),
-                'password' => Hash::make($password),
-            ],
-        );
-
-        $role = Role::findOrCreate('admin', 'api');
-        $user->syncRoles([$role]);
+        // Idempotente: mantiene sincronizados roles/permisos y cuentas base.
+        $this->call(AccessControlSeeder::class);
     }
 
     /**
-     * Ejecuta cada seeder una sola vez por base de datos.
+     * Ejecuta cada seeder de datos una sola vez por base de datos.
      */
     private function runOnce(string $seederClass): void
     {
