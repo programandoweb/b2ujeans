@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, UnauthorizedException } from "@nestjs/common";
+import { Body, Controller, Get, Headers, Param, Post, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
 import { AgentRegistryService } from "./agent-registry.service";
 import { AgentRuntimeService } from "./agent-runtime.service";
 import type { AgentMessageInput } from "./agent.types";
@@ -23,7 +23,15 @@ export class AgentController {
     @Headers("authorization") authorization?: string,
   ) {
     this.authorize(authorization);
-    return { data: await this.runtime.execute(id, payload) };
+
+    try {
+      return { data: await this.runtime.execute(id, payload) };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ServiceUnavailableException(error.message);
+      }
+      throw error;
+    }
   }
 
   private authorize(authorization?: string): void {
