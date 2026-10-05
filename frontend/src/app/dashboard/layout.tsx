@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("gaspronal_access_token")?.value;
+  const impersonatorToken = cookieStore.get("gaspronal_impersonator_token")?.value;
 
   if (!token) redirect("/login");
 
@@ -20,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: user } = await response.json();
 
   return (
-    <DashboardShell user={{ name: user.name, email: user.email, roles: user.roles ?? [], permissions: user.permissions ?? [] }}>
+    <DashboardShell impersonating={Boolean(impersonatorToken)} user={{ name: user.name, email: user.email, roles: user.roles ?? [], permissions: user.permissions ?? [] }}>
       {children}
     </DashboardShell>
   );
