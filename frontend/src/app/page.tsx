@@ -206,7 +206,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </header>
 
-      <HomeHeroVariants option={heroOption} />
+      <HomeHeroVariants option={heroOption} publicBackendUrl={publicBackendUrl} />
 
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
