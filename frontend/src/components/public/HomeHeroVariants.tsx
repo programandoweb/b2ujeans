@@ -5,12 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Flame,
-  Hammer,
   Settings,
   ShieldCheck,
-  Wind,
-  Wrench,
 } from "lucide-react";
 
 const whatsappHref =
@@ -136,6 +132,8 @@ function FullHeroCarousel({
               </a>
               <a
                 href={slide.secondaryHref}
+                target={slide.secondaryHref.startsWith("http") ? "_blank" : undefined}
+                rel={slide.secondaryHref.startsWith("http") ? "noreferrer" : undefined}
                 className="inline-flex min-h-14 items-center justify-center rounded-full border border-white/25 bg-white/5 px-7 text-sm font-black text-white backdrop-blur transition hover:bg-white/10"
               >
                 {slide.secondaryLabel}
