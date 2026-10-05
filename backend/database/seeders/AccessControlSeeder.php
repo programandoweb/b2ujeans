@@ -38,6 +38,7 @@ class AccessControlSeeder extends Seeder
 
         $root = Role::findOrCreate('root', 'api');
         $admin = Role::findOrCreate('admin', 'api');
+        Role::findOrCreate('cliente', 'api');
 
         $allPermissions = Permission::where('guard_name', 'api')->get();
         $root->syncPermissions($allPermissions);
