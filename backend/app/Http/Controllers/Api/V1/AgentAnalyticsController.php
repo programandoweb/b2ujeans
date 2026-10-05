@@ -24,6 +24,7 @@ class AgentAnalyticsController extends Controller
         $hasKnowledge = Schema::hasTable('agent_knowledge_entries');
         $hasUnanswered = Schema::hasTable('agent_unanswered_questions');
         $hasSettings = Schema::hasTable('agent_settings');
+        $hasResearch = Schema::hasTable('agent_research_runs');
 
         $interactions30 = $hasInteractions
             ? AgentInteraction::query()->where('created_at', '>=', $since30)->count()
@@ -108,7 +109,9 @@ class AgentAnalyticsController extends Controller
                 ->get(['id', 'agent_id', 'category', 'title', 'confidence', 'source_type', 'updated_at'])
             : collect();
 
-        $research = AgentResearchRun::query()->latest()->first();
+        $research = $hasResearch
+            ? AgentResearchRun::query()->latest()->first()
+            : null;
 
         return response()->json(['data' => [
             'kpis' => [
