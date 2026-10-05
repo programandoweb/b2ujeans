@@ -7,6 +7,7 @@ use App\Models\CatalogItem;
 use App\Models\CommercialAppointment;
 use App\Models\CommercialLead;
 use App\Models\CommercialQuote;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,7 @@ class InternalAgentCommercialController extends Controller
             'create_quote' => $this->createQuote($arguments),
             'create_appointment' => $this->createAppointment($arguments),
             'handoff_to_human' => $this->handoff($arguments),
+            'register_customer' => $this->registerCustomer($arguments),
             default => abort(422, 'Herramienta comercial no reconocida.'),
         };
     }
@@ -133,6 +135,50 @@ class InternalAgentCommercialController extends Controller
         ]);
 
         return response()->json(['data' => $appointment->load('lead')], 201);
+    }
+
+    private function registerCustomer(array $arguments): JsonResponse
+    {
+        validator($arguments, [
+            'name' => ['required', 'string', 'max:190'],
+            'email' => ['required', 'email', 'max:190'],
+            'whatsapp' => ['required', 'string', 'max:20', 'regex:/^\\+[1-9]\\d{7,14}$/'],
+            'accepts_data_processing' => ['required', 'accepted'],
+            'policy_version' => ['nullable', 'string', 'max:40'],
+        ])->validate();
+
+        $email = mb_strtolower(trim((string) $arguments['email']));
+        $whatsapp = trim((string) $arguments['whatsapp']);
+
+        $emailUser = User::query()->where('email', $email)->first();
+        $whatsappUser = User::query()->where('whatsapp', $whatsapp)->first();
+
+        if ($emailUser && $whatsappUser && ! $emailUser->is($whatsappUser)) {
+            abort(422, 'El correo y el WhatsApp pertenecen a clientes diferentes. Se requiere validación humana.');
+        }
+
+        $user = $emailUser ?? $whatsappUser ?? new User();
+        $user->name = trim((string) $arguments['name']);
+        $user->email = $email;
+        $user->whatsapp = $whatsapp;
+        $user->password = null;
+        $user->data_processing_consent_at = now();
+        $user->data_processing_consent_source = 'claudio';
+        $user->data_processing_policy_version = trim((string) ($arguments['policy_version'] ?? '2026-10-05'));
+        $user->save();
+
+        $user->syncRoles(['cliente']);
+
+        return response()->json([
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'whatsapp' => $user->whatsapp,
+                'role' => 'cliente',
+                'data_processing_consent_at' => $user->data_processing_consent_at?->toIso8601String(),
+            ],
+        ], $user->wasRecentlyCreated ? 201 : 200);
     }
 
     private function handoff(array $arguments): JsonResponse
