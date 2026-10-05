@@ -1,9 +1,50 @@
 import { Injectable } from "@nestjs/common";
+import type { GeminiFunctionDeclaration } from "./gemini.service";
 import type { RuntimeAiModel } from "./laravel-agent-settings.client";
+
+export type OpenAiMessage = {
+  role: "user" | "assistant" | "tool";
+  content: string | null;
+  tool_call_id?: string;
+  tool_calls?: Array<{
+    id: string;
+    type: "function";
+    function: { name: string; arguments: string };
+  }>;
+};
+
+export type OpenAiTurn =
+  | { type: "text"; text: string; message: OpenAiMessage }
+  | {
+      type: "function_call";
+      name: string;
+      args: Record<string, unknown>;
+      toolCallId: string;
+      message: OpenAiMessage;
+    };
 
 @Injectable()
 export class OpenAiCompatibleService {
   async generate(input: { model: RuntimeAiModel; system: string; message: string }): Promise<string> {
+    const turn = await this.generateTurn({
+      model: input.model,
+      system: input.system,
+      messages: [{ role: "user", content: input.message }],
+    });
+
+    if (turn.type !== "text") {
+      throw new Error("El modelo solicitó una herramienta no disponible.");
+    }
+
+    return turn.text;
+  }
+
+  async generateTurn(input: {
+    model: RuntimeAiModel;
+    system: string;
+    messages: OpenAiMessage[];
+    functions?: GeminiFunctionDeclaration[];
+  }): Promise<OpenAiTurn> {
     const provider = input.model.provider;
     const controller = new AbortController();
     const timeout = setTimeout(
@@ -26,25 +67,41 @@ export class OpenAiCompatibleService {
         ? await this.resolveAutomaticModel(baseUrl, headers, controller.signal)
         : input.model.model_identifier;
 
-      const response = await fetch(
-        `${baseUrl}/chat/completions`,
-        {
-          method: "POST",
-          headers,
-          signal: controller.signal,
-          body: JSON.stringify({
-            model: modelIdentifier,
-            messages: [
-              { role: "system", content: input.system },
-              { role: "user", content: input.message },
-            ],
-            stream: false,
-          }),
+      const tools = (input.functions ?? []).map(fn => ({
+        type: "function",
+        function: {
+          name: fn.name,
+          description: fn.description,
+          parameters: this.normalizeSchema(fn.parameters),
         },
-      );
+      }));
+
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers,
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: modelIdentifier,
+          messages: [
+            { role: "system", content: input.system },
+            ...input.messages,
+          ],
+          ...(tools.length ? { tools, tool_choice: "auto" } : {}),
+          stream: false,
+        }),
+      });
 
       const json = await response.json() as {
-        choices?: Array<{ message?: { content?: string | Array<{ text?: string }> } }>;
+        choices?: Array<{
+          message?: {
+            content?: string | Array<{ text?: string }> | null;
+            tool_calls?: Array<{
+              id?: string;
+              type?: string;
+              function?: { name?: string; arguments?: string };
+            }>;
+          };
+        }>;
         error?: { message?: string };
       };
 
@@ -52,16 +109,68 @@ export class OpenAiCompatibleService {
         throw new Error(json.error?.message ?? `Proveedor respondió HTTP ${response.status}.`);
       }
 
-      const content = json.choices?.[0]?.message?.content;
+      const raw = json.choices?.[0]?.message;
+      if (!raw) throw new Error("El proveedor respondió sin mensaje.");
+
+      const toolCall = raw.tool_calls?.find(call => call.function?.name);
+      if (toolCall?.function?.name) {
+        let args: Record<string, unknown> = {};
+        try {
+          args = JSON.parse(toolCall.function.arguments || "{}") as Record<string, unknown>;
+        } catch {
+          throw new Error(`El modelo devolvió argumentos inválidos para ${toolCall.function.name}.`);
+        }
+
+        const message: OpenAiMessage = {
+          role: "assistant",
+          content: typeof raw.content === "string" ? raw.content : null,
+          tool_calls: [{
+            id: toolCall.id ?? `tool-${Date.now()}`,
+            type: "function",
+            function: {
+              name: toolCall.function.name,
+              arguments: toolCall.function.arguments || "{}",
+            },
+          }],
+        };
+
+        return {
+          type: "function_call",
+          name: toolCall.function.name,
+          args,
+          toolCallId: message.tool_calls![0].id,
+          message,
+        };
+      }
+
+      const content = raw.content;
       const text = Array.isArray(content)
         ? content.map(part => part?.text ?? "").join("").trim()
         : String(content ?? "").trim();
 
       if (!text) throw new Error("El proveedor respondió sin contenido.");
-      return text;
+
+      return {
+        type: "text",
+        text,
+        message: { role: "assistant", content: text },
+      };
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  private normalizeSchema(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(item => this.normalizeSchema(item));
+    if (!value || typeof value !== "object") return value;
+
+    const result: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      result[key] = key === "type" && typeof item === "string"
+        ? item.toLowerCase()
+        : this.normalizeSchema(item);
+    }
+    return result;
   }
 
   private async resolveAutomaticModel(
@@ -85,7 +194,7 @@ export class OpenAiCompatibleService {
     const model = identifiers[0];
 
     if (!model) {
-      throw new Error("LM Studio no reportó ningún modelo cargado en /models.");
+      throw new Error("El proveedor no reportó ningún modelo cargado en /models.");
     }
 
     return model;
@@ -98,7 +207,6 @@ export class OpenAiCompatibleService {
       candidates.push(...payload);
     } else if (payload && typeof payload === "object") {
       const object = payload as Record<string, unknown>;
-
       if (Array.isArray(object.data)) candidates.push(...object.data);
       if (Array.isArray(object.models)) candidates.push(...object.models);
     }
