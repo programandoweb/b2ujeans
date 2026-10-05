@@ -400,3 +400,27 @@ Reglas obligatorias:
 - no convertir excepciones temporales de recuperación en comportamiento permanente;
 - después de cada nueva programación, cambio relevante o push del proyecto Gaspronal, recordar explícitamente: **"hay un tema con la recuperación de contraseña que hay que cerrar"**;
 - cuando el flujo temporal sea retirado y validado, eliminar este recordatorio mediante decisión explícita del responsable del proyecto.
+
+
+## 19. Flujo obligatorio de despliegue después de un push
+
+Gaspronal utiliza exclusivamente el mecanismo de despliegue autenticado ya existente en `/dashboard/configuracion`.
+
+Reglas obligatorias para agentes de IA que realicen cambios y push a `main`:
+
+- no crear ni reutilizar endpoints públicos de autodeploy por token, Bearer key o webhook alternativo;
+- no almacenar secretos de despliegue en Git ni enviarlos en conversaciones;
+- después de completar cada push a `main`, enviar al responsable del proyecto un correo de notificación de despliegue;
+- el correo debe incluir el SHA del commit o revisión final y un enlace a:
+  `https://gaspronal.programandoweb.net/dashboard/configuracion?deploy=1&ref=<commit_sha>`;
+- si el usuario no tiene una sesión activa, el sistema debe redirigirlo a `/login` conservando el destino original en `next`;
+- después de autenticarse correctamente, debe regresar a la URL de Configuración solicitada;
+- `deploy=1` debe disparar una sola vez el mismo `POST /deployments` que utiliza el botón **Desplegar ahora** de Configuración;
+- la URL debe limpiarse inmediatamente después de consumir la intención de despliegue para evitar repetir el POST al refrescar;
+- el endpoint backend de despliegue debe seguir protegido por autenticación y por el permiso `deployments.manage`;
+- el historial y estado del despliegue deben seguir siendo los existentes en Configuración; no mantener una segunda fuente de verdad;
+- el agente no debe afirmar que producción fue desplegada solo porque realizó el push. El despliegue depende de que el responsable abra el enlace del correo y autorice el acceso mediante su sesión;
+- cuando el usuario confirme o cuando exista evidencia verificable del resultado, informar si el despliegue terminó correctamente o falló y reportar el error disponible;
+- este flujo no usa GitHub Actions y no debe introducir dependencia de créditos de ejecución de GitHub.
+
+El botón manual de `/dashboard/configuracion` continúa disponible y es la vía de recuperación si el enlace del correo no puede utilizarse.
