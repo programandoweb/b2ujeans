@@ -494,3 +494,7 @@ El agente `lucia` utiliza `extensions/gaspronal-browser-collector` para recolect
 - Al hacer scroll, el header permanece adherido al borde superior y utiliza Motion para suavizar reducción de altura/logo, cambio de fondo y aparición de sombra; no debe producir saltos de layout.
 - Los enlaces de sección del home conservan anclas a productos, servicios, ingeniería, Gaspronal y contacto.
 - El footer del home también debe mantener un acceso directo a Gaspro-notas.
+- La ruta pública `/gaspro-notas` debe existir y listar únicamente posts publicados; cada nota usa `/gaspro-notas/{slug}`.
+- El backend expone lectura pública mediante `/api/v1/content/public/posts` y `/api/v1/content/public/posts/{slug}`; borradores y archivados nunca deben aparecer en estas rutas.
+- El header público reserva su altura en el flujo y, después de comenzar el scroll, pasa a `position: fixed` en `top: 0` para evitar que un ancestro con overflow anule el comportamiento sticky.
+- Los enlaces de secciones del header usan rutas absolutas del home (`/#productos`, `/#servicios`, etc.) para funcionar también desde Gaspro-notas y otras páginas públicas.
