@@ -193,7 +193,7 @@ export class AgentRuntimeService {
               )
             : await this.generateWithRoutedModel(routedModel, system, message);
 
-          return this.finish(requestId, agent, message, answer, startedAt);
+          return this.finish(requestId, agent, message, answer, startedAt, input.sessionId);
         } catch (error) {
           lastError = error;
         }
@@ -229,7 +229,7 @@ export class AgentRuntimeService {
           message,
         });
 
-    return this.finish(requestId, agent, message, answer, startedAt);
+    return this.finish(requestId, agent, message, answer, startedAt, input.sessionId);
   }
 
   private isToolAgent(agentId: string): agentId is "claudio" | "sofia" {
@@ -408,9 +408,11 @@ export class AgentRuntimeService {
     question:string,
     answer:string,
     startedAt:number,
+    sessionId?:number,
   ):Promise<AgentResponse>{
     await this.analytics.log(agent.id,{
       request_id:requestId,
+      session_id:sessionId,
       question,
       answer,
       status:"completed",
