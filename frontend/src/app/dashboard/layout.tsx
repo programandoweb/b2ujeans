@@ -20,7 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: user } = await response.json();
 
   return (
-    <DashboardShell user={{ name: user.name, email: user.email }}>
+    <DashboardShell user={{ name: user.name, email: user.email, roles: user.roles ?? [], permissions: user.permissions ?? [] }}>
       {children}
     </DashboardShell>
   );
