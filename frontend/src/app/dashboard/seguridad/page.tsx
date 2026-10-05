@@ -32,7 +32,7 @@ function groupPermission(permission: string) {
     dashboard: "Dashboard",
     catalog: "Productos y servicios",
     content: "Gaspro-notas",
-    heroes: "Heroes del home",
+    heroes: "Constructor de heroes",
     agents: "Agentes",
     ai: "Proveedores IA",
     channels: "Canales",
