@@ -7,7 +7,7 @@ import {
   FiAlertCircle,
   FiArrowUpRight,
   FiBookOpen,
-  FiBot,
+  FiCpu,
   FiCheckCircle,
   FiChevronRight,
   FiCpu,
@@ -291,7 +291,7 @@ export default function AgentsPage(){
           >
             <div className="flex items-start justify-between gap-3">
               <div className="grid size-12 place-items-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                <FiBot size={23}/>
+                <FiCpu size={23}/>
               </div>
               <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
                 metric?.has_api_key
