@@ -10,6 +10,7 @@ use App\Models\AgentSetting;
 use App\Models\AgentUnansweredQuestion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AgentAnalyticsController extends Controller
 {
@@ -21,7 +22,10 @@ class AgentAnalyticsController extends Controller
         $interactions30 = AgentInteraction::query()->where('created_at', '>=', $since30)->count();
         $knowledgeTotal = AgentKnowledgeEntry::query()->where('status', 'published')->count();
         $unansweredPending = AgentUnansweredQuestion::query()->where('status', 'pending')->count();
-        $configuredAgents = AgentSetting::query()->whereNotNull('api_key')->count();
+        $configuredAgents = DB::table('agent_settings')
+            ->whereNotNull('api_key')
+            ->where('api_key', '<>', '')
+            ->count();
 
         $activity = collect(range(0, 6))->map(function (int $offset) use ($since7): array {
             $day = $since7->copy()->addDays($offset);
@@ -42,8 +46,10 @@ class AgentAnalyticsController extends Controller
             ->get()
             ->keyBy('agent_id');
 
-        $settings = AgentSetting::query()
-            ->get(['agent_id', 'model', 'api_key'])
+        $settings = DB::table('agent_settings')
+            ->select(['agent_id', 'model'])
+            ->selectRaw("CASE WHEN api_key IS NOT NULL AND api_key <> '' THEN 1 ELSE 0 END as has_api_key")
+            ->get()
             ->keyBy('agent_id');
 
         $agents = collect(['claudio', 'cristina', 'jorge', 'sofia'])->map(function (string $agent) use ($byAgent, $settings): array {
@@ -59,7 +65,7 @@ class AgentAnalyticsController extends Controller
                 'id' => $agent,
                 'interactions_30d' => (int) ($byAgent[$agent]?->total ?? 0),
                 'last_activity' => $byAgent[$agent]?->last_activity,
-                'has_api_key' => filled($settings[$agent]?->api_key),
+                'has_api_key' => (bool) ($settings[$agent]?->has_api_key ?? false),
                 'model' => $settings[$agent]?->model ?? 'gemini-2.5-flash',
                 'knowledge_count' => $knowledge,
                 'pending_questions' => $pending,
