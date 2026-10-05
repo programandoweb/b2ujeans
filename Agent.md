@@ -444,3 +444,21 @@ Reglas obligatorias:
 - el backend debe registrar el inicio de la impersonación con el identificador del root y del usuario objetivo, sin registrar tokens;
 - nunca se deben exponer JWT, cookies de sesión o credenciales en logs, UI, URLs o correos;
 - esta capacidad no puede extenderse a `admin` ni a permisos configurables sin una decisión explícita del responsable del proyecto.
+
+
+## 21. Administración de heroes del home
+
+Los carruseles del home deben administrarse desde `/dashboard/heroes` y no volver a depender de cambios manuales de código para contenido operativo.
+
+Reglas:
+
+- los slides administrados se almacenan en `hero_slides`;
+- el home consume únicamente slides activos y respeta su orden;
+- las propuestas 2, 3 y 5 utilizan el contenido administrado y conservan fallback en código si la API pública falla;
+- cada slide puede gestionar imagen, posición de fondo, badge, título, texto destacado, descripción, CTAs, tres bloques derechos, orden, estado e intervalo;
+- las imágenes cargadas desde el dashboard se almacenan en el backend y se sirven por una ruta pública controlada;
+- `heroes.view` permite consultar el módulo;
+- `heroes.manage` permite crear, editar, eliminar, ordenar, activar/desactivar y subir imágenes;
+- el backend debe validar siempre ambos permisos; ocultar opciones del menú no sustituye la autorización;
+- el sidebar solo debe mostrar **Heroes del home** a usuarios con `heroes.view`;
+- cualquier nuevo rol o usuario debe recibir estos permisos únicamente de acuerdo con la política de acceso definida por el responsable del proyecto.
