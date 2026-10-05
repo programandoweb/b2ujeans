@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
 import {
   ArrowRight,
   Building2,
@@ -19,6 +20,24 @@ import {
 
 const whatsappHref =
   "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
+
+const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
+
+async function getUseCases(): Promise<UseCaseProduct[]> {
+  try {
+    const response = await fetch(`${backendUrl}/api/v1/catalog/public/use-cases`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) return [];
+
+    const payload = await response.json();
+    return payload.data ?? [];
+  } catch {
+    return [];
+  }
+}
 
 const services = [
   {
@@ -63,7 +82,8 @@ const advantages = [
   "Asesoría técnica desde la necesidad hasta la operación",
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const useCases = await getUseCases();
   return (
     <main className="min-h-screen overflow-hidden bg-white text-[var(--foreground)]">
       <div className="bg-[var(--brand)] text-white">
@@ -342,6 +362,8 @@ export default function HomePage() {
           </p>
         </div>
       </section>
+
+      <ProductUseCasesCarousel products={useCases} />
 
       <section id="ingenieria" className="scroll-mt-28 bg-[#0d2b40] py-20 text-white sm:py-28">
         <div className="mx-auto grid max-w-[1440px] gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
