@@ -15,12 +15,19 @@ class User extends Authenticatable implements JWTSubject
     use HasRoles;
     use Notifiable;
 
-    protected $fillable = ['name', 'email', 'whatsapp', 'password'];
+    protected $fillable = [
+        'name', 'email', 'whatsapp', 'password',
+        'data_processing_consent_at', 'data_processing_consent_source', 'data_processing_policy_version',
+    ];
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed'];
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'data_processing_consent_at' => 'datetime',
+        ];
     }
 
     public function sendPasswordResetNotification($token): void
