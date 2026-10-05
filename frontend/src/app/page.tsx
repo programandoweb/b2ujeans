@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
 import HomeHeroVariants, { type FullHeroSlide } from "@/components/public/HomeHeroVariants";
+import PublicHeader from "@/components/public/PublicHeader";
 import {
   ArrowRight,
   Building2,
@@ -11,8 +12,6 @@ import {
   Flame,
   Gauge,
   Hammer,
-  Menu,
-  Phone,
   Settings,
   Wrench,
   Wind,
@@ -176,81 +175,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[78px] max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
-          <Link href="/" aria-label="Gaspronal - Inicio" className="shrink-0">
-            <Image
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
-              alt="Gaspronal Industrias y Servicios"
-              width={220}
-              height={78}
-              priority
-              className="h-auto w-[170px] sm:w-[205px]"
-            />
-          </Link>
-
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-700 lg:flex">
-            <Link className="transition hover:text-[var(--brand)]" href="#productos">
-              Productos
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#servicios">
-              Servicios
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#ingenieria">
-              A medida
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#nosotros">
-              Gaspronal
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#contacto">
-              Contacto
-            </Link>
-          </nav>
-
-          <div className="hidden items-center gap-3 lg:flex">
-            <a
-              href="tel:+573045527575"
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-            >
-              <Phone size={17} />
-              304 552 7575
-            </a>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--accent)] px-5 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
-            >
-              Hablar con un asesor
-              <ArrowRight size={17} />
-            </a>
-          </div>
-
-          <details className="group relative lg:hidden">
-            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-slate-200 text-slate-800 [&::-webkit-details-marker]:hidden">
-              <Menu size={22} />
-              <span className="sr-only">Abrir navegación</span>
-            </summary>
-            <div className="absolute right-0 top-14 w-[min(88vw,340px)] rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl">
-              <nav className="grid gap-1 text-sm font-semibold">
-                <a href="#productos" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Productos</a>
-                <a href="#servicios" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Servicios</a>
-                <a href="#ingenieria" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Equipos a medida</a>
-                <a href="#nosotros" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Gaspronal</a>
-                <a href="#contacto" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Contacto</a>
-              </nav>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] px-4 text-sm font-bold text-white"
-              >
-                Solicitar asesoría <ArrowRight size={17} />
-              </a>
-            </div>
-          </details>
-        </div>
-      </header>
+      <PublicHeader whatsappHref={whatsappHref} />
 
       <HomeHeroVariants option={heroOption} publicBackendUrl={publicBackendUrl} managedSlides={managedHeroes} />
 
@@ -519,6 +444,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <a className="hover:text-white" href="#productos">Productos</a>
             <a className="hover:text-white" href="#servicios">Servicios</a>
             <a className="hover:text-white" href="#ingenieria">A medida</a>
+            <Link className="hover:text-white" href="/gaspro-notas">Gaspro-notas</Link>
             <a className="hover:text-white" href="#contacto">Contacto</a>
           </div>
         </div>
