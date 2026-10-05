@@ -12,7 +12,7 @@ export class ContentCreatorService{
   const sourceUrls=[...new Set((agent.tools.match(/https?:\/\/[^\s)>`]+/g)||[]).map(url=>url.replace(/[.,;]+$/,"")))];
   if(!sourceUrls.length)throw new Error("Lucía no tiene URLs fuente configuradas en Tools.md.");
   if(!this.browser.hasCollector())throw new Error("La extensión Gaspronal Browser Collector no está conectada.");
-  const created=await this.trace.createRun({agent:"lucia",topic:input.topic,source_urls:sourceUrls}),uuid=String(created?.data?.uuid||"");if(!uuid)throw new Error("Laravel no devolvió UUID de trazabilidad.");
+  const created=await this.trace.createRun({agent:"lucia",topic:input.topic,source_urls:sourceUrls});const uuid=String(created?.data?.uuid||created?.uuid||created?.data?.run?.uuid||"");if(!uuid)throw new Error(`Laravel no devolvió UUID de trazabilidad. Respuesta: ${JSON.stringify(created).slice(0,1000)}`);
   try{
    const collected:Array<Record<string,unknown>>=[];
    for(const url of sourceUrls){const result=await this.browser.scrape(url);const normalized={url,title:String(result.title||""),description:String(result.description||""),text:String(result.text||"").slice(0,120000),headings:Array.isArray(result.headings)?result.headings:[],links:Array.isArray(result.links)?result.links:[],images:Array.isArray(result.images)?result.images:[]};collected.push(normalized);await this.trace.addSource(uuid,normalized)}
