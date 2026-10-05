@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
+import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";\nimport HomeHeroVariants from "@/components/public/HomeHeroVariants";
 import {
   ArrowRight,
   Building2,
@@ -168,96 +168,7 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <section className="relative border-b border-slate-200 bg-[#f7fafc]">
-        <div className="mx-auto grid max-w-[1440px] items-stretch lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
-          <div className="flex items-center px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/15 bg-white px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm">
-                <Sparkles size={15} />
-                Ingeniería para cocinas y procesos industriales
-              </div>
-
-              <h1 className="mt-7 max-w-[850px] text-[clamp(3.1rem,7vw,7.4rem)] font-black leading-[0.9] tracking-[-0.065em] text-[#102d42]">
-                Equipos que están hechos para{" "}
-                <span className="text-[var(--brand)]">trabajar.</span>
-              </h1>
-
-              <p className="mt-7 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-                Diseñamos, fabricamos, instalamos y mantenemos soluciones para cocinas profesionales,
-                producción de alimentos, redes de gas y extracción industrial.
-              </p>
-
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#productos"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)]"
-                >
-                  Conocer soluciones
-                  <ArrowRight size={18} />
-                </a>
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-slate-800 transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                >
-                  Cuéntanos tu proyecto
-                </a>
-              </div>
-
-              <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-2">
-                {advantages.slice(0, 2).map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm font-semibold text-slate-700">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative min-h-[520px] overflow-hidden bg-[#0d2b40] lg:min-h-full">
-            <div className="absolute inset-x-0 top-0 h-2 bg-[var(--accent)]" />
-            <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full border-[60px] border-white/5" />
-            <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border-[70px] border-white/5" />
-
-            <div className="relative flex h-full min-h-[520px] flex-col justify-between p-6 sm:p-10 lg:p-12">
-              <div className="flex items-start justify-between gap-4">
-                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white/75">
-                  Gaspronal · Industria
-                </span>
-                <ShieldCheck className="text-[var(--accent)]" size={34} />
-              </div>
-
-              <div className="my-12">
-                <p className="max-w-xl text-4xl font-black leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-                  Acero, calor y precisión para operaciones que no pueden parar.
-                </p>
-                <p className="mt-6 max-w-lg text-base leading-7 text-slate-300">
-                  Desde una estación de cocción hasta una solución especial fabricada según tu necesidad.
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  ["AISI 304", "Acero inoxidable"],
-                  ["Gas", "Natural y propano"],
-                  ["A medida", "Diseño especial"],
-                ].map(([value, label]) => (
-                  <div key={value} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
-                    <strong className="block text-xl font-black text-white">{value}</strong>
-                    <span className="mt-1 block text-xs font-medium text-slate-300">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-slate-200 bg-white">
+      <HomeHeroVariants option={heroOption} />\n\n      <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
           {[
             ["Fabricación", "Equipos industriales"],
