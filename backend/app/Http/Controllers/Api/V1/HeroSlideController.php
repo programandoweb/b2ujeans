@@ -12,10 +12,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HeroSlideController extends Controller
 {
-    public function publicIndex(): JsonResponse
+    public function publicIndex(Request $request): JsonResponse
     {
+        $section = trim((string) $request->query('section', 'home.hero'));
+
         return response()->json([
             'data' => HeroSlide::query()
+                ->where('section_key', $section)
                 ->where('is_active', true)
                 ->orderBy('option')
                 ->orderBy('sort_order')
@@ -25,10 +28,14 @@ class HeroSlideController extends Controller
         ]);
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $section = trim((string) $request->query('section', ''));
+
         return response()->json([
             'data' => HeroSlide::query()
+                ->when($section !== '', fn ($query) => $query->where('section_key', $section))
+                ->orderBy('section_key')
                 ->orderBy('option')
                 ->orderBy('sort_order')
                 ->get(),
@@ -91,6 +98,7 @@ class HeroSlideController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
+            'section_key' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9._-]+$/'],
             'option' => ['required', 'integer', 'between:1,5'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
             'is_active' => ['nullable', 'boolean'],
