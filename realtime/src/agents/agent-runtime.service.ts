@@ -145,7 +145,7 @@ export class AgentRuntimeService {
       "\nResponde siempre en español salvo que el usuario solicite otro idioma.",
     ].join("\n").trim();
 
-    if (!["claudio", "sofia"].includes(agent.id)) {
+    if (agent.id !== "sofia") {
       const routedModels = [credentials.primary, credentials.fallback].filter(
         (item): item is RuntimeAiModel => Boolean(item),
       );
