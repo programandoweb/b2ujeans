@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AgentSettingController;
 use App\Http\Controllers\Api\V1\AgentKnowledgeController;
+use App\Http\Controllers\Api\V1\AgentAnalyticsController;
 use App\Http\Controllers\Api\V1\InternalAgentKnowledgeController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\PostController;
@@ -24,6 +25,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
     Route::post('internal/agents/{agent}/knowledge-tools', [InternalAgentKnowledgeController::class, 'execute']);
+    Route::post('internal/agents/{agent}/interactions', [AgentAnalyticsController::class, 'internalLog']);
     Route::get('internal/communications/providers', [CommunicationProviderController::class, 'internalList']);
     Route::post('internal/communications/outbound-log', [CommunicationProviderController::class, 'internalLog']);
 
@@ -42,6 +44,7 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:api', 'role:admin'])->group(function (): void {
         Route::get('dashboard/metrics', DashboardController::class);
         Route::get('deployments', [DeploymentController::class, 'index']);
+        Route::get('agents/dashboard', [AgentAnalyticsController::class, 'dashboard']);
         Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
         Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
