@@ -60,7 +60,7 @@ export const metadata: Metadata = {
 
 async function getManagedHeroes(): Promise<Record<number, FullHeroSlide[]>> {
   try {
-    const response = await fetch(`${backendUrl}/api/v1/heroes/public`, {
+    const response = await fetch(`${backendUrl}/api/v1/heroes/public?section=home.hero`, {
       cache: "no-store",
       headers: { Accept: "application/json" },
     });
