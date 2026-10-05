@@ -185,6 +185,17 @@ export class AgentRuntimeService {
       return this.finish(requestId, agent, message, answer, startedAt);
     }
 
+    const legacyGeminiApiKey = credentials.api_key;
+
+    if (!legacyGeminiApiKey) {
+      return {
+        requestId,
+        agent: { id: agent.id, name: agent.name, role: agent.role },
+        message: `${agent.name} todavía requiere una API key de Gemini para sus herramientas actuales.`,
+        status: "configuration_required",
+      };
+    }
+
     const contents: GeminiContent[] = [
       ...(input.history ?? []).slice(-20).map(item => ({
         role: item.role === "assistant" ? "model" as const : "user" as const,
@@ -197,7 +208,7 @@ export class AgentRuntimeService {
 
     for (let attempt = 0; attempt < 8; attempt++) {
       const turn = await this.gemini.generateTurn({
-        apiKey: credentials.api_key,
+        apiKey: legacyGeminiApiKey,
         model: credentials.model,
         system,
         contents,
