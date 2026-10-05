@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { authenticatedUser, createSocketToken } from "@/lib/agents-server";
 
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await authenticatedUser();
   if (!auth) return NextResponse.json({ message: "No autenticado." }, { status: 401 });
 
   try {
     return NextResponse.json({
       token: createSocketToken(String(auth.user.id)),
-      realtime_url: process.env.NEXT_PUBLIC_REALTIME_URL ?? "",
+      realtime_url: process.env.NEXT_PUBLIC_REALTIME_URL?.trim() || new URL(request.url).origin,
       expires_in: 300,
     });
   } catch (error) {
