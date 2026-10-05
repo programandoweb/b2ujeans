@@ -120,6 +120,9 @@ services:
       AGENTS_PATH: /app/agents
       CORS_ORIGIN: ${REALTIME_CORS_ORIGIN:-https://gaspronal.programandoweb.net}
       AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+      BROWSER_SOCKET_PATH: ${BROWSER_SOCKET_PATH:-/browser}
+      BROWSER_TASK_TIMEOUT_MS: ${BROWSER_TASK_TIMEOUT_MS:-90000}
+      GEMINI_IMAGE_MODEL: ${GEMINI_IMAGE_MODEL:-gemini-3.1-flash-image}
       LARAVEL_API_URL: http://backend-nginx/api/v1
       BAILEYS_SESSIONS_PATH: /app/data/baileys
     volumes:

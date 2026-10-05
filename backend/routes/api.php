@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AgentKnowledgeController;
 use App\Http\Controllers\Api\V1\AgentAnalyticsController;
 use App\Http\Controllers\Api\V1\AgentConversationController;
 use App\Http\Controllers\Api\V1\InternalAgentKnowledgeController;
+use App\Http\Controllers\Api\V1\InternalContentCreatorController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\SeoRedirectController;
@@ -36,6 +37,11 @@ Route::prefix('v1')->group(function (): void {
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
     Route::post('internal/agents/{agent}/knowledge-tools', [InternalAgentKnowledgeController::class, 'execute']);
     Route::post('internal/agents/{agent}/interactions', [AgentAnalyticsController::class, 'internalLog']);
+    Route::post('internal/content-creator/runs', [InternalContentCreatorController::class, 'storeRun']);
+    Route::post('internal/content-creator/runs/{run}/sources', [InternalContentCreatorController::class, 'addSource']);
+    Route::post('internal/content-creator/runs/{run}/artifacts', [InternalContentCreatorController::class, 'addArtifact']);
+    Route::post('internal/content-creator/runs/{run}/complete', [InternalContentCreatorController::class, 'complete']);
+    Route::post('internal/content-creator/runs/{run}/fail', [InternalContentCreatorController::class, 'fail']);
     Route::get('internal/communications/providers', [CommunicationProviderController::class, 'internalList']);
     Route::post('internal/communications/outbound-log', [CommunicationProviderController::class, 'internalLog']);
 
