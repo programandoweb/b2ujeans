@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { KeyRound, Pencil, Plus, Save, ShieldCheck, Trash2, UserCog, Users } from "lucide-react";
+import { KeyRound, Pencil, Plus, Save, Send, ShieldCheck, Trash2, UserCog, Users } from "lucide-react";
 
 type UserRow = {
   id: number;
@@ -61,6 +61,7 @@ export default function SecurityPage() {
   const [editingRole, setEditingRole] = useState<typeof emptyRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [invitingUserId, setInvitingUserId] = useState<number | null>(null);
 
   const grouped = useMemo(() => {
     return permissions.reduce<Record<string, string[]>>((acc, permission) => {
@@ -131,6 +132,19 @@ export default function SecurityPage() {
     }
   }
 
+  async function inviteUser(user: UserRow) {
+    setMessage("");
+    setInvitingUserId(user.id);
+    try {
+      const result = await api(`/security/users/${user.id}/invite`, { method: "POST" });
+      setMessage(result.message ?? `Invitación enviada correctamente a ${user.email}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No fue posible enviar la invitación.");
+    } finally {
+      setInvitingUserId(null);
+    }
+  }
+
   async function removeUser(user: UserRow) {
     if (!confirm(`¿Eliminar a ${user.name}?`)) return;
     try {
@@ -196,6 +210,15 @@ export default function SecurityPage() {
                     <td className="px-4 py-4">{user.effective_permissions.length}</td>
                     <td className="px-4 py-4">
                       <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => void inviteUser(user)}
+                          disabled={invitingUserId === user.id}
+                          className="grid size-9 place-items-center rounded-lg border border-[var(--border)] text-[var(--brand)] transition hover:bg-[var(--brand-soft)] disabled:cursor-wait disabled:opacity-50"
+                          title={invitingUserId === user.id ? "Enviando invitación…" : "Enviar invitación a GaspronalApp"}
+                          aria-label={`Enviar invitación a GaspronalApp a ${user.name}`}
+                        >
+                          <Send size={16}/>
+                        </button>
                         <button onClick={() => setEditingUser({ id: user.id, name: user.name, email: user.email, roles: [...user.roles], permissions: [...user.permissions] })} className="grid size-9 place-items-center rounded-lg border border-[var(--border)]" title="Editar"><Pencil size={16}/></button>
                         {!user.protected && <button onClick={() => void removeUser(user)} className="grid size-9 place-items-center rounded-lg border border-[var(--border)] text-red-600" title="Eliminar"><Trash2 size={16}/></button>}
                       </div>
