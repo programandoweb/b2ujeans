@@ -79,10 +79,10 @@ class AgentAnalyticsController extends Controller
 
             return [
                 'id' => $agent,
-                'interactions_30d' => (int) ($byAgent[$agent]?->total ?? 0),
-                'last_activity' => $byAgent[$agent]?->last_activity,
-                'has_api_key' => (bool) ($settings[$agent]?->has_api_key ?? false),
-                'model' => $settings[$agent]?->model ?? 'gemini-2.5-flash',
+                'interactions_30d' => (int) ($byAgent->get($agent)?->total ?? 0),
+                'last_activity' => $byAgent->get($agent)?->last_activity,
+                'has_api_key' => (bool) ($settings->get($agent)?->has_api_key ?? false),
+                'model' => $settings->get($agent)?->model ?? 'gemini-2.5-flash',
                 'knowledge_count' => $knowledge,
                 'pending_questions' => $pending,
             ];
