@@ -11,12 +11,12 @@ type PublicHeaderProps = {
 };
 
 const navigation = [
-  { label: "Productos", href: "#productos" },
-  { label: "Servicios", href: "#servicios" },
-  { label: "A medida", href: "#ingenieria" },
+  { label: "Productos", href: "/#productos" },
+  { label: "Servicios", href: "/#servicios" },
+  { label: "A medida", href: "/#ingenieria" },
   { label: "Gaspro-notas", href: "/gaspro-notas" },
-  { label: "Gaspronal", href: "#nosotros" },
-  { label: "Contacto", href: "#contacto" },
+  { label: "Gaspronal", href: "/#nosotros" },
+  { label: "Contacto", href: "/#contacto" },
 ];
 
 export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
@@ -28,19 +28,21 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
   });
 
   return (
-    <motion.header
-      initial={false}
-      animate={{
-        boxShadow: scrolled
-          ? "0 16px 36px rgba(15, 45, 66, 0.12)"
-          : "0 0 0 rgba(15, 45, 66, 0)",
-        backgroundColor: scrolled
-          ? "rgba(255,255,255,0.97)"
-          : "rgba(255,255,255,0.95)",
-      }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="sticky top-0 z-50 border-b border-black/5 backdrop-blur-xl"
-    >
+    <div className="h-[78px]">
+      <motion.header
+        initial={false}
+        animate={{
+          boxShadow: scrolled
+            ? "0 16px 36px rgba(15, 45, 66, 0.14)"
+            : "0 0 0 rgba(15, 45, 66, 0)",
+          backgroundColor: scrolled
+            ? "rgba(255,255,255,0.985)"
+            : "rgba(255,255,255,0.95)",
+          y: 0,
+        }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        className={`${scrolled ? "fixed left-0 right-0 top-0" : "relative"} z-50 border-b border-black/5 backdrop-blur-xl`}
+      >
       <motion.div
         initial={false}
         animate={{ height: scrolled ? 66 : 78 }}
@@ -134,6 +136,7 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
           </motion.div>
         </details>
       </motion.div>
-    </motion.header>
+      </motion.header>
+    </div>
   );
 }
