@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\CommercialAppointmentController;
 use App\Http\Controllers\Api\V1\JorgeResearchController;
 use App\Http\Controllers\Api\V1\CommunicationProviderController;
 use App\Http\Controllers\Api\V1\AiProviderController;
+use App\Http\Controllers\Api\V1\UserAccessController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -46,25 +47,25 @@ Route::prefix('v1')->group(function (): void {
         });
     });
 
-    Route::middleware(['auth:api', 'role:admin'])->group(function (): void {
-        Route::get('dashboard/metrics', DashboardController::class);
-        Route::get('deployments', [DeploymentController::class, 'index']);
-        Route::get('agents/dashboard', [AgentAnalyticsController::class, 'dashboard']);
-        Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
-        Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
-        Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
+    Route::middleware('auth:api')->group(function (): void {
+        Route::get('dashboard/metrics', DashboardController::class)->middleware('permission:dashboard.view');
+        Route::get('deployments', [DeploymentController::class, 'index'])->middleware('permission:deployments.view');
+        Route::get('agents/dashboard', [AgentAnalyticsController::class, 'dashboard'])->middleware('permission:agents.view');
+        Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show'])->middleware('permission:agents.view');
+        Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update'])->middleware('permission:agents.manage');
+        Route::post('deployments', [DeploymentController::class, 'store'])->middleware(['permission:deployments.manage', 'throttle:2,1']);
 
-        Route::get('ai/providers', [AiProviderController::class, 'providers']);
-        Route::post('ai/providers', [AiProviderController::class, 'storeProvider']);
-        Route::put('ai/providers/{aiProvider}', [AiProviderController::class, 'updateProvider']);
-        Route::delete('ai/providers/{aiProvider}', [AiProviderController::class, 'destroyProvider']);
-        Route::post('ai/providers/{aiProvider}/test', [AiProviderController::class, 'testProvider']);
+        Route::get('ai/providers', [AiProviderController::class, 'providers'])->middleware('permission:ai.view');
+        Route::post('ai/providers', [AiProviderController::class, 'storeProvider'])->middleware('permission:ai.manage');
+        Route::put('ai/providers/{aiProvider}', [AiProviderController::class, 'updateProvider'])->middleware('permission:ai.manage');
+        Route::delete('ai/providers/{aiProvider}', [AiProviderController::class, 'destroyProvider'])->middleware('permission:ai.manage');
+        Route::post('ai/providers/{aiProvider}/test', [AiProviderController::class, 'testProvider'])->middleware('permission:ai.manage');
 
-        Route::get('ai/agent-models', [AiProviderController::class, 'agentModels']);
-        Route::get('ai/models', [AiProviderController::class, 'models']);
-        Route::post('ai/models', [AiProviderController::class, 'storeModel']);
-        Route::put('ai/models/{aiModel}', [AiProviderController::class, 'updateModel']);
-        Route::delete('ai/models/{aiModel}', [AiProviderController::class, 'destroyModel']);
+        Route::get('ai/agent-models', [AiProviderController::class, 'agentModels'])->middleware('permission:ai.view');
+        Route::get('ai/models', [AiProviderController::class, 'models'])->middleware('permission:ai.view');
+        Route::post('ai/models', [AiProviderController::class, 'storeModel'])->middleware('permission:ai.manage');
+        Route::put('ai/models/{aiModel}', [AiProviderController::class, 'updateModel'])->middleware('permission:ai.manage');
+        Route::delete('ai/models/{aiModel}', [AiProviderController::class, 'destroyModel'])->middleware('permission:ai.manage');
 
         Route::get('communications/providers', [CommunicationProviderController::class, 'index']);
         Route::get('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'show']);
@@ -105,6 +106,17 @@ Route::prefix('v1')->group(function (): void {
         Route::get('content/post-categories', [PostController::class, 'categories']);
         Route::post('content/post-categories', [PostController::class, 'storeCategory']);
         Route::put('content/post-categories/{postCategory}', [PostController::class, 'updateCategory']);
+
+
+        Route::get('security/users', [UserAccessController::class, 'users'])->middleware('permission:security.users.view');
+        Route::post('security/users', [UserAccessController::class, 'storeUser'])->middleware('permission:security.users.manage');
+        Route::put('security/users/{user}', [UserAccessController::class, 'updateUser'])->middleware('permission:security.users.manage');
+        Route::delete('security/users/{user}', [UserAccessController::class, 'destroyUser'])->middleware('permission:security.users.manage');
+        Route::get('security/roles', [UserAccessController::class, 'roles'])->middleware('permission:security.roles.view');
+        Route::post('security/roles', [UserAccessController::class, 'storeRole'])->middleware('permission:security.roles.manage');
+        Route::put('security/roles/{role}', [UserAccessController::class, 'updateRole'])->middleware('permission:security.roles.manage');
+        Route::delete('security/roles/{role}', [UserAccessController::class, 'destroyRole'])->middleware('permission:security.roles.manage');
+        Route::get('security/permissions', [UserAccessController::class, 'permissions'])->middleware('permission:security.roles.view');
 
         Route::get('seo/redirects', [SeoRedirectController::class, 'index']);
         Route::get('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'show']);
