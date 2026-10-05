@@ -42,6 +42,7 @@ services:
       DEPLOYMENT_USE_SUDO: "true"
       DEPLOYMENT_TIMEOUT: ${DEPLOYMENT_TIMEOUT:-1800}
       AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+      REALTIME_INTERNAL_URL: http://realtime:4100
     depends_on:
       mariadb:
         condition: service_healthy
