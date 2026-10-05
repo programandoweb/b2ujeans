@@ -8,6 +8,7 @@ use App\Models\AiProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -58,6 +59,12 @@ class AiProviderController extends Controller
     {
         $result = $this->testConnection($aiProvider);
 
+        $syncedModels = 0;
+
+        if ($result['ok'] && $aiProvider->driver === 'openai_compatible') {
+            $syncedModels = $this->syncOpenAiCompatibleModels($aiProvider, $result['models'] ?? []);
+        }
+
         $aiProvider->forceFill([
             'health_status' => $result['ok'] ? 'healthy' : 'unhealthy',
             'health_checked_at' => now(),
@@ -67,7 +74,10 @@ class AiProviderController extends Controller
         return response()->json([
             'data' => [
                 ...$this->serializeProvider($aiProvider->fresh()->loadCount('models')),
-                'test' => $result,
+                'test' => [
+                    ...$result,
+                    'synced_models' => $syncedModels,
+                ],
             ],
         ]);
     }
@@ -76,7 +86,7 @@ class AiProviderController extends Controller
     {
         return response()->json([
             'data' => AiModel::query()
-                ->with('provider:id,name,code,driver')
+                ->with('provider:id,name,code,driver,is_active')
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get(),
@@ -86,13 +96,13 @@ class AiProviderController extends Controller
     public function storeModel(Request $request): JsonResponse
     {
         $model = AiModel::query()->create($this->modelData($request));
-        return response()->json(['data' => $model->load('provider:id,name,code,driver')], 201);
+        return response()->json(['data' => $model->load('provider:id,name,code,driver,is_active')], 201);
     }
 
     public function updateModel(Request $request, AiModel $aiModel): JsonResponse
     {
         $aiModel->update($this->modelData($request, $aiModel));
-        return response()->json(['data' => $aiModel->fresh()->load('provider:id,name,code,driver')]);
+        return response()->json(['data' => $aiModel->fresh()->load('provider:id,name,code,driver,is_active')]);
     }
 
     public function destroyModel(AiModel $aiModel): JsonResponse
