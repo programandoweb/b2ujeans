@@ -8,6 +8,7 @@ use App\Services\PasswordResetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Throwable;
@@ -16,14 +17,14 @@ use Spatie\Permission\Models\Role;
 
 class UserAccessController extends Controller
 {
-    public function users(): JsonResponse
+    public function users(Request $request): JsonResponse
     {
         return response()->json([
             'data' => User::query()
                 ->with(['roles:id,name', 'permissions:id,name'])
                 ->orderBy('name')
                 ->get()
-                ->map(fn (User $user) => $this->userPayload($user)),
+                ->map(fn (User $user) => $this->userPayload($user, (bool) $request->user()?->hasRole('root'))),
         ]);
     }
 
@@ -102,6 +103,34 @@ class UserAccessController extends Controller
         ]);
     }
 
+    public function impersonateUser(Request $request, User $user): JsonResponse
+    {
+        $actor = $request->user();
+
+        abort_unless($actor?->hasRole('root'), 403, 'Solo un usuario root puede iniciar sesión como otro usuario.');
+        abort_if($actor->is($user), 422, 'No puedes iniciar una suplantación sobre tu propia cuenta.');
+        abort_if($user->hasRole('root'), 422, 'No se puede iniciar sesión como otro usuario root.');
+
+        $guard = auth('api');
+        $token = $guard->login($user);
+
+        Log::notice('Root user impersonation started.', [
+            'actor_user_id' => $actor->id,
+            'target_user_id' => $user->id,
+        ]);
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => $guard->factory()->getTTL() * 60,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+        ]);
+    }
+
     public function destroyUser(Request $request, User $user): JsonResponse
     {
         abort_if($request->user()->is($user), 422, 'No puedes eliminar tu propio usuario.');
@@ -174,7 +203,7 @@ class UserAccessController extends Controller
         ]);
     }
 
-    private function userPayload(User $user): array
+    private function userPayload(User $user, bool $requesterIsRoot = false): array
     {
         return [
             'id' => $user->id,
@@ -184,6 +213,7 @@ class UserAccessController extends Controller
             'permissions' => $user->permissions->pluck('name')->values(),
             'effective_permissions' => $user->getAllPermissions()->pluck('name')->sort()->values(),
             'protected' => $user->hasRole('root'),
+            'can_impersonate' => $requesterIsRoot && ! $user->hasRole('root'),
         ];
     }
 
