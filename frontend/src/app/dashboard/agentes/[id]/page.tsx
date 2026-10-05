@@ -388,7 +388,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           {!messages.length&&<div className="mx-auto max-w-md py-16 text-center">
             <Bot size={34} className="mx-auto text-[var(--brand)]"/>
             <h3 className="mt-3 font-bold">Inicia una conversación</h3>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{settings?.has_api_key?"Gemini está configurado para este agente.":"Configura primero una API key de Gemini en el panel lateral."}</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{settings?.primary_ai_model_id?"El modelo principal seleccionado está listo para este agente.":settings?.has_api_key?"Gemini está configurado para este agente.":"Configura primero un modelo principal en el panel lateral."}</p>
           </div>}
           {messages.map(message=><div key={message.id} className={`flex ${message.role==="user"?"justify-end":"justify-start"}`}>
             <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${message.role==="user"?"bg-[var(--brand)] text-white":message.error?"border border-red-200 bg-red-50 text-red-800":"bg-[var(--app-bg)] text-[var(--app-fg)]"}`}>{message.content}</div>
