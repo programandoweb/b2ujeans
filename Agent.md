@@ -478,3 +478,6 @@ El agente `lucia` utiliza `extensions/gaspronal-browser-collector` para recolect
 - Se producen exactamente cinco imágenes y cada una debe persistirse antes de solicitar la siguiente.
 - El post final se crea como `draft`, nunca se publica automáticamente.
 - `GEMINI_IMAGE_MODEL` controla el modelo visual y no se hardcodean API keys.
+- Lucía emite progreso operativo en tiempo real mediante el evento Socket.IO `agent:progress`; el dashboard debe mostrar cada paso como un item independiente del chat sin incluir esos items en el historial enviado al modelo.
+- El progreso debe cubrir como mínimo: inicio, apertura de la extensión, respuesta del recolector con resumen cuantitativo, persistencia de cada fuente, planificación editorial, generación y persistencia individual de cada una de las cinco imágenes, redacción y guardado final del borrador.
+- Cuando `NEXT_PUBLIC_REALTIME_URL` no está configurado, el frontend usa el mismo origen del dashboard para Socket.IO; el proxy público debe enrutar `/socket.io/` al servicio realtime en el puerto 4100.
