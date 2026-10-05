@@ -158,6 +158,11 @@ class InternalAgentCommercialController extends Controller
         }
 
         $user = $emailUser ?? $whatsappUser ?? new User();
+
+        if ($user->exists && $user->hasAnyRole(['root', 'admin'])) {
+            abort(422, 'Los datos corresponden a un usuario interno de Gaspronal y no pueden registrarse como cliente desde el agente.');
+        }
+
         $user->name = trim((string) $arguments['name']);
         $user->email = $email;
         $user->whatsapp = $whatsapp;
@@ -167,7 +172,9 @@ class InternalAgentCommercialController extends Controller
         $user->data_processing_policy_version = trim((string) ($arguments['policy_version'] ?? '2026-10-05'));
         $user->save();
 
-        $user->syncRoles(['cliente']);
+        if (! $user->hasRole('cliente')) {
+            $user->assignRole('cliente');
+        }
 
         return response()->json([
             'data' => [
