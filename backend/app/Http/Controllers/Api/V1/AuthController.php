@@ -21,6 +21,13 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
+        $email = mb_strtolower((string) $request->validated('email'));
+        $user = \App\Models\User::query()->where('email', $email)->first();
+
+        if (! $user || blank($user->password)) {
+            return response()->json(['message' => 'Credenciales inválidas.'], 401);
+        }
+
         /** @var JWTGuard $guard */
         $guard = auth('api');
 
