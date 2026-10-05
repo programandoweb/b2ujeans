@@ -90,6 +90,11 @@ Route::prefix('v1')->group(function (): void {
         Route::post('agents/jorge/research/pause', [JorgeResearchController::class, 'pause'])->middleware('permission:agents.manage');
         Route::post('agents/jorge/research/stop', [JorgeResearchController::class, 'stop'])->middleware('permission:agents.manage');
 
+        Route::get('agents/{agent}/knowledge', [AgentKnowledgeController::class, 'knowledge'])->middleware('permission:agents.view');
+        Route::get('agents/{agent}/unanswered-questions', [AgentKnowledgeController::class, 'unanswered'])->middleware('permission:agents.view');
+        Route::post('agents/{agent}/unanswered-questions/{question}/answer', [AgentKnowledgeController::class, 'answer'])->middleware('permission:agents.manage');
+        Route::post('agents/{agent}/unanswered-questions/{question}/discard', [AgentKnowledgeController::class, 'discard'])->middleware('permission:agents.manage');
+
         Route::get('catalog/items', [CatalogController::class, 'index'])->middleware('permission:catalog.view');
         Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show'])->middleware('permission:catalog.view');
         Route::post('catalog/items', [CatalogController::class, 'store'])->middleware('permission:catalog.manage');
