@@ -82,180 +82,37 @@ const advantages = [
   "Asesoría técnica desde la necesidad hasta la operación",
 ];
 
-export default async function HomePage() {
-  const useCases = await getUseCases();
+
+function HeroSelector({ option }: { option: number }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-white text-[var(--foreground)]">
-      <div className="bg-[var(--brand)] text-white">
-        <div className="mx-auto flex min-h-9 max-w-[1440px] items-center justify-center px-4 text-center text-[11px] font-semibold tracking-[0.12em] sm:text-xs">
-          FABRICACIÓN · SERVICIO TÉCNICO · GAS · EXTRACCIÓN INDUSTRIAL
-        </div>
-      </div>
-
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[78px] max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
-          <Link href="/" aria-label="Gaspronal - Inicio" className="shrink-0">
-            <Image
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
-              alt="Gaspronal Industrias y Servicios"
-              width={220}
-              height={78}
-              priority
-              className="h-auto w-[170px] sm:w-[205px]"
-            />
+    <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
+      <div className="flex items-center gap-1 rounded-full border border-white/20 bg-[#0d2b40]/90 p-1 text-white shadow-xl backdrop-blur">
+        <span className="hidden px-3 text-[10px] font-black uppercase tracking-[0.14em] text-white/55 sm:inline">Propuestas</span>
+        {[1, 2, 3, 4, 5].map((item) => (
+          <Link
+            key={item}
+            href={item === 1 ? "/" : "/?option=" + item}
+            scroll={false}
+            className={
+              "grid size-8 place-items-center rounded-full text-xs font-black transition " +
+              (option === item ? "bg-[var(--accent)] text-white" : "text-white/70 hover:bg-white/10 hover:text-white")
+            }
+            aria-label={"Ver propuesta " + item}
+          >
+            {item}
           </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-700 lg:flex">
-            <Link className="transition hover:text-[var(--brand)]" href="#productos">
-              Productos
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#servicios">
-              Servicios
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#ingenieria">
-              A medida
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#nosotros">
-              Gaspronal
-            </Link>
-            <Link className="transition hover:text-[var(--brand)]" href="#contacto">
-              Contacto
-            </Link>
-          </nav>
+function HomeHero({ option }: { option: number }) {
+  const selector = <HeroSelector option={option} />;
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <a
-              href="tel:+573045527575"
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-            >
-              <Phone size={17} />
-              304 552 7575
-            </a>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--accent)] px-5 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
-            >
-              Hablar con un asesor
-              <ArrowRight size={17} />
-            </a>
-          </div>
-
-          <details className="group relative lg:hidden">
-            <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-slate-200 text-slate-800 [&::-webkit-details-marker]:hidden">
-              <Menu size={22} />
-              <span className="sr-only">Abrir navegación</span>
-            </summary>
-            <div className="absolute right-0 top-14 w-[min(88vw,340px)] rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl">
-              <nav className="grid gap-1 text-sm font-semibold">
-                <a href="#productos" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Productos</a>
-                <a href="#servicios" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Servicios</a>
-                <a href="#ingenieria" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Equipos a medida</a>
-                <a href="#nosotros" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Gaspronal</a>
-                <a href="#contacto" className="rounded-2xl px-4 py-3 hover:bg-slate-50">Contacto</a>
-              </nav>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] px-4 text-sm font-bold text-white"
-              >
-                Solicitar asesoría <ArrowRight size={17} />
-              </a>
-            </div>
-          </details>
-        </div>
-      </header>
-
-      <section className="relative border-b border-slate-200 bg-[#f7fafc]">
-        <div className="mx-auto grid max-w-[1440px] items-stretch lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
-          <div className="flex items-center px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/15 bg-white px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm">
-                <Sparkles size={15} />
-                Ingeniería para cocinas y procesos industriales
-              </div>
-
-              <h1 className="mt-7 max-w-[850px] text-[clamp(3.1rem,7vw,7.4rem)] font-black leading-[0.9] tracking-[-0.065em] text-[#102d42]">
-                Equipos que están hechos para{" "}
-                <span className="text-[var(--brand)]">trabajar.</span>
-              </h1>
-
-              <p className="mt-7 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-                Diseñamos, fabricamos, instalamos y mantenemos soluciones para cocinas profesionales,
-                producción de alimentos, redes de gas y extracción industrial.
-              </p>
-
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#productos"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)]"
-                >
-                  Conocer soluciones
-                  <ArrowRight size={18} />
-                </a>
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-slate-800 transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                >
-                  Cuéntanos tu proyecto
-                </a>
-              </div>
-
-              <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-2">
-                {advantages.slice(0, 2).map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm font-semibold text-slate-700">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative min-h-[520px] overflow-hidden bg-[#0d2b40] lg:min-h-full">
-            <div className="absolute inset-x-0 top-0 h-2 bg-[var(--accent)]" />
-            <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full border-[60px] border-white/5" />
-            <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border-[70px] border-white/5" />
-
-            <div className="relative flex h-full min-h-[520px] flex-col justify-between p-6 sm:p-10 lg:p-12">
-              <div className="flex items-start justify-between gap-4">
-                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white/75">
-                  Gaspronal · Industria
-                </span>
-                <ShieldCheck className="text-[var(--accent)]" size={34} />
-              </div>
-
-              <div className="my-12">
-                <p className="max-w-xl text-4xl font-black leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-                  Acero, calor y precisión para operaciones que no pueden parar.
-                </p>
-                <p className="mt-6 max-w-lg text-base leading-7 text-slate-300">
-                  Desde una estación de cocción hasta una solución especial fabricada según tu necesidad.
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  ["AISI 304", "Acero inoxidable"],
-                  ["Gas", "Natural y propano"],
-                  ["A medida", "Diseño especial"],
-                ].map(([value, label]) => (
-                  <div key={value} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
-                    <strong className="block text-xl font-black text-white">{value}</strong>
-                    <span className="mt-1 block text-xs font-medium text-slate-300">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+  if (option === 2) {
+    return (
+      <HomeHero option={heroOption} />
 
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
