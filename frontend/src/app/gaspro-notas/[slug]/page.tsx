@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import PublicHeader from "@/components/public/PublicHeader";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://gaspronal.programandoweb.net").replace(/\/$/, "");
 const whatsappHref =
   "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
 
@@ -22,6 +22,17 @@ type Post = {
   updated_at?:string|null;
 };
 
+async function requestSiteUrl():Promise<string>{
+  const requestHeaders=await headers();
+  const host=(requestHeaders.get("x-forwarded-host")||requestHeaders.get("host")||"gaspronal.programandoweb.net")
+    .split(",")[0]
+    .trim();
+  const proto=(requestHeaders.get("x-forwarded-proto")||"https")
+    .split(",")[0]
+    .trim();
+  return `${proto}://${host}`.replace(/\/$/,"");
+}
+
 async function getPost(slug:string):Promise<Post|null>{
   const response=await fetch(`${backendUrl}/api/v1/content/public/posts/${encodeURIComponent(slug)}`,{
     cache:"no-store",
@@ -37,12 +48,13 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
   const {slug}=await params;
   const post=await getPost(slug);
   if(!post)return{robots:{index:false,follow:false}};
+  const siteUrl=await requestSiteUrl();
 
   const title=post.seo_title||post.title;
   const description=post.seo_description||post.excerpt||"Contenido técnico y soluciones industriales de Gaspronal.";
   const canonical=`${siteUrl}/gaspro-notas/${post.slug}`;
   const imageVersion=encodeURIComponent(post.updated_at||post.published_at||"1");
-  const socialImage=`${canonical}/opengraph-image?v=${imageVersion}`;
+  const socialImage=`${siteUrl}/api/og/gaspro-notas/${encodeURIComponent(post.slug)}?v=${imageVersion}`;
 
   return{
     title,
@@ -106,10 +118,11 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
   const {slug}=await params;
   const post=await getPost(slug);
   if(!post)notFound();
+  const siteUrl=await requestSiteUrl();
 
   const gallery=Array.from(new Set([post.featured_image||"",...(post.gallery||[])].filter(Boolean)));
   const canonical=`${siteUrl}/gaspro-notas/${post.slug}`;
-  const socialImage=`${canonical}/opengraph-image?v=${encodeURIComponent(post.updated_at||post.published_at||"1")}`;
+  const socialImage=`${siteUrl}/api/og/gaspro-notas/${encodeURIComponent(post.slug)}?v=${encodeURIComponent(post.updated_at||post.published_at||"1")}`;
   const structuredData={
     "@context":"https://schema.org",
     "@type":"Article",
@@ -137,9 +150,12 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
     ],
   };
 
+  const safeStructuredData=JSON.stringify(structuredData).replace(/</g,"\\u003c");
+  const safeBreadcrumbs=JSON.stringify(breadcrumbs).replace(/</g,"\\u003c");
+
   return <main className="min-h-screen bg-white text-[var(--foreground)]">
-    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumbs)}}/>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeStructuredData}}/>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeBreadcrumbs}}/>
     <PublicHeader whatsappHref={whatsappHref}/>
 
     <article className="mx-auto max-w-[1100px] px-4 py-12 sm:px-6 sm:py-16 lg:px-10">
