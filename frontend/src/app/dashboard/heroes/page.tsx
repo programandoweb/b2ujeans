@@ -46,6 +46,7 @@ export default function HeroesPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
+  const [canManage, setCanManage] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -57,6 +58,7 @@ export default function HeroesPage() {
       return;
     }
     setSlides(json.data ?? []);
+    setCanManage(Boolean(json.meta?.can_manage));
   }
 
   useEffect(() => {
@@ -173,13 +175,15 @@ export default function HeroesPage() {
             Administra heroes y carruseles por ubicación. <strong>home.hero</strong> está conectado al home actual; las demás ubicaciones quedan disponibles para reutilizar el mismo constructor en otras páginas.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void createSlide()}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white"
-        >
-          <FiPlus /> Nuevo slide
-        </button>
+        {canManage && (
+          <button
+            type="button"
+            onClick={() => void createSlide()}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white"
+          >
+            <FiPlus /> Nuevo slide
+          </button>
+        )}
       </header>
 
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
@@ -265,45 +269,53 @@ export default function HeroesPage() {
                   <span className="ml-3 text-xs text-[var(--muted)]">ID {slide.id}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => patch(slide.id, "is_active", !slide.is_active)}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold"
-                  >
-                    {slide.is_active ? <FiEye /> : <FiEyeOff />}
-                    {slide.is_active ? "Activo" : "Inactivo"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void save(slide)}
-                    disabled={busyId === slide.id}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    <FiSave /> Guardar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void remove(slide)}
-                    className="grid size-10 place-items-center rounded-xl border border-red-200 text-red-600"
-                    title="Eliminar slide"
-                  >
-                    <FiTrash2 />
-                  </button>
+                  {canManage ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => patch(slide.id, "is_active", !slide.is_active)}
+                        className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold"
+                      >
+                        {slide.is_active ? <FiEye /> : <FiEyeOff />}
+                        {slide.is_active ? "Activo" : "Inactivo"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void save(slide)}
+                        disabled={busyId === slide.id}
+                        className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+                      >
+                        <FiSave /> Guardar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void remove(slide)}
+                        className="grid size-10 place-items-center rounded-xl border border-red-200 text-red-600"
+                        title="Eliminar slide"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="inline-flex min-h-10 items-center rounded-xl border border-[var(--border)] px-3 text-xs font-semibold text-[var(--muted)]">
+                      Solo lectura
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="grid gap-5 p-5 lg:grid-cols-4">
                 <label className="space-y-2 lg:col-span-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Imagen de fondo / URL</span>
-                  <input value={slide.image_url} onChange={(e) => patch(slide.id, "image_url", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} value={slide.image_url} onChange={(e) => patch(slide.id, "image_url", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Posición</span>
-                  <input value={slide.background_position} onChange={(e) => patch(slide.id, "background_position", e.target.value)} placeholder="center 38%" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} value={slide.background_position} onChange={(e) => patch(slide.id, "background_position", e.target.value)} placeholder="center 38%" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Intervalo ms</span>
-                  <input type="number" min={1000} max={15000} step={250} value={slide.interval_ms} onChange={(e) => patch(slide.id, "interval_ms", Number(e.target.value))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} type="number" min={1000} max={15000} step={250} value={slide.interval_ms} onChange={(e) => patch(slide.id, "interval_ms", Number(e.target.value))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
 
                 <label className="space-y-2 lg:col-span-3">
@@ -311,7 +323,7 @@ export default function HeroesPage() {
                   <span className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[var(--border)] px-4 text-sm font-semibold">
                     <FiImage />
                     Seleccionar JPG, PNG o WebP
-                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
+                    <input disabled={!canManage} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) void uploadImage(slide, file);
                       e.currentTarget.value = "";
@@ -320,25 +332,25 @@ export default function HeroesPage() {
                 </label>
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Orden</span>
-                  <input type="number" min={0} value={slide.sort_order} onChange={(e) => patch(slide.id, "sort_order", Number(e.target.value))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} type="number" min={0} value={slide.sort_order} onChange={(e) => patch(slide.id, "sort_order", Number(e.target.value))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
 
                 <label className="space-y-2 lg:col-span-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Badge</span>
-                  <input value={slide.eyebrow ?? ""} onChange={(e) => patch(slide.id, "eyebrow", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} value={slide.eyebrow ?? ""} onChange={(e) => patch(slide.id, "eyebrow", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Título</span>
-                  <input value={slide.title} onChange={(e) => patch(slide.id, "title", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} value={slide.title} onChange={(e) => patch(slide.id, "title", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
                 <label className="space-y-2">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Texto naranja</span>
-                  <input value={slide.accent ?? ""} onChange={(e) => patch(slide.id, "accent", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <input disabled={!canManage} value={slide.accent ?? ""} onChange={(e) => patch(slide.id, "accent", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                 </label>
 
                 <label className="space-y-2 lg:col-span-4">
                   <span className="text-xs font-bold uppercase text-[var(--muted)]">Descripción</span>
-                  <textarea value={slide.description ?? ""} onChange={(e) => patch(slide.id, "description", e.target.value)} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm" />
+                  <textarea disabled={!canManage} value={slide.description ?? ""} onChange={(e) => patch(slide.id, "description", e.target.value)} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm" />
                 </label>
 
                 {[
@@ -348,11 +360,11 @@ export default function HeroesPage() {
                   <div key={labelKey} className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
                     <label className="space-y-2">
                       <span className="text-xs font-bold uppercase text-[var(--muted)]">{labelTitle}</span>
-                      <input value={String(slide[labelKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, labelKey as keyof HeroSlide, e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                      <input disabled={!canManage} value={String(slide[labelKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, labelKey as keyof HeroSlide, e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                     </label>
                     <label className="space-y-2">
                       <span className="text-xs font-bold uppercase text-[var(--muted)]">{hrefTitle}</span>
-                      <input value={String(slide[hrefKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, hrefKey as keyof HeroSlide, e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                      <input disabled={!canManage} value={String(slide[hrefKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, hrefKey as keyof HeroSlide, e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
                     </label>
                   </div>
                 ))}
@@ -364,8 +376,8 @@ export default function HeroesPage() {
                       const card = (slide.cards ?? emptyCards)[cardIndex] ?? { title: "", text: "" };
                       return (
                         <div key={cardIndex} className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--app-bg)] p-4">
-                          <input value={card.title} onChange={(e) => patchCard(slide.id, cardIndex, "title", e.target.value)} placeholder="Título" className="min-h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold" />
-                          <textarea value={card.text} onChange={(e) => patchCard(slide.id, cardIndex, "text", e.target.value)} placeholder="Descripción" rows={2} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm" />
+                          <input disabled={!canManage} value={card.title} onChange={(e) => patchCard(slide.id, cardIndex, "title", e.target.value)} placeholder="Título" className="min-h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold" />
+                          <textarea disabled={!canManage} value={card.text} onChange={(e) => patchCard(slide.id, cardIndex, "text", e.target.value)} placeholder="Descripción" rows={2} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm" />
                         </div>
                       );
                     })}
