@@ -181,16 +181,18 @@ class AiProviderController extends Controller
                 ->withOptions(['verify' => (bool) $provider->verify_tls]);
 
             $apiKey = $provider->credentials['api_key'] ?? null;
-            if (is_string($apiKey) && $apiKey !== '') {
-                $request = $request->withToken($apiKey);
-            }
-
             $url = rtrim($provider->base_url, '/');
 
             $response = match ($provider->driver) {
-                'openai_compatible' => $request->get($url.'/models'),
-                'gemini' => $request->get($url.'/models'),
-                'anthropic' => $request->withHeaders(['anthropic-version' => '2023-06-01'])->get($url.'/models'),
+                'openai_compatible' => (is_string($apiKey) && $apiKey !== ''
+                    ? $request->withToken($apiKey)
+                    : $request)->get($url.'/models'),
+                'gemini' => (is_string($apiKey) && $apiKey !== ''
+                    ? $request->withHeaders(['x-goog-api-key' => $apiKey])
+                    : $request)->get($url.'/models'),
+                'anthropic' => (is_string($apiKey) && $apiKey !== ''
+                    ? $request->withHeaders(['x-api-key' => $apiKey, 'anthropic-version' => '2023-06-01'])
+                    : $request->withHeaders(['anthropic-version' => '2023-06-01']))->get($url.'/models'),
                 default => throw ValidationException::withMessages(['driver' => ['Driver no soportado.']]),
             };
 
