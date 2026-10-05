@@ -60,6 +60,7 @@ Route::prefix('v1')->group(function (): void {
         Route::delete('ai/providers/{aiProvider}', [AiProviderController::class, 'destroyProvider']);
         Route::post('ai/providers/{aiProvider}/test', [AiProviderController::class, 'testProvider']);
 
+        Route::get('ai/agent-models', [AiProviderController::class, 'agentModels']);
         Route::get('ai/models', [AiProviderController::class, 'models']);
         Route::post('ai/models', [AiProviderController::class, 'storeModel']);
         Route::put('ai/models/{aiModel}', [AiProviderController::class, 'updateModel']);
