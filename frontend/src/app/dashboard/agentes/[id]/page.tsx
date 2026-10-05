@@ -81,7 +81,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       const [agentsResponse,settingsResponse,modelsResponse]=await Promise.all([
         fetch("/api/agents",{cache:"no-store"}),
         fetch(`/api/agents/${id}/settings`,{cache:"no-store"}),
-        fetch("/api/admin/ai/models",{cache:"no-store"}),
+        fetch("/api/admin/ai/agent-models",{cache:"no-store"}),
       ]);
       const agentsJson=await agentsResponse.json().catch(()=>({}));
       const settingsJson=await settingsResponse.json().catch(()=>({}));
@@ -91,9 +91,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       setAgent(found);
 
       if(modelsResponse.ok){
-        setAiModels((modelsJson.data??[]).filter(
-          (item:AiModelOption)=>item.is_active&&item.provider?.is_active!==false
-        ));
+        setAiModels(modelsJson.data??[]);
       }
 
       if(settingsResponse.ok&&settingsJson.data){
