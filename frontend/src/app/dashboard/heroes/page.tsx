@@ -6,6 +6,7 @@ import { FiEye, FiEyeOff, FiImage, FiPlus, FiSave, FiTrash2 } from "react-icons/
 type CardItem = { title: string; text: string };
 type HeroSlide = {
   id: number;
+  section_key: string;
   option: number;
   sort_order: number;
   is_active: boolean;
@@ -23,7 +24,14 @@ type HeroSlide = {
   cards: CardItem[] | null;
 };
 
-const options = [2, 3, 5] as const;
+const options = [1, 2, 3, 4, 5] as const;
+const sectionPresets = [
+  { key: "home.hero", label: "Home / Hero principal" },
+  { key: "productos.hero", label: "Productos / Hero" },
+  { key: "servicios.hero", label: "Servicios / Hero" },
+  { key: "gaspro-notas.hero", label: "Gaspro-notas / Hero" },
+  { key: "contacto.hero", label: "Contacto / Hero" },
+] as const;
 const emptyCards: CardItem[] = [
   { title: "Bloque 1", text: "Descripción" },
   { title: "Bloque 2", text: "Descripción" },
@@ -33,6 +41,8 @@ const emptyCards: CardItem[] = [
 export default function HeroesPage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [activeOption, setActiveOption] = useState<number>(2);
+  const [activeSection, setActiveSection] = useState("home.hero");
+  const [sectionInput, setSectionInput] = useState("home.hero");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
@@ -54,8 +64,10 @@ export default function HeroesPage() {
   }, []);
 
   const visibleSlides = useMemo(
-    () => slides.filter((slide) => slide.option === activeOption).sort((a, b) => a.sort_order - b.sort_order),
-    [slides, activeOption]
+    () => slides
+      .filter((slide) => slide.section_key === activeSection && slide.option === activeOption)
+      .sort((a, b) => a.sort_order - b.sort_order),
+    [slides, activeOption, activeSection]
   );
 
   function patch(id: number, field: keyof HeroSlide, value: HeroSlide[keyof HeroSlide]) {
@@ -94,11 +106,12 @@ export default function HeroesPage() {
 
   async function createSlide() {
     setMessage("");
-    const current = slides.filter((slide) => slide.option === activeOption);
+    const current = slides.filter((slide) => slide.section_key === activeSection && slide.option === activeOption);
     const response = await fetch("/api/admin/heroes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        section_key: activeSection,
         option: activeOption,
         sort_order: current.length,
         is_active: true,
@@ -154,10 +167,10 @@ export default function HeroesPage() {
     <div className="w-full max-w-none space-y-6">
       <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Contenido / Home</span>
-          <h1 className="mt-2 text-3xl font-bold">Heroes del home</h1>
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Contenido / Constructor visual</span>
+          <h1 className="mt-2 text-3xl font-bold">Constructor de heroes</h1>
           <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
-            Administra los carruseles de las propuestas 2, 3 y 5. Los cambios publicados se consumen directamente en el home.
+            Administra heroes y carruseles por ubicación. <strong>home.hero</strong> está conectado al home actual; las demás ubicaciones quedan disponibles para reutilizar el mismo constructor en otras páginas.
           </p>
         </div>
         <button
@@ -168,6 +181,57 @@ export default function HeroesPage() {
           <FiPlus /> Nuevo slide
         </button>
       </header>
+
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+          <label className="space-y-2">
+            <span className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Ubicación / section key</span>
+            <input
+              list="hero-section-presets"
+              value={sectionInput}
+              onChange={(e) => setSectionInput(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
+              className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm"
+              placeholder="home.hero"
+            />
+            <datalist id="hero-section-presets">
+              {sectionPresets.map((section) => <option key={section.key} value={section.key}>{section.label}</option>)}
+            </datalist>
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              if (!sectionInput.trim()) return;
+              setActiveSection(sectionInput.trim());
+            }}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] px-4 text-sm font-semibold"
+          >
+            Administrar ubicación
+          </button>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {sectionPresets.map((section) => (
+            <button
+              key={section.key}
+              type="button"
+              onClick={() => {
+                setSectionInput(section.key);
+                setActiveSection(section.key);
+              }}
+              className={
+                "rounded-lg border px-3 py-2 text-xs font-semibold " +
+                (activeSection === section.key
+                  ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
+                  : "border-[var(--border)]")
+              }
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-[var(--muted)]">
+          Ubicación activa: <strong>{activeSection}</strong>
+        </p>
+      </section>
 
       <div className="flex flex-wrap gap-2">
         {options.map((option) => (
@@ -313,7 +377,7 @@ export default function HeroesPage() {
 
           {visibleSlides.length === 0 && (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center text-sm text-[var(--muted)]">
-              Esta propuesta todavía no tiene slides.
+              Esta ubicación/propuesta todavía no tiene slides. Puedes crear el primero con “Nuevo slide”.
             </div>
           )}
         </div>
