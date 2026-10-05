@@ -82,6 +82,50 @@ class AiProviderController extends Controller
         ]);
     }
 
+    public function agentModels(): JsonResponse
+    {
+        $providers = AiProvider::query()
+            ->where('is_active', true)
+            ->where('driver', 'openai_compatible')
+            ->get();
+
+        foreach ($providers as $provider) {
+            $hasActiveModels = $provider->models()->where('is_active', true)->exists();
+
+            if ($hasActiveModels) {
+                continue;
+            }
+
+            $result = $this->testConnection($provider);
+
+            if (($result['ok'] ?? false) === true) {
+                $this->syncOpenAiCompatibleModels($provider, $result['models'] ?? []);
+
+                $provider->forceFill([
+                    'health_status' => 'healthy',
+                    'health_checked_at' => now(),
+                    'health_message' => $result['message'] ?? 'Conexión verificada correctamente.',
+                ])->save();
+            } else {
+                $provider->forceFill([
+                    'health_status' => 'unhealthy',
+                    'health_checked_at' => now(),
+                    'health_message' => $result['message'] ?? 'No fue posible verificar el proveedor.',
+                ])->save();
+            }
+        }
+
+        return response()->json([
+            'data' => AiModel::query()
+                ->where('is_active', true)
+                ->whereHas('provider', fn ($query) => $query->where('is_active', true))
+                ->with('provider:id,name,code,driver,is_active')
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get(),
+        ]);
+    }
+
     public function models(): JsonResponse
     {
         return response()->json([
