@@ -40,6 +40,9 @@ Route::prefix('v1')->group(function (): void {
 
     Route::prefix('auth')->group(function (): void {
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
+        Route::get('whatsapp/status', [AuthController::class, 'whatsappStatus'])->middleware('throttle:30,1');
+        Route::post('whatsapp/request', [AuthController::class, 'requestWhatsAppPin'])->middleware('throttle:5,1');
+        Route::post('whatsapp/verify', [AuthController::class, 'verifyWhatsAppPin'])->middleware('throttle:10,1');
         Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-reset');
         Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password-reset');
 
