@@ -26,13 +26,17 @@ class UserInvitationNotification extends Notification
         ], '', '&', PHP_QUERY_RFC3986);
 
         $imagePath = 'programandoweb/default/recover.jpg';
+        $publicBackendUrl = rtrim((string) config('app.public_backend_url'), '/');
+        $imageUrl = file_exists(public_path($imagePath))
+            ? $publicBackendUrl.'/'.$imagePath
+            : null;
 
         return (new MailMessage())
             ->subject('Bienvenido a GaspronalApp')
             ->view('emails.auth.user-invitation', [
                 'user' => $notifiable,
                 'resetUrl' => $frontendUrl.'/reset-password?'.$query,
-                'imageUrl' => file_exists(public_path($imagePath)) ? asset($imagePath) : null,
+                'imageUrl' => $imageUrl,
                 'expiresInMinutes' => (int) config('auth.passwords.users.expire', 60),
                 'applicationName' => 'GaspronalApp',
             ]);
