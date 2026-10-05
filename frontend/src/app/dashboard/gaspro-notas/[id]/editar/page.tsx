@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiArrowLeft, FiExternalLink, FiSave, FiType, FiLink2, FiTag, FiActivity, FiSearch, FiFileText } from "react-icons/fi";
+import { FiArrowLeft, FiExternalLink, FiSave, FiType, FiLink2, FiTag, FiActivity, FiSearch, FiFileText, FiImage, FiUploadCloud, FiStar, FiTrash2 } from "react-icons/fi";
 import { use, useEffect, useState } from "react";
 
 type Category = { id:number; name:string; slug:string };
@@ -26,6 +26,9 @@ type Post = {
   seo_title?:string|null;
   seo_description?:string|null;
   public_url:string;
+  gallery?:unknown[]|null;
+  featured_image?:string|null;
+  og_image?:string|null;
 };
 
 function slugify(v:string){
@@ -41,6 +44,11 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
   });
   const [loading,setLoading]=useState(true);
   const [message,setMessage]=useState("");
+  const [activeTab,setActiveTab]=useState<"form"|"gallery">("form");
+  const [gallery,setGallery]=useState<string[]>([]);
+  const [primaryImage,setPrimaryImage]=useState("");
+  const [galleryMessage,setGalleryMessage]=useState("");
+  const [uploading,setUploading]=useState(false);
 
   useEffect(()=>{
     async function load(){
@@ -60,6 +68,14 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
       const post:Post=postJson.data;
       setCategories(categoriesJson.data??[]);
       setPublicUrl(post.public_url);
+      const normalizedGallery=Array.from(new Set([
+        post.featured_image??"",
+        post.og_image??"",
+        ...(post.gallery??[])
+          .map(image=>typeof image==="string"?image:(typeof image==="object"&&image&&"url" in image?String((image as {url?:unknown}).url??""):"")),
+      ].filter(Boolean)));
+      setGallery(normalizedGallery);
+      setPrimaryImage(post.featured_image??post.og_image??normalizedGallery[0]??"");
       setForm({
         title:post.title,
         slug:post.slug,
@@ -102,6 +118,70 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
     setMessage("Publicación actualizada correctamente.");
   }
 
+  async function uploadGallery(files:FileList|null){
+    if(!files?.length)return;
+    setUploading(true);
+    setGalleryMessage("");
+
+    const data=new FormData();
+    Array.from(files).forEach(file=>data.append("images[]",file));
+
+    const response=await fetch(`/api/admin/content/posts/${id}/gallery`,{
+      method:"POST",
+      body:data,
+    });
+    const json=await response.json().catch(()=>({}));
+    setUploading(false);
+
+    if(!response.ok){
+      setGalleryMessage(json.message??"No fue posible subir las imágenes.");
+      return;
+    }
+
+    setGallery(json.data?.gallery??[]);
+    setPrimaryImage(json.data?.featured_image??json.data?.og_image??"");
+    setGalleryMessage("Galería actualizada correctamente.");
+  }
+
+  async function makePrimary(image:string){
+    setGalleryMessage("");
+    const response=await fetch(`/api/admin/content/posts/${id}/gallery/primary`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({image}),
+    });
+    const json=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      setGalleryMessage(json.message??"No fue posible establecer la imagen principal.");
+      return;
+    }
+
+    setPrimaryImage(json.data?.featured_image??json.data?.og_image??image);
+    setGalleryMessage("Imagen principal actualizada.");
+  }
+
+  async function removeGalleryImage(image:string){
+    if(!confirm("¿Eliminar esta imagen de la galería?"))return;
+    setGalleryMessage("");
+
+    const response=await fetch(`/api/admin/content/posts/${id}/gallery`,{
+      method:"DELETE",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({image}),
+    });
+    const json=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      setGalleryMessage(json.message??"No fue posible eliminar la imagen.");
+      return;
+    }
+
+    setGallery(json.data?.gallery??[]);
+    setPrimaryImage(json.data?.featured_image??json.data?.og_image??"");
+    setGalleryMessage("Imagen eliminada.");
+  }
+
   if(loading) return <div className="w-full max-w-none py-8 text-sm text-[var(--muted)]">Cargando publicación…</div>;
 
   return <div className="w-full max-w-none space-y-6">
@@ -116,7 +196,25 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
       <p className="mt-2 text-sm text-[var(--muted)]">Edita el contenido manteniendo el slug histórico cuando tenga valor SEO.</p>
     </header>
 
-    <form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+    <div className="flex gap-2 border-b border-[var(--border)]">
+      <button
+        type="button"
+        onClick={()=>setActiveTab("form")}
+        className={`inline-flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-semibold transition ${activeTab==="form"?"border-[var(--brand)] text-[var(--brand)]":"border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]"}`}
+      >
+        <FiFileText size={16}/>Formulario
+      </button>
+      <button
+        type="button"
+        onClick={()=>setActiveTab("gallery")}
+        className={`inline-flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-semibold transition ${activeTab==="gallery"?"border-[var(--brand)] text-[var(--brand)]":"border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]"}`}
+      >
+        <FiImage size={16}/>Galería
+        {gallery.length>0&&<span className="rounded-full bg-[var(--brand-soft)] px-2 py-0.5 text-[11px] font-bold text-[var(--brand)]">{gallery.length}</span>}
+      </button>
+    </div>
+
+    {activeTab==="form"&&<form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="grid content-start gap-4 md:grid-cols-2">
           <label className="space-y-2 md:col-span-2">
@@ -159,6 +257,67 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
 
       <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 font-semibold text-white"><FiSave size={17}/>Guardar cambios</button>
       {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
-    </form>
+    </form>}
+
+    {activeTab==="gallery"&&<section className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="flex items-center gap-2 text-lg font-bold"><FiImage className="text-[var(--brand)]"/>Galería de imágenes</h2>
+          <p className="mt-1 text-sm text-[var(--muted)]">Aquí aparecen también las 5 imágenes generadas por Lucía. Puedes subir más imágenes y elegir la principal/OG.</p>
+        </div>
+
+        <label className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white ${uploading?"pointer-events-none opacity-60":""}`}>
+          <FiUploadCloud size={18}/>
+          {uploading?"Subiendo…":"Subir imágenes"}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="sr-only"
+            disabled={uploading}
+            onChange={e=>{void uploadGallery(e.target.files);e.currentTarget.value="";}}
+          />
+        </label>
+      </div>
+
+      {gallery.length===0?(
+        <div className="rounded-xl border border-dashed border-[var(--border)] p-10 text-center">
+          <FiImage className="mx-auto text-[var(--muted)]" size={34}/>
+          <p className="mt-3 text-sm font-medium">Esta Gaspro-nota todavía no tiene imágenes en la galería.</p>
+        </div>
+      ):(
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {gallery.map((image,index)=>{
+            const isPrimary=image===primaryImage;
+            return <article key={image} className={`overflow-hidden rounded-xl border bg-[var(--surface)] ${isPrimary?"border-[var(--brand)] ring-2 ring-[var(--brand-soft)]":"border-[var(--border)]"}`}>
+              <div className="aspect-[4/3] bg-[var(--app-bg)]">
+                <img src={image} alt={`${form.title} - imagen ${index+1}`} className="h-full w-full object-contain"/>
+              </div>
+              <div className="flex items-center justify-between gap-2 border-t border-[var(--border)] p-3">
+                <button
+                  type="button"
+                  onClick={()=>void makePrimary(image)}
+                  className={`inline-flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold ${isPrimary?"bg-[var(--brand-soft)] text-[var(--brand)]":"border border-[var(--border)]"}`}
+                  aria-pressed={isPrimary}
+                >
+                  <FiStar className={isPrimary?"fill-current":""}/>{isPrimary?"Principal":"Hacer principal"}
+                </button>
+                <button
+                  type="button"
+                  onClick={()=>void removeGalleryImage(image)}
+                  className="grid size-9 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50"
+                  aria-label="Eliminar imagen"
+                  title="Eliminar imagen"
+                >
+                  <FiTrash2/>
+                </button>
+              </div>
+            </article>;
+          })}
+        </div>
+      )}
+
+      {galleryMessage&&<p className="text-sm font-medium text-[var(--brand)]">{galleryMessage}</p>}
+    </section>}
   </div>;
 }
