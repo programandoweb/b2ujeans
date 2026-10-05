@@ -33,6 +33,7 @@ class UserAccessController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'whatsapp' => ['nullable', 'string', 'max:20', 'regex:/^\\+[1-9]\\d{7,14}$/', 'unique:users,whatsapp'],
             'password' => ['nullable', Password::defaults()],
             'roles' => ['array'],
             'roles.*' => ['string', Rule::exists('roles', 'name')->where('guard_name', 'api')],
@@ -45,6 +46,7 @@ class UserAccessController extends Controller
         $user = User::query()->create([
             'name' => $data['name'],
             'email' => mb_strtolower($data['email']),
+            'whatsapp' => $data['whatsapp'] ?? null,
             'password' => Hash::make($data['password'] ?? str()->password(40)),
         ]);
 
@@ -61,6 +63,7 @@ class UserAccessController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'whatsapp' => ['nullable', 'string', 'max:20', 'regex:/^\\+[1-9]\\d{7,14}$/', Rule::unique('users', 'whatsapp')->ignore($user->id)],
             'password' => ['nullable', Password::defaults()],
             'roles' => ['array'],
             'roles.*' => ['string', Rule::exists('roles', 'name')->where('guard_name', 'api')],
@@ -75,6 +78,7 @@ class UserAccessController extends Controller
         $user->fill([
             'name' => $data['name'],
             'email' => $user->hasRole('root') ? 'lic.jorgemendez@gmail.com' : mb_strtolower($data['email']),
+            'whatsapp' => $data['whatsapp'] ?? null,
         ]);
         if (! empty($data['password'])) {
             $user->password = $data['password'];
@@ -209,6 +213,7 @@ class UserAccessController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'whatsapp' => $user->whatsapp,
             'roles' => $user->roles->pluck('name')->values(),
             'permissions' => $user->permissions->pluck('name')->values(),
             'effective_permissions' => $user->getAllPermissions()->pluck('name')->sort()->values(),
