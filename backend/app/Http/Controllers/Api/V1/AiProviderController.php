@@ -336,10 +336,32 @@ class AiProviderController extends Controller
             $models = [];
 
             if ($provider->driver === 'openai_compatible') {
-                $models = collect($response->json('data', []))
-                    ->pluck('id')
-                    ->filter(fn ($id) => is_string($id) && trim($id) !== '')
-                    ->map(fn ($id) => trim($id))
+                $payload = $response->json();
+                $candidates = [];
+
+                if (is_array($payload) && array_is_list($payload)) {
+                    $candidates = $payload;
+                } elseif (is_array($payload)) {
+                    $candidates = is_array($payload['data'] ?? null)
+                        ? $payload['data']
+                        : (is_array($payload['models'] ?? null) ? $payload['models'] : []);
+                }
+
+                $models = collect($candidates)
+                    ->map(function ($item): string {
+                        if (is_string($item)) {
+                            return trim($item);
+                        }
+
+                        if (! is_array($item)) {
+                            return '';
+                        }
+
+                        $identifier = $item['id'] ?? $item['model'] ?? $item['name'] ?? '';
+
+                        return is_string($identifier) ? trim($identifier) : '';
+                    })
+                    ->filter()
                     ->unique()
                     ->values()
                     ->all();
