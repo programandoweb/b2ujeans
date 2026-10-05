@@ -1,10 +1,28 @@
 import { Injectable } from "@nestjs/common";
 
+export type RuntimeAiModel = {
+  id: number;
+  name: string;
+  model_identifier: string;
+  provider: {
+    id: number;
+    name: string;
+    code: string;
+    driver: "gemini" | "openai_compatible" | "anthropic";
+    base_url: string;
+    api_key: string | null;
+    timeout_seconds: number;
+    verify_tls: boolean;
+  };
+};
+
 type AgentCredentials = {
   agent_id: string;
   provider: "gemini";
   model: string;
   api_key: string | null;
+  primary: RuntimeAiModel | null;
+  fallback: RuntimeAiModel | null;
 };
 
 @Injectable()
