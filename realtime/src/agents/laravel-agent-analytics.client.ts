@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 export class LaravelAgentAnalyticsClient {
   async log(agentId:string, payload:{
     request_id?:string;
+    session_id?:number;
     question:string;
     answer?:string;
     status:string;
