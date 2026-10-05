@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\AgentSetting;
 use App\Models\AiModel;
+use App\Models\AiProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -108,41 +109,49 @@ class AgentSettingController extends Controller
             return null;
         }
 
+        $provider = $model->provider ?? AiProvider::query()->find($model->ai_provider_id);
+
         return [
             'id' => (int) $model->id,
             'name' => $model->name,
             'code' => $model->code,
             'model_identifier' => $model->model_identifier,
-            'provider' => $model->provider ? [
-                'id' => (int) $model->provider->id,
-                'name' => $model->provider->name,
-                'code' => $model->provider->code,
-                'driver' => $model->provider->driver,
+            'provider' => $provider ? [
+                'id' => (int) $provider->id,
+                'name' => $provider->name,
+                'code' => $provider->code,
+                'driver' => $provider->driver,
             ] : null,
         ];
     }
 
     private function serializeRuntimeModel(?AiModel $model): ?array
     {
-        if (! $model || ! $model->is_active || ! $model->provider || ! $model->provider->is_active) {
+        if (! $model || ! $model->is_active) {
             return null;
         }
 
-        $credentials = $model->provider->credentials ?? [];
+        $provider = $model->provider ?? AiProvider::query()->find($model->ai_provider_id);
+
+        if (! $provider || ! $provider->is_active) {
+            return null;
+        }
+
+        $credentials = $provider->credentials ?? [];
 
         return [
             'id' => (int) $model->id,
             'name' => $model->name,
             'model_identifier' => $model->model_identifier,
             'provider' => [
-                'id' => (int) $model->provider->id,
-                'name' => $model->provider->name,
-                'code' => $model->provider->code,
-                'driver' => $model->provider->driver,
-                'base_url' => $model->provider->base_url,
+                'id' => (int) $provider->id,
+                'name' => $provider->name,
+                'code' => $provider->code,
+                'driver' => $provider->driver,
+                'base_url' => $provider->base_url,
                 'api_key' => $credentials['api_key'] ?? null,
-                'timeout_seconds' => (int) $model->provider->timeout_seconds,
-                'verify_tls' => (bool) $model->provider->verify_tls,
+                'timeout_seconds' => (int) $provider->timeout_seconds,
+                'verify_tls' => (bool) $provider->verify_tls,
             ],
         ];
     }
