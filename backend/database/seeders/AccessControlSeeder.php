@@ -39,8 +39,18 @@ class AccessControlSeeder extends Seeder
         $root = Role::findOrCreate('root', 'api');
         $admin = Role::findOrCreate('admin', 'api');
 
-        $root->syncPermissions(Permission::where('guard_name', 'api')->get());
-        $admin->syncPermissions(Permission::where('guard_name', 'api')->get());
+        $allPermissions = Permission::where('guard_name', 'api')->get();
+        $root->syncPermissions($allPermissions);
+
+        $adminDefaults = $allPermissions->reject(
+            fn (Permission $permission) => in_array($permission->name, ['heroes.view', 'heroes.manage'], true)
+        );
+
+        if ($admin->permissions()->count() === 0) {
+            $admin->syncPermissions($adminDefaults);
+        } else {
+            $admin->givePermissionTo($adminDefaults);
+        }
 
         $rootUser = User::query()->firstOrCreate(
             ['email' => 'lic.jorgemendez@gmail.com'],
