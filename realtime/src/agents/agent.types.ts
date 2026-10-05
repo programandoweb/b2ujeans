@@ -17,6 +17,7 @@ export type AgentConversationMessage = {
 export type AgentMessageInput = {
   message: string;
   requestId?: string;
+  sessionId?: number;
   history?: AgentConversationMessage[];
 };
 
