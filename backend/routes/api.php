@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AgentSettingController;
 use App\Http\Controllers\Api\V1\AgentKnowledgeController;
 use App\Http\Controllers\Api\V1\AgentAnalyticsController;
+use App\Http\Controllers\Api\V1\AgentConversationController;
 use App\Http\Controllers\Api\V1\InternalAgentKnowledgeController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\PostController;
@@ -58,6 +59,9 @@ Route::prefix('v1')->group(function (): void {
         Route::get('deployments', [DeploymentController::class, 'index'])->middleware('permission:deployments.view');
         Route::get('agents/dashboard', [AgentAnalyticsController::class, 'dashboard'])->middleware('permission:agents.view');
         Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show'])->middleware('permission:agents.view');
+        Route::get('agents/{agent}/sessions/latest', [AgentConversationController::class, 'latest'])->middleware('permission:agents.view');
+        Route::post('agents/{agent}/sessions', [AgentConversationController::class, 'store'])->middleware('permission:agents.view');
+        Route::post('agents/{agent}/sessions/{session}/messages', [AgentConversationController::class, 'storeMessage'])->middleware('permission:agents.view');
         Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update'])->middleware('permission:agents.manage');
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware(['permission:deployments.manage', 'throttle:2,1']);
 
