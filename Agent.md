@@ -486,3 +486,11 @@ El agente `lucia` utiliza `extensions/gaspronal-browser-collector` para recolect
 - Las cinco imágenes generadas por Lucía deben quedar asociadas a la galería del post creado, no únicamente a la trazabilidad interna.
 - Las imágenes de posts se sirven por `/api/post-media/{post}/{filename}`; las nuevas cargas manuales y las imágenes generadas por Lucía se copian a almacenamiento público de posts.
 - La migración de backfill debe incorporar a la galería las imágenes de corridas de Lucía ya completadas cuando sus archivos originales aún existan.
+
+## 23. Navegación pública del home
+
+- El home utiliza `frontend/src/components/public/PublicHeader.tsx` como navegación pública reutilizable.
+- La navegación debe incluir acceso visible a `/gaspro-notas` tanto en escritorio como en móvil.
+- Al hacer scroll, el header permanece adherido al borde superior y utiliza Motion para suavizar reducción de altura/logo, cambio de fondo y aparición de sombra; no debe producir saltos de layout.
+- Los enlaces de sección del home conservan anclas a productos, servicios, ingeniería, Gaspronal y contacto.
+- El footer del home también debe mantener un acceso directo a Gaspro-notas.
