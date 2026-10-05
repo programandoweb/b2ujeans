@@ -2,7 +2,25 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bot, BookOpen, Boxes, BrainCircuit, CalendarDays, CornerDownRight, ExternalLink, FileCheck2, LayoutDashboard, LogOut, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck, X } from "lucide-react";
+import {
+  Bot,
+  BookOpen,
+  Boxes,
+  BrainCircuit,
+  CalendarDays,
+  CornerDownRight,
+  ExternalLink,
+  FileCheck2,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessagesSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
@@ -13,66 +31,17 @@ type User = {
 };
 
 const navItems = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    exact: true,\n    permission: "dashboard.view",
-  },
-  {
-    href: "/dashboard/catalogo",
-    label: "Productos y servicios",
-    icon: Boxes,
-    exact: false,
-  },
-  {
-    href: "/dashboard/gaspro-notas",
-    label: "Gaspro-notas",
-    icon: BookOpen,
-    exact: false,
-  },
-  {
-    href: "/dashboard/agentes",
-    label: "Agentes",
-    icon: Bot,
-    exact: false,
-  },
-  {
-    href: "/dashboard/ia",
-    label: "Proveedores IA",
-    icon: BrainCircuit,
-    exact: false,
-  },
-  {
-    href: "/dashboard/canales",
-    label: "Canales",
-    icon: MessagesSquare,
-    exact: false,
-  },
-  {
-    href: "/dashboard/comercial/propuestas",
-    label: "Propuestas",
-    icon: FileCheck2,
-    exact: false,
-  },
-  {
-    href: "/dashboard/comercial/citas",
-    label: "Citas",
-    icon: CalendarDays,
-    exact: false,
-  },
-  {
-    href: "/dashboard/seo/redirecciones",
-    label: "Redirecciones 301",
-    icon: CornerDownRight,
-    exact: false,
-  },
-  {
-    href: "/dashboard/configuracion",
-    label: "Configuración",
-    icon: Settings,
-    exact: false,
-  },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true, permission: "dashboard.view" },
+  { href: "/dashboard/catalogo", label: "Productos y servicios", icon: Boxes, exact: false, permission: "catalog.view" },
+  { href: "/dashboard/gaspro-notas", label: "Gaspro-notas", icon: BookOpen, exact: false, permission: "content.view" },
+  { href: "/dashboard/agentes", label: "Agentes", icon: Bot, exact: false, permission: "agents.view" },
+  { href: "/dashboard/ia", label: "Proveedores IA", icon: BrainCircuit, exact: false, permission: "ai.view" },
+  { href: "/dashboard/canales", label: "Canales", icon: MessagesSquare, exact: false, permission: "channels.view" },
+  { href: "/dashboard/comercial/propuestas", label: "Propuestas", icon: FileCheck2, exact: false, permission: "commercial.quotes.view" },
+  { href: "/dashboard/comercial/citas", label: "Citas", icon: CalendarDays, exact: false, permission: "commercial.appointments.view" },
+  { href: "/dashboard/seo/redirecciones", label: "Redirecciones 301", icon: CornerDownRight, exact: false, permission: "seo.view" },
+  { href: "/dashboard/configuracion", label: "Configuración", icon: Settings, exact: false, permission: "deployments.view" },
+  { href: "/dashboard/seguridad", label: "Usuarios y roles", icon: ShieldCheck, exact: false, permission: "security.users.view" },
 ] as const;
 
 export function DashboardShell({ children, user }: { children: React.ReactNode; user: User }) {
@@ -99,6 +68,8 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
     router.replace("/login");
     router.refresh();
   }
+
+  const visibleNavItems = navItems.filter((item) => user.permissions.includes(item.permission));
 
   return (
     <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]">
@@ -165,7 +136,7 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
           </p>
 
           <div className="space-y-1">
-            {navItems.filter((item) => user.permissions.includes(item.permission)).map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const active = item.exact
                 ? pathname === item.href
