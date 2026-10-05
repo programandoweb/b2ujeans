@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { KeyRound, Pencil, Plus, Save, Send, ShieldCheck, Trash2, UserCog, Users } from "lucide-react";
+import { KeyRound, LogIn, Pencil, Plus, Save, Send, ShieldCheck, Trash2, UserCog, Users } from "lucide-react";
 
 type UserRow = {
   id: number;
@@ -11,6 +11,7 @@ type UserRow = {
   permissions: string[];
   effective_permissions: string[];
   protected: boolean;
+  can_impersonate: boolean;
 };
 
 type RoleRow = {
@@ -62,6 +63,7 @@ export default function SecurityPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [invitingUserId, setInvitingUserId] = useState<number | null>(null);
+  const [impersonatingUserId, setImpersonatingUserId] = useState<number | null>(null);
 
   const grouped = useMemo(() => {
     return permissions.reduce<Record<string, string[]>>((acc, permission) => {
@@ -129,6 +131,27 @@ export default function SecurityPage() {
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No fue posible guardar el rol.");
+    }
+  }
+
+  async function impersonateUser(user: UserRow) {
+    if (!confirm(`¿Iniciar sesión como ${user.name}? Podrás volver a tu cuenta root desde el menú lateral.`)) return;
+
+    setMessage("");
+    setImpersonatingUserId(user.id);
+
+    try {
+      const response = await fetch(`/api/auth/impersonate/${user.id}`, { method: "POST" });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.message ?? "No fue posible iniciar sesión como este usuario.");
+      }
+
+      window.location.assign("/dashboard");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No fue posible iniciar la suplantación.");
+      setImpersonatingUserId(null);
     }
   }
 
@@ -210,6 +233,17 @@ export default function SecurityPage() {
                     <td className="px-4 py-4">{user.effective_permissions.length}</td>
                     <td className="px-4 py-4">
                       <div className="flex justify-end gap-2">
+                        {user.can_impersonate && (
+                          <button
+                            onClick={() => void impersonateUser(user)}
+                            disabled={impersonatingUserId === user.id}
+                            className="grid size-9 place-items-center rounded-lg border border-[var(--border)] text-[var(--accent)] transition hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
+                            title={impersonatingUserId === user.id ? "Iniciando sesión…" : "Iniciar sesión como este usuario"}
+                            aria-label={`Iniciar sesión como ${user.name}`}
+                          >
+                            <LogIn size={16}/>
+                          </button>
+                        )}
                         <button
                           onClick={() => void inviteUser(user)}
                           disabled={invitingUserId === user.id}
