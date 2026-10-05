@@ -50,6 +50,23 @@ class CatalogController extends Controller
         );
     }
 
+    public function publicShow(string $slug): JsonResponse
+    {
+        $item = CatalogItem::query()
+            ->with('category:id,name,slug')
+            ->where('type', 'product')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('slug', $slug)
+            ->where(function ($query): void {
+                $query->whereNull('category_id')
+                    ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('is_active', true));
+            })
+            ->firstOrFail();
+
+        return response()->json(['data' => $item]);
+    }
+
     public function publicCategories(): JsonResponse
     {
         return response()->json([
