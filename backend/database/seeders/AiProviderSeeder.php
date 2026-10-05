@@ -14,7 +14,8 @@ class AiProviderSeeder extends Seeder
             [
                 'name' => 'LM Studio',
                 'driver' => 'openai_compatible',
-                'base_url' => env('LM_STUDIO_BASE_URL', 'http://host.docker.internal:1234/v1'),
+                'base_url' => env('LM_STUDIO_BASE_URL', 'http://10.8.0.2:1234/v1'),
+                'credentials' => null,
                 'timeout_seconds' => 120,
                 'max_retries' => 1,
                 'verify_tls' => false,
