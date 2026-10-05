@@ -103,7 +103,7 @@ compose exec -T backend php artisan optimize
 
 echo "[backend] Corrigiendo permisos persistentes..."
 compose exec -T -u root backend sh -lc \
-  'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache'
+  'mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache public/images/uploads/agente-contenido && chown -R www-data:www-data storage bootstrap/cache public/images/uploads && chmod -R ug+rwX storage bootstrap/cache public/images/uploads'
 
 echo "[scheduler] Publicando scheduler de agentes..."
 compose up -d --no-deps scheduler
