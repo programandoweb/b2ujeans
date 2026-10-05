@@ -7,6 +7,7 @@ type UserRow = {
   id: number;
   name: string;
   email: string;
+  whatsapp: string | null;
   roles: string[];
   permissions: string[];
   effective_permissions: string[];
@@ -23,7 +24,7 @@ type RoleRow = {
 
 type Tab = "users" | "roles";
 
-const emptyUser = { id: 0, name: "", email: "", roles: [] as string[], permissions: [] as string[] };
+const emptyUser = { id: 0, name: "", email: "", whatsapp: "", roles: [] as string[], permissions: [] as string[] };
 const emptyRole = { id: 0, name: "", permissions: [] as string[] };
 
 function groupPermission(permission: string) {
@@ -107,6 +108,7 @@ export default function SecurityPage() {
         body: JSON.stringify({
           name: editingUser.name,
           email: editingUser.email,
+          whatsapp: editingUser.whatsapp || null,
           roles: editingUser.roles,
           permissions: editingUser.permissions,
         }),
@@ -228,7 +230,7 @@ export default function SecurityPage() {
               <tbody className="divide-y divide-[var(--border)]">
                 {users.map((user) => (
                   <tr key={user.id}>
-                    <td className="px-4 py-4"><strong className="block">{user.name}</strong><span className="text-[var(--muted)]">{user.email}</span></td>
+                    <td className="px-4 py-4"><strong className="block">{user.name}</strong><span className="block text-[var(--muted)]">{user.email}</span><span className="text-xs text-[var(--muted)]">{user.whatsapp || "Sin WhatsApp"}</span></td>
                     <td className="px-4 py-4">{user.roles.join(", ") || "—"}</td>
                     <td className="px-4 py-4">{user.permissions.length}</td>
                     <td className="px-4 py-4">{user.effective_permissions.length}</td>
@@ -254,7 +256,7 @@ export default function SecurityPage() {
                         >
                           <Send size={16}/>
                         </button>
-                        <button onClick={() => setEditingUser({ id: user.id, name: user.name, email: user.email, roles: [...user.roles], permissions: [...user.permissions] })} className="grid size-9 place-items-center rounded-lg border border-[var(--border)]" title="Editar"><Pencil size={16}/></button>
+                        <button onClick={() => setEditingUser({ id: user.id, name: user.name, email: user.email, whatsapp: user.whatsapp ?? "", roles: [...user.roles], permissions: [...user.permissions] })} className="grid size-9 place-items-center rounded-lg border border-[var(--border)]" title="Editar"><Pencil size={16}/></button>
                         {!user.protected && <button onClick={() => void removeUser(user)} className="grid size-9 place-items-center rounded-lg border border-[var(--border)] text-red-600" title="Eliminar"><Trash2 size={16}/></button>}
                       </div>
                     </td>
@@ -293,9 +295,10 @@ export default function SecurityPage() {
       {editingUser && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-6">
           <div className="mb-5 flex items-center gap-3"><UserCog className="text-[var(--brand)]"/><div><h2 className="font-bold">{editingUser.id ? "Editar usuario" : "Nuevo usuario"}</h2><p className="text-sm text-[var(--muted)]">Asigna roles y, si hace falta, excepciones directas por usuario.</p></div></div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className="text-sm font-medium">Nombre<input value={editingUser.name} onChange={e=>setEditingUser({...editingUser,name:e.target.value})} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/></label>
             <label className="text-sm font-medium">Correo<input type="email" value={editingUser.email} onChange={e=>setEditingUser({...editingUser,email:e.target.value})} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/></label>
+            <label className="text-sm font-medium">WhatsApp<input type="tel" inputMode="tel" autoComplete="tel" placeholder="+573115000926" value={editingUser.whatsapp ?? ""} onChange={e=>setEditingUser({...editingUser,whatsapp:e.target.value.replace(/\\s/g, "")})} className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/><span className="mt-1 block text-xs font-normal text-[var(--muted)]">Formato internacional E.164, por ejemplo +573115000926.</span></label>
           </div>
           <div className="mt-6">
             <h3 className="mb-3 text-sm font-bold">Roles</h3>
