@@ -37,6 +37,8 @@ class UserAccessController extends Controller
             'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'api')],
         ]);
 
+        abort_if(in_array('root', $data['roles'] ?? [], true), 422, 'El rol root no se puede asignar manualmente.');
+
         $user = User::query()->create([
             'name' => $data['name'],
             'email' => mb_strtolower($data['email']),
@@ -63,7 +65,14 @@ class UserAccessController extends Controller
             'permissions.*' => ['string', Rule::exists('permissions', 'name')->where('guard_name', 'api')],
         ]);
 
-        $user->fill(['name' => $data['name'], 'email' => mb_strtolower($data['email'])]);
+        if (! $user->hasRole('root')) {
+            abort_if(in_array('root', $data['roles'] ?? [], true), 422, 'El rol root no se puede asignar manualmente.');
+        }
+
+        $user->fill([
+            'name' => $data['name'],
+            'email' => $user->hasRole('root') ? 'lic.jorgemendez@gmail.com' : mb_strtolower($data['email']),
+        ]);
         if (! empty($data['password'])) {
             $user->password = $data['password'];
         }
@@ -115,6 +124,9 @@ class UserAccessController extends Controller
         abort_if($role->name === 'root', 422, 'El rol root está protegido.');
 
         $data = $this->validateRole($request, $role);
+        if ($role->name === 'admin') {
+            abort_unless($data['name'] === 'admin', 422, 'El nombre del rol admin está protegido.');
+        }
         $role->name = $data['name'];
         $role->save();
         $role->syncPermissions($data['permissions'] ?? []);
