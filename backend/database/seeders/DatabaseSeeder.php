@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->runOnce(LegacyProductsSeeder::class);
         $this->runOnce(LegacyServicesSeeder::class);
         $this->runOnce(AiProviderSeeder::class);
+        $this->runOnce(GeminiProviderSeeder::class);
 
         $email = trim((string) env('ADMIN_EMAIL', ''));
         $password = (string) env('ADMIN_PASSWORD', '');
