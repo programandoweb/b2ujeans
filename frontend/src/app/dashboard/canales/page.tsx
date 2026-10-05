@@ -33,6 +33,7 @@ type RuntimeProvider=Provider&{
   runtime_status:"disconnected"|"connecting"|"qr_pending"|"connected"|"ready"|"error";
   phone_number?:string;
   display_name?:string;
+  qr_data_url?:string;
   last_error?:string;
 };
 type PaginationMeta={
@@ -241,16 +242,27 @@ export default function ChannelsPage(){
                 <td className="px-5 py-4 text-sm">{provider.priority}</td>
                 <td className="px-5 py-4 text-sm">{provider.is_fallback?"Fallback":"Principal"}</td>
                 <td className="px-5 py-4">
-                  <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    connected
-                      ?"bg-emerald-50 text-emerald-700"
-                      :status==="error"
-                        ?"bg-red-50 text-red-700"
-                        :"bg-slate-100 text-slate-600"
-                  }`}>
-                    {connected?<FiWifi/>:<FiWifiOff/>}
-                    {status}
-                  </span>
+                  <div className="space-y-3">
+                    <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      connected
+                        ?"bg-emerald-50 text-emerald-700"
+                        :status==="error"
+                          ?"bg-red-50 text-red-700"
+                          :"bg-slate-100 text-slate-600"
+                    }`}>
+                      {connected?<FiWifi/>:<FiWifiOff/>}
+                      {status}
+                    </span>
+                    {status==="qr_pending"&&runtimeProvider?.qr_data_url&&(
+                      <div className="w-fit rounded-xl border border-[var(--border)] bg-white p-3">
+                        <img src={runtimeProvider.qr_data_url} alt={"QR para conectar "+provider.name+" con WhatsApp"} className="size-48 max-w-full"/>
+                        <p className="mt-2 max-w-48 text-xs leading-5 text-[var(--muted)]">Escanéalo desde WhatsApp → Dispositivos vinculados.</p>
+                      </div>
+                    )}
+                    {status==="qr_pending"&&!runtimeProvider?.qr_data_url&&(
+                      <p className="text-xs text-amber-700">Generando código QR…</p>
+                    )}
+                  </div>
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-2">
