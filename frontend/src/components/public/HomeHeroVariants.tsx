@@ -15,6 +15,31 @@ import {
 const whatsappHref =
   "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
 
+const heroBackgroundOne =
+  "https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web.jpg?1791214773376";
+const heroBackgroundTwo =
+  "https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web-2.jpg?1791214773955";
+
+function HeroBackground({
+  src,
+  overlay = "bg-[#082237]/75",
+  position = "center",
+}: {
+  src: string;
+  overlay?: string;
+  position?: string;
+}) {
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div
+        className="absolute inset-0 bg-cover bg-no-repeat"
+        style={{ backgroundImage: `url("${src}")`, backgroundPosition: position }}
+      />
+      <div className={"absolute inset-0 " + overlay} />
+    </div>
+  );
+}
+
 const services = [
   {
     icon: Hammer,
@@ -75,7 +100,8 @@ export default function HomeHeroVariants({ option }: { option: number }) {
 
   if (option === 2) {
     return (
-      <section className="relative border-b border-slate-200 bg-[#f7fafc]">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-[#f7fafc]">
+        <HeroBackground src={heroBackgroundTwo} overlay="bg-white/88" position="center" />
         {selector}
         <div className="mx-auto grid max-w-[1440px] items-stretch pt-14 lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
           <div className="flex items-center px-4 py-14 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
@@ -153,6 +179,7 @@ export default function HomeHeroVariants({ option }: { option: number }) {
   if (option === 3) {
     return (
       <section className="relative overflow-hidden border-b border-slate-200 bg-white">
+        <HeroBackground src={heroBackgroundOne} overlay="bg-white/90" position="center 35%" />
         {selector}
         <div className="mx-auto max-w-[1440px] px-4 pb-14 pt-24 sm:px-6 sm:pb-20 lg:px-10 lg:pb-24">
           <div className="grid items-end gap-10 lg:grid-cols-[1.12fr_0.88fr]">
@@ -218,8 +245,9 @@ export default function HomeHeroVariants({ option }: { option: number }) {
   if (option === 4) {
     return (
       <section className="relative overflow-hidden bg-[#0b2b40] text-white">
+        <HeroBackground src={heroBackgroundTwo} overlay="bg-[#082237]/80" position="center" />
         {selector}
-        <div className="absolute inset-y-0 right-0 hidden w-[42%] bg-[var(--brand)] lg:block" />
+        <div className="absolute inset-y-0 right-0 hidden w-[42%] bg-[var(--brand)]/70 lg:block" />
         <div className="absolute -left-24 top-32 size-72 rounded-full border-[70px] border-white/[0.035]" />
 
         <div className="relative mx-auto grid min-h-[720px] max-w-[1440px] items-center gap-10 px-4 pb-14 pt-24 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:px-10">
@@ -265,7 +293,8 @@ export default function HomeHeroVariants({ option }: { option: number }) {
 
   if (option === 5) {
     return (
-      <section className="relative border-b border-slate-200 bg-[#f6f9fb]">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-[#f6f9fb]">
+        <HeroBackground src={heroBackgroundOne} overlay="bg-[#edf4f8]/88" position="center 40%" />
         {selector}
         <div className="mx-auto max-w-[1440px] px-4 pb-16 pt-24 sm:px-6 lg:px-10 lg:pb-24">
           <div className="rounded-[2.5rem] bg-white p-6 shadow-[0_30px_80px_rgba(13,43,64,0.10)] sm:p-10 lg:p-14">
@@ -319,6 +348,7 @@ export default function HomeHeroVariants({ option }: { option: number }) {
 
   return (
     <section className="relative overflow-hidden bg-[#0b2b40] text-white">
+      <HeroBackground src={heroBackgroundOne} overlay="bg-[#082237]/78" position="center" />
       {selector}
       <div className="absolute inset-0">
         <div className="absolute right-[-8%] top-[-18%] size-[620px] rounded-full border-[120px] border-white/[0.035]" />
