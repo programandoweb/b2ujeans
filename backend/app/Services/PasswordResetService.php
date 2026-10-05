@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\Auth\UserInvitationNotification;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
@@ -20,6 +21,12 @@ class PasswordResetService
                 'exception' => $exception::class,
             ]);
         }
+    }
+
+    public function sendInvitation(User $user): void
+    {
+        $token = Password::broker()->createToken($user);
+        $user->notify(new UserInvitationNotification($token));
     }
 
     public function reset(string $email, string $token, string $password): bool
