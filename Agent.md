@@ -425,3 +425,22 @@ Reglas obligatorias para agentes de IA que realicen cambios y push a `main`:
 - este flujo no usa GitHub Actions y no debe introducir dependencia de créditos de ejecución de GitHub.
 
 El botón manual de `/dashboard/configuracion` continúa disponible y es la vía de recuperación si el enlace del correo no puede utilizarse.
+
+
+## 20. Impersonación de usuarios
+
+La función **Iniciar sesión como usuario** es una capacidad administrativa excepcional y queda restringida exclusivamente al rol `root`.
+
+Reglas obligatorias:
+
+- solo una sesión autenticada cuyo usuario tenga el rol `root` puede solicitar impersonación;
+- el control debe validarse siempre en backend; ocultar el botón en frontend no es una medida de seguridad suficiente;
+- no se permite impersonar la propia cuenta root ni otra cuenta con rol `root`;
+- al iniciar la impersonación, el JWT original del root debe conservarse únicamente en una cookie `HttpOnly`, `Secure` en producción y `SameSite=Lax`;
+- la cookie activa debe pasar a representar al usuario objetivo, de modo que todas las Policies, Gates, roles y permisos se evalúen exactamente como para ese usuario;
+- mientras exista impersonación debe mostrarse una acción visible **Volver a cuenta root** en el dashboard;
+- no se permiten impersonaciones encadenadas;
+- cerrar sesión durante una impersonación debe eliminar tanto la sesión activa como la sesión root preservada;
+- el backend debe registrar el inicio de la impersonación con el identificador del root y del usuario objetivo, sin registrar tokens;
+- nunca se deben exponer JWT, cookies de sesión o credenciales en logs, UI, URLs o correos;
+- esta capacidad no puede extenderse a `admin` ni a permisos configurables sin una decisión explícita del responsable del proyecto.
