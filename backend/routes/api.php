@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\CommercialQuoteController;
 use App\Http\Controllers\Api\V1\CommercialAppointmentController;
 use App\Http\Controllers\Api\V1\JorgeResearchController;
 use App\Http\Controllers\Api\V1\CommunicationProviderController;
+use App\Http\Controllers\Api\V1\AiProviderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -52,6 +53,17 @@ Route::prefix('v1')->group(function (): void {
         Route::get('agents/{agent}/settings', [AgentSettingController::class, 'show']);
         Route::put('agents/{agent}/settings', [AgentSettingController::class, 'update']);
         Route::post('deployments', [DeploymentController::class, 'store'])->middleware('throttle:2,1');
+
+        Route::get('ai/providers', [AiProviderController::class, 'providers']);
+        Route::post('ai/providers', [AiProviderController::class, 'storeProvider']);
+        Route::put('ai/providers/{aiProvider}', [AiProviderController::class, 'updateProvider']);
+        Route::delete('ai/providers/{aiProvider}', [AiProviderController::class, 'destroyProvider']);
+        Route::post('ai/providers/{aiProvider}/test', [AiProviderController::class, 'testProvider']);
+
+        Route::get('ai/models', [AiProviderController::class, 'models']);
+        Route::post('ai/models', [AiProviderController::class, 'storeModel']);
+        Route::put('ai/models/{aiModel}', [AiProviderController::class, 'updateModel']);
+        Route::delete('ai/models/{aiModel}', [AiProviderController::class, 'destroyModel']);
 
         Route::get('communications/providers', [CommunicationProviderController::class, 'index']);
         Route::get('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'show']);
