@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { AgentRegistryService } from "./agent-registry.service";
 import { GeminiService, type GeminiContent, type GeminiFunctionDeclaration } from "./gemini.service";
+import { OpenAiCompatibleService } from "./openai-compatible.service";
+import type { RuntimeAiModel } from "./laravel-agent-settings.client";
 import { LaravelAgentSettingsClient } from "./laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./laravel-commercial.client";
 import { LaravelKnowledgeClient } from "./laravel-knowledge.client";
@@ -119,6 +121,7 @@ export class AgentRuntimeService {
     private readonly registry: AgentRegistryService,
     private readonly settings: LaravelAgentSettingsClient,
     private readonly gemini: GeminiService,
+    private readonly openAiCompatible: OpenAiCompatibleService,
     private readonly commercial: LaravelCommercialClient,
     private readonly knowledge: LaravelKnowledgeClient,
     private readonly analytics: LaravelAgentAnalyticsClient,
@@ -135,15 +138,6 @@ export class AgentRuntimeService {
     const requestId = input.requestId?.trim() || randomUUID();
     const credentials = await this.settings.credentials(agent.id);
 
-    if (!credentials.api_key) {
-      return {
-        requestId,
-        agent: { id: agent.id, name: agent.name, role: agent.role },
-        message: `${agent.name} todavía no tiene una API key de Gemini configurada. Guárdala en la configuración del agente para comenzar a conversar.`,
-        status: "configuration_required",
-      };
-    }
-
     const system = [
       agent.prompt,
       agent.memory ? "\n## Memoria\n" + agent.memory : "",
@@ -152,6 +146,36 @@ export class AgentRuntimeService {
     ].join("\n").trim();
 
     if (!["claudio", "sofia"].includes(agent.id)) {
+      const routedModels = [credentials.primary, credentials.fallback].filter(
+        (item): item is RuntimeAiModel => Boolean(item),
+      );
+
+      if (routedModels.length) {
+        let lastError: unknown = null;
+
+        for (const routedModel of routedModels) {
+          try {
+            const answer = await this.generateWithRoutedModel(routedModel, system, message);
+            return this.finish(requestId, agent, message, answer, startedAt);
+          } catch (error) {
+            lastError = error;
+          }
+        }
+
+        throw lastError instanceof Error
+          ? lastError
+          : new Error("No fue posible obtener respuesta de los modelos configurados.");
+      }
+
+      if (!credentials.api_key) {
+        return {
+          requestId,
+          agent: { id: agent.id, name: agent.name, role: agent.role },
+          message: `${agent.name} no tiene un modelo principal configurado ni una API key heredada de Gemini.`,
+          status: "configuration_required",
+        };
+      }
+
       const answer = await this.gemini.generate({
         apiKey: credentials.api_key,
         model: credentials.model,
@@ -201,6 +225,31 @@ export class AgentRuntimeService {
     }
 
     throw new Error(`${agent.name} excedió el límite de operaciones de herramienta para este mensaje.`);
+  }
+
+  private async generateWithRoutedModel(
+    model: RuntimeAiModel,
+    system: string,
+    message: string,
+  ): Promise<string> {
+    if (model.provider.driver === "gemini") {
+      if (!model.provider.api_key) {
+        throw new Error(`El proveedor ${model.provider.name} no tiene API key configurada.`);
+      }
+
+      return this.gemini.generate({
+        apiKey: model.provider.api_key,
+        model: model.model_identifier,
+        system,
+        message,
+      });
+    }
+
+    if (model.provider.driver === "openai_compatible") {
+      return this.openAiCompatible.generate({ model, system, message });
+    }
+
+    throw new Error(`El driver ${model.provider.driver} todavía no está habilitado para agentes conversacionales.`);
   }
 
   private async finish(
