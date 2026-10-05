@@ -158,7 +158,7 @@ export class AgentRuntimeService {
     private readonly contentCreator: ContentCreatorService,
   ) {}
 
-  async execute(agentId: string, input: AgentMessageInput): Promise<AgentResponse> {
+  async execute(agentId: string, input: AgentMessageInput, onProgress?: (payload: { requestId: string; agentId: string; message: string }) => void): Promise<AgentResponse> {
     const agent = this.registry.get(agentId);
     if (!agent) throw new NotFoundException("Agente no encontrado.");
 
@@ -176,7 +176,7 @@ export class AgentRuntimeService {
       if (!apiKey) {
         return { requestId, agent: { id: agent.id, name: agent.name, role: agent.role }, message: "Lucía necesita un modelo Gemini configurado con API key.", status: "configuration_required" };
       }
-      const answer = await this.contentCreator.execute({ topic: message, apiKey, textModel });
+      const answer = await this.contentCreator.execute({ topic: message, apiKey, textModel, progress: progressMessage => onProgress?.({ requestId, agentId: agent.id, message: progressMessage }) });
       return this.finish(requestId, agent, message, answer, startedAt, input.sessionId);
     }
 
