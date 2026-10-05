@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\AgentInteraction;
+use App\Models\AgentConversationMessage;
+use App\Models\AgentConversationSession;
 use App\Models\AgentKnowledgeEntry;
 use App\Models\AgentResearchRun;
 use App\Models\AgentSetting;
@@ -143,16 +145,58 @@ class AgentAnalyticsController extends Controller
 
         $data = $request->validate([
             'request_id' => ['nullable', 'uuid'],
+            'session_id' => ['nullable', 'integer', 'exists:agent_conversation_sessions,id'],
             'question' => ['required', 'string'],
             'answer' => ['nullable', 'string'],
             'status' => ['required', 'string', 'max:50'],
             'duration_ms' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $interaction = AgentInteraction::query()->create([
-            ...$data,
-            'agent_id' => strtolower(trim($agent)),
-        ]);
+        $agent = strtolower(trim($agent));
+        $sessionId = $data['session_id'] ?? null;
+        unset($data['session_id']);
+
+        $interaction = DB::transaction(function () use ($data, $agent, $sessionId): AgentInteraction {
+            $interaction = AgentInteraction::query()->create([
+                ...$data,
+                'agent_id' => $agent,
+            ]);
+
+            if ($sessionId) {
+                $session = AgentConversationSession::query()
+                    ->whereKey($sessionId)
+                    ->where('agent_id', $agent)
+                    ->first();
+
+                if ($session) {
+                    if (! empty($data['request_id'])) {
+                        AgentConversationMessage::query()->firstOrCreate(
+                            [
+                                'session_id' => $session->id,
+                                'request_id' => $data['request_id'],
+                                'role' => 'user',
+                            ],
+                            ['content' => $data['question']],
+                        );
+                    }
+
+                    if (filled($data['answer'])) {
+                        AgentConversationMessage::query()->firstOrCreate(
+                            [
+                                'session_id' => $session->id,
+                                'request_id' => $data['request_id'] ?? null,
+                                'role' => 'assistant',
+                            ],
+                            ['content' => $data['answer']],
+                        );
+                    }
+
+                    $session->forceFill(['last_message_at' => now()])->save();
+                }
+            }
+
+            return $interaction;
+        });
 
         return response()->json(['data' => $interaction], 201);
     }
