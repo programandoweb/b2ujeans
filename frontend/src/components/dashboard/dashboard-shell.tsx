@@ -17,6 +17,7 @@ import {
   MessagesSquare,
   PanelLeftClose,
   PanelLeftOpen,
+  RotateCcw,
   Settings,
   ShieldCheck,
   X,
@@ -44,7 +45,7 @@ const navItems = [
   { href: "/dashboard/seguridad", label: "Usuarios y roles", icon: ShieldCheck, exact: false, permission: "security.users.view" },
 ] as const;
 
-export function DashboardShell({ children, user }: { children: React.ReactNode; user: User }) {
+export function DashboardShell({ children, user, impersonating = false }: { children: React.ReactNode; user: User; impersonating?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -61,6 +62,13 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
       window.localStorage.setItem("gaspronal-sidebar-collapsed", String(next));
       return next;
     });
+  }
+
+  async function stopImpersonation() {
+    const response = await fetch("/api/auth/impersonation/stop", { method: "POST" });
+    if (!response.ok) return;
+    router.replace("/dashboard/seguridad");
+    router.refresh();
   }
 
   async function logout() {
@@ -166,6 +174,20 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
         </nav>
 
         <div className="border-t border-white/10 p-3">
+          {impersonating && (
+            <button
+              onClick={stopImpersonation}
+              title={collapsed ? "Volver a la cuenta root" : undefined}
+              className={[
+                "mb-2 flex min-h-11 w-full items-center rounded-xl bg-amber-400 px-3 text-sm font-bold text-amber-950 transition hover:bg-amber-300",
+                collapsed ? "lg:justify-center lg:px-0" : "gap-3",
+              ].join(" ")}
+            >
+              <RotateCcw size={18} className="shrink-0" />
+              <span className={collapsed ? "lg:hidden" : ""}>Volver a cuenta root</span>
+            </button>
+          )}
+
           <div
             className={[
               "mb-2 flex items-center rounded-xl py-3",
