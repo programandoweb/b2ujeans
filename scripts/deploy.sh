@@ -132,7 +132,7 @@ echo "[health] Realtime..."
 compose exec -T realtime node -e "fetch('http://127.0.0.1:4100/health').then(async r=>{if(!r.ok)process.exit(1);console.log(await r.text())}).catch(()=>process.exit(1))"
 
 echo "[health] Frontend..."
-compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/login
+compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/
 
 echo "[deploy] Estado de servicios:"
 compose ps
