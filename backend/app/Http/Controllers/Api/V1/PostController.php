@@ -15,6 +15,42 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PostController extends Controller
 {
+    public function publicIndex(Request $request): JsonResponse
+    {
+        return response()->json(
+            Post::query()
+                ->with('category:id,name,slug')
+                ->where('status', 'published')
+                ->whereNotNull('published_at')
+                ->whereHas('category', fn ($query) => $query->where('is_active', true))
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = trim((string) $request->string('search'));
+                    $like = '%'.$search.'%';
+                    $query->where(function ($searchQuery) use ($like): void {
+                        $searchQuery
+                            ->where('title', 'like', $like)
+                            ->orWhere('excerpt', 'like', $like)
+                            ->orWhere('content', 'like', $like);
+                    });
+                })
+                ->orderByDesc('published_at')
+                ->paginate(min(max($request->integer('per_page', 12), 1), 48))
+        );
+    }
+
+    public function publicShow(string $slug): JsonResponse
+    {
+        $post = Post::query()
+            ->with('category:id,name,slug')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('slug', $slug)
+            ->whereHas('category', fn ($query) => $query->where('is_active', true))
+            ->firstOrFail();
+
+        return response()->json(['data' => $post]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         return response()->json(
