@@ -104,6 +104,7 @@ Obligatorio:
 - cierre de sesión;
 - recuperación de acceso segura;
 - no filtrar secretos o datos administrativos en bundles públicos.
+- los correos y notificaciones no deben generar URLs de assets usando hostnames internos de Docker; toda URL pública del backend debe salir de `PUBLIC_BACKEND_URL` y ser configurable por entorno.
 
 El dashboard administrará progresivamente:
 
