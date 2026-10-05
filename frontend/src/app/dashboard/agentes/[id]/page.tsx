@@ -342,8 +342,6 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
             </div>
           </div>
         </div>
-        {agent?.role&&<p className="mt-3 text-sm text-[var(--muted)]">{agent.role}</p>}
-        {socketMessage&&<p className="mt-2 text-xs text-[var(--muted)]">{socketMessage}</p>}
       </div>
 
       <Link href="/dashboard/agentes" className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-medium">
@@ -355,7 +353,8 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       <div className="flex min-h-[640px] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
         <div className="border-b border-[var(--border)] px-5 py-4">
           <h2 className="font-bold">Chat con {name}</h2>
-          <p className="mt-1 text-xs text-[var(--muted)]">La conversación usa Socket.IO cuando está disponible y cambia automáticamente a REST si falla.</p>
+          {agent?.role&&<p className="mt-1 text-sm text-[var(--muted)]">{agent.role}</p>}
+          {socketMessage&&<p className="mt-1 text-xs text-[var(--muted)]">{socketMessage}</p>}
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
