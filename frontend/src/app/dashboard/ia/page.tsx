@@ -47,10 +47,25 @@ type Model = {
 
 type Tab="providers"|"models";
 
-const emptyProvider={
+type ProviderForm = {
+  id?: number;
+  has_credentials?: boolean;
+  code: string;
+  name: string;
+  driver: Provider["driver"];
+  base_url: string;
+  api_key: string;
+  timeout_seconds: number;
+  max_retries: number;
+  verify_tls: boolean;
+  allow_private_network: boolean;
+  is_active: boolean;
+};
+
+const emptyProvider: ProviderForm = {
   code:"",
   name:"",
-  driver:"openai_compatible" as const,
+  driver:"openai_compatible",
   base_url:"",
   api_key:"",
   timeout_seconds:30,
@@ -76,7 +91,7 @@ export default function AiPage(){
   const [models,setModels]=useState<Model[]>([]);
   const [loading,setLoading]=useState(true);
   const [message,setMessage]=useState("");
-  const [providerForm,setProviderForm]=useState<typeof emptyProvider & {id?:number;has_credentials?:boolean} | null>(null);
+  const [providerForm,setProviderForm]=useState<ProviderForm | null>(null);
   const [modelForm,setModelForm]=useState<typeof emptyModel & {id?:number} | null>(null);
   const [saving,setSaving]=useState(false);
 
