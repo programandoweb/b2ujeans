@@ -182,6 +182,60 @@ class AiProviderController extends Controller
         ];
     }
 
+    private function syncOpenAiCompatibleModels(AiProvider $provider, array $identifiers): int
+    {
+        $count = 0;
+
+        foreach ($identifiers as $identifier) {
+            if (! is_string($identifier) || trim($identifier) === '') {
+                continue;
+            }
+
+            $identifier = trim($identifier);
+            $baseCode = Str::slug($provider->code.'-'.$identifier);
+            $code = strlen($baseCode) <= 72
+                ? $baseCode
+                : substr($baseCode, 0, 63).'-'.substr(sha1($identifier), 0, 8);
+
+            $existing = AiModel::query()
+                ->where('ai_provider_id', $provider->id)
+                ->where('model_identifier', $identifier)
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'name' => $existing->name ?: $identifier,
+                    'is_active' => true,
+                    'settings' => [
+                        ...($existing->settings ?? []),
+                        'source' => 'provider_discovery',
+                    ],
+                ]);
+                $count++;
+                continue;
+            }
+
+            if (AiModel::query()->where('code', $code)->exists()) {
+                $code = substr($code, 0, 70).'-'.substr(sha1($provider->id.'|'.$identifier), 0, 8);
+            }
+
+            AiModel::query()->create([
+                'ai_provider_id' => $provider->id,
+                'code' => $code,
+                'name' => $identifier,
+                'model_identifier' => $identifier,
+                'priority' => 100,
+                'capabilities' => ['text'],
+                'settings' => ['source' => 'provider_discovery'],
+                'is_active' => true,
+            ]);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
     private function testConnection(AiProvider $provider): array
     {
         try {
@@ -214,10 +268,25 @@ class AiProviderController extends Controller
                 ];
             }
 
+            $models = [];
+
+            if ($provider->driver === 'openai_compatible') {
+                $models = collect($response->json('data', []))
+                    ->pluck('id')
+                    ->filter(fn ($id) => is_string($id) && trim($id) !== '')
+                    ->map(fn ($id) => trim($id))
+                    ->unique()
+                    ->values()
+                    ->all();
+            }
+
             return [
                 'ok' => true,
-                'message' => 'Conexión verificada correctamente.',
+                'message' => $provider->driver === 'openai_compatible' && count($models) > 0
+                    ? 'Conexión verificada. '.count($models).' modelo(s) detectado(s).'
+                    : 'Conexión verificada correctamente.',
                 'http_status' => $response->status(),
+                'models' => $models,
             ];
         } catch (\Throwable $e) {
             return [
