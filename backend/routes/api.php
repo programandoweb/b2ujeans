@@ -111,6 +111,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('security/users', [UserAccessController::class, 'users'])->middleware('permission:security.users.view');
         Route::post('security/users', [UserAccessController::class, 'storeUser'])->middleware('permission:security.users.manage');
         Route::put('security/users/{user}', [UserAccessController::class, 'updateUser'])->middleware('permission:security.users.manage');
+        Route::post('security/users/{user}/invite', [UserAccessController::class, 'inviteUser'])->middleware(['permission:security.users.manage', 'throttle:6,1']);
         Route::delete('security/users/{user}', [UserAccessController::class, 'destroyUser'])->middleware('permission:security.users.manage');
         Route::get('security/roles', [UserAccessController::class, 'roles'])->middleware('permission:security.roles.view');
         Route::post('security/roles', [UserAccessController::class, 'storeRole'])->middleware('permission:security.roles.manage');
