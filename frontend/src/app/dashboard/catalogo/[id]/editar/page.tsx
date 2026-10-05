@@ -60,6 +60,7 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
   const [primaryImage,setPrimaryImage]=useState("");
   const [galleryMessage,setGalleryMessage]=useState("");
   const [uploading,setUploading]=useState(false);
+  const [activeTab,setActiveTab]=useState<"form"|"gallery">("form");
   const [form,setForm]=useState<CatalogForm>({
     type:"product",
     name:"",
@@ -243,7 +244,39 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
       <p className="mt-2 text-sm text-[var(--muted)]">Compara con la publicación histórica antes de modificar slug, contenido o SEO.</p>
     </header>
 
-    <form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+    <div className="flex gap-2 border-b border-[var(--border)]">
+      <button
+        type="button"
+        onClick={()=>setActiveTab("form")}
+        className={`inline-flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-semibold transition ${
+          activeTab==="form"
+            ?"border-[var(--brand)] text-[var(--brand)]"
+            :"border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]"
+        }`}
+      >
+        <FiFileText size={16}/>
+        Formulario
+      </button>
+      <button
+        type="button"
+        onClick={()=>setActiveTab("gallery")}
+        className={`inline-flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-semibold transition ${
+          activeTab==="gallery"
+            ?"border-[var(--brand)] text-[var(--brand)]"
+            :"border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]"
+        }`}
+      >
+        <FiImage size={16}/>
+        Galería
+        {gallery.length>0&&(
+          <span className="rounded-full bg-[var(--brand-soft)] px-2 py-0.5 text-[11px] font-bold text-[var(--brand)]">
+            {gallery.length}
+          </span>
+        )}
+      </button>
+    </div>
+
+    {activeTab==="form"&&<form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="grid content-start gap-4 md:grid-cols-2">
           <label className="space-y-2">
@@ -340,9 +373,9 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
         <FiSave size={17}/>Guardar cambios
       </button>
       {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
-    </form>
+    </form>}
 
-    <section className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+    {activeTab==="gallery"&&<section className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-bold"><FiImage className="text-[var(--brand)]"/>Galería de imágenes</h2>
@@ -401,6 +434,6 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
       )}
 
       {galleryMessage&&<p className="text-sm font-medium text-[var(--brand)]">{galleryMessage}</p>}
-    </section>
+    </section>}
   </div>;
 }
