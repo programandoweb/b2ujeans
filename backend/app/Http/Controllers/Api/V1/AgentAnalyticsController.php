@@ -11,6 +11,7 @@ use App\Models\AgentUnansweredQuestion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AgentAnalyticsController extends Controller
 {
@@ -19,45 +20,59 @@ class AgentAnalyticsController extends Controller
         $since30 = now()->subDays(30);
         $since7 = now()->subDays(6)->startOfDay();
 
-        $interactions30 = AgentInteraction::query()->where('created_at', '>=', $since30)->count();
-        $knowledgeTotal = AgentKnowledgeEntry::query()->where('status', 'published')->count();
-        $unansweredPending = AgentUnansweredQuestion::query()->where('status', 'pending')->count();
-        $configuredAgents = DB::table('agent_settings')
-            ->whereNotNull('api_key')
-            ->where('api_key', '<>', '')
-            ->count();
+        $hasInteractions = Schema::hasTable('agent_interactions');
+        $hasKnowledge = Schema::hasTable('agent_knowledge_entries');
+        $hasUnanswered = Schema::hasTable('agent_unanswered_questions');
+        $hasSettings = Schema::hasTable('agent_settings');
 
-        $activity = collect(range(0, 6))->map(function (int $offset) use ($since7): array {
+        $interactions30 = $hasInteractions
+            ? AgentInteraction::query()->where('created_at', '>=', $since30)->count()
+            : 0;
+        $knowledgeTotal = $hasKnowledge
+            ? AgentKnowledgeEntry::query()->where('status', 'published')->count()
+            : 0;
+        $unansweredPending = $hasUnanswered
+            ? AgentUnansweredQuestion::query()->where('status', 'pending')->count()
+            : 0;
+        $configuredAgents = $hasSettings
+            ? DB::table('agent_settings')->whereNotNull('api_key')->where('api_key', '<>', '')->count()
+            : 0;
+
+        $activity = collect(range(0, 6))->map(function (int $offset) use ($since7, $hasInteractions): array {
             $day = $since7->copy()->addDays($offset);
 
             return [
                 'date' => $day->toDateString(),
                 'label' => $day->locale('es')->isoFormat('dd D'),
-                'interactions' => AgentInteraction::query()
-                    ->whereDate('created_at', $day->toDateString())
-                    ->count(),
+                'interactions' => $hasInteractions
+                    ? AgentInteraction::query()->whereDate('created_at', $day->toDateString())->count()
+                    : 0,
             ];
         });
 
-        $byAgent = AgentInteraction::query()
-            ->selectRaw('agent_id, COUNT(*) as total, MAX(created_at) as last_activity')
-            ->where('created_at', '>=', $since30)
-            ->groupBy('agent_id')
-            ->get()
-            ->keyBy('agent_id');
+        $byAgent = $hasInteractions
+            ? AgentInteraction::query()
+                ->selectRaw('agent_id, COUNT(*) as total, MAX(created_at) as last_activity')
+                ->where('created_at', '>=', $since30)
+                ->groupBy('agent_id')
+                ->get()
+                ->keyBy('agent_id')
+            : collect();
 
-        $settings = DB::table('agent_settings')
-            ->select(['agent_id', 'model'])
-            ->selectRaw("CASE WHEN api_key IS NOT NULL AND api_key <> '' THEN 1 ELSE 0 END as has_api_key")
-            ->get()
-            ->keyBy('agent_id');
+        $settings = $hasSettings
+            ? DB::table('agent_settings')
+                ->select(['agent_id', 'model'])
+                ->selectRaw("CASE WHEN api_key IS NOT NULL AND api_key <> '' THEN 1 ELSE 0 END as has_api_key")
+                ->get()
+                ->keyBy('agent_id')
+            : collect();
 
-        $agents = collect(['claudio', 'cristina', 'jorge', 'sofia'])->map(function (string $agent) use ($byAgent, $settings): array {
-            $knowledge = $agent === 'claudio'
+        $agents = collect(['claudio', 'cristina', 'jorge', 'sofia'])->map(function (string $agent) use ($byAgent, $settings, $hasKnowledge, $hasUnanswered): array {
+            $knowledge = $agent === 'claudio' && $hasKnowledge
                 ? AgentKnowledgeEntry::query()->where('agent_id', 'claudio')->where('status', 'published')->count()
                 : 0;
 
-            $pending = $agent === 'claudio'
+            $pending = $agent === 'claudio' && $hasUnanswered
                 ? AgentUnansweredQuestion::query()->where('agent_id', 'claudio')->where('status', 'pending')->count()
                 : 0;
 
@@ -72,23 +87,26 @@ class AgentAnalyticsController extends Controller
             ];
         });
 
-        $recentQuestions = AgentInteraction::query()
-            ->latest()
-            ->limit(12)
-            ->get(['id', 'agent_id', 'question', 'status', 'created_at']);
+        $recentQuestions = $hasInteractions
+            ? AgentInteraction::query()->latest()->limit(12)->get(['id', 'agent_id', 'question', 'status', 'created_at'])
+            : collect();
 
-        $topUnanswered = AgentUnansweredQuestion::query()
-            ->where('status', 'pending')
-            ->orderByDesc('times_asked')
-            ->orderByDesc('last_asked_at')
-            ->limit(8)
-            ->get(['id', 'agent_id', 'question', 'times_asked', 'last_asked_at']);
+        $topUnanswered = $hasUnanswered
+            ? AgentUnansweredQuestion::query()
+                ->where('status', 'pending')
+                ->orderByDesc('times_asked')
+                ->orderByDesc('last_asked_at')
+                ->limit(8)
+                ->get(['id', 'agent_id', 'question', 'times_asked', 'last_asked_at'])
+            : collect();
 
-        $recentKnowledge = AgentKnowledgeEntry::query()
-            ->where('status', 'published')
-            ->latest('updated_at')
-            ->limit(8)
-            ->get(['id', 'agent_id', 'category', 'title', 'confidence', 'source_type', 'updated_at']);
+        $recentKnowledge = $hasKnowledge
+            ? AgentKnowledgeEntry::query()
+                ->where('status', 'published')
+                ->latest('updated_at')
+                ->limit(8)
+                ->get(['id', 'agent_id', 'category', 'title', 'confidence', 'source_type', 'updated_at'])
+            : collect();
 
         $research = AgentResearchRun::query()->latest()->first();
 
