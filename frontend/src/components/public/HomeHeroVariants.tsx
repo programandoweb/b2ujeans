@@ -74,14 +74,16 @@ function FullHeroCarousel({
   const slide = slides[active];
 
   return (
-    <section className="relative overflow-hidden bg-[#0b2b40] text-white">
+    <section className="relative h-[1040px] overflow-hidden bg-[#0b2b40] text-white sm:h-[960px] lg:h-[760px] xl:h-[780px]">
       <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={"bg-" + active}
-          className="absolute inset-0 bg-cover bg-no-repeat"
+          className="absolute inset-0 h-full w-full bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url("${slide.src}")`,
             backgroundPosition: slide.position ?? "center",
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
           }}
           initial={reduceMotion ? false : { opacity: 0, scale: 1.045 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -101,7 +103,7 @@ function FullHeroCarousel({
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={"content-" + active}
-          className="relative mx-auto grid min-h-[760px] max-w-[1440px] gap-10 px-4 pb-20 pt-24 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-10"
+          className="relative mx-auto grid h-full min-h-0 max-w-[1440px] content-center gap-10 overflow-hidden px-4 pb-20 pt-24 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-10"
           initial={reduceMotion ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
