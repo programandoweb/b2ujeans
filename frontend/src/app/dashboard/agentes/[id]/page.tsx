@@ -371,6 +371,16 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
         </div>
 
         <form onSubmit={send} className="border-t border-[var(--border)] p-4">
+          {id==="lucia"&&<div className="mb-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={()=>setDraft("Haz una prueba completa de investigación para crear un nuevo post de Gaspronal. Usa la extensión recolectora conectada por WebSocket para visitar las fuentes web configuradas, identifica un tema útil y relevante para nuestros clientes, recopila información verificable y sus URLs de origen, y con esa investigación prepara un borrador completo de post. Genera también las 5 imágenes relacionadas con el tema siguiendo el flujo secuencial definido: generar una imagen, guardarla y registrar su trazabilidad antes de continuar con la siguiente. No publiques el post: déjalo como borrador para revisión.")}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--brand)] bg-[var(--brand-soft)] px-3 text-sm font-semibold text-[var(--brand)] transition hover:opacity-85"
+            >
+              <Search size={16}/>Prueba de investigación para post
+            </button>
+            <span className="text-xs text-[var(--muted)]">Carga la instrucción en el textarea; tú decides cuándo enviarla.</span>
+          </div>}
           <div className="flex gap-2">
             <textarea value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder={`Escribe a ${name}…`} rows={2} className="min-h-12 min-w-0 flex-1 resize-none rounded-xl border border-[var(--border)] bg-transparent p-3 text-sm"/>
             <button disabled={sending||!draft.trim()} className="inline-flex min-h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--brand)] text-white disabled:opacity-45" aria-label="Enviar mensaje"><Send size={18}/></button>
