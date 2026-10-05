@@ -10,9 +10,27 @@ use Illuminate\Validation\Rule;
 
 class SeoRedirectController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(SeoRedirect::query()->latest()->paginate(50));
+        return response()->json(
+            SeoRedirect::query()
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = '%'.trim((string) $request->string('search')).'%';
+                    $query->where(function ($searchQuery) use ($search): void {
+                        $searchQuery
+                            ->where('source_path', 'like', $search)
+                            ->orWhere('target_path', 'like', $search)
+                            ->orWhere('reason', 'like', $search);
+                    });
+                })
+                ->latest()
+                ->paginate(min(max($request->integer('per_page', 10), 1), 50))
+        );
+    }
+
+    public function show(SeoRedirect $seoRedirect): JsonResponse
+    {
+        return response()->json(['data' => $seoRedirect]);
     }
 
     public function store(Request $request): JsonResponse
