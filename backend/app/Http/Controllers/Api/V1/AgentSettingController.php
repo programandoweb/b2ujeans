@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\AgentSetting;
+use App\Models\AiModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,7 +16,13 @@ class AgentSettingController extends Controller
     public function show(string $agent): JsonResponse
     {
         $agent = $this->agent($agent);
-        $setting = AgentSetting::query()->where('agent_id', $agent)->first();
+        $setting = AgentSetting::query()
+            ->with([
+                'primaryAiModel.provider:id,name,code,driver',
+                'fallbackAiModel.provider:id,name,code,driver',
+            ])
+            ->where('agent_id', $agent)
+            ->first();
 
         return response()->json([
             'data' => [
@@ -23,6 +30,10 @@ class AgentSettingController extends Controller
                 'provider' => $setting?->provider ?? 'gemini',
                 'model' => $setting?->model ?? 'gemini-2.5-flash',
                 'has_api_key' => filled($setting?->api_key),
+                'primary_ai_model_id' => $setting?->primary_ai_model_id,
+                'fallback_ai_model_id' => $setting?->fallback_ai_model_id,
+                'primary_ai_model' => $this->serializeAiModel($setting?->primaryAiModel),
+                'fallback_ai_model' => $this->serializeAiModel($setting?->fallbackAiModel),
             ],
         ]);
     }
@@ -35,6 +46,8 @@ class AgentSettingController extends Controller
             'provider' => ['sometimes', Rule::in(['gemini'])],
             'model' => ['sometimes', 'string', 'max:120'],
             'api_key' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'primary_ai_model_id' => ['sometimes', 'nullable', 'integer', 'exists:ai_models,id'],
+            'fallback_ai_model_id' => ['sometimes', 'nullable', 'integer', 'different:primary_ai_model_id', 'exists:ai_models,id'],
         ]);
 
         $setting = AgentSetting::query()->firstOrNew(['agent_id' => $agent]);
@@ -43,6 +56,14 @@ class AgentSettingController extends Controller
 
         if (array_key_exists('api_key', $data)) {
             $setting->api_key = filled($data['api_key']) ? trim((string) $data['api_key']) : null;
+        }
+
+        if (array_key_exists('primary_ai_model_id', $data)) {
+            $setting->primary_ai_model_id = $data['primary_ai_model_id'];
+        }
+
+        if (array_key_exists('fallback_ai_model_id', $data)) {
+            $setting->fallback_ai_model_id = $data['fallback_ai_model_id'];
         }
 
         $setting->save();
@@ -61,7 +82,13 @@ class AgentSettingController extends Controller
         );
 
         $agent = $this->agent($agent);
-        $setting = AgentSetting::query()->where('agent_id', $agent)->first();
+        $setting = AgentSetting::query()
+            ->with([
+                'primaryAiModel.provider',
+                'fallbackAiModel.provider',
+            ])
+            ->where('agent_id', $agent)
+            ->first();
 
         return response()->json([
             'data' => [
@@ -69,8 +96,55 @@ class AgentSettingController extends Controller
                 'provider' => $setting?->provider ?? 'gemini',
                 'model' => $setting?->model ?? 'gemini-2.5-flash',
                 'api_key' => $setting?->api_key,
+                'primary' => $this->serializeRuntimeModel($setting?->primaryAiModel),
+                'fallback' => $this->serializeRuntimeModel($setting?->fallbackAiModel),
             ],
         ]);
+    }
+
+    private function serializeAiModel(?AiModel $model): ?array
+    {
+        if (! $model) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $model->id,
+            'name' => $model->name,
+            'code' => $model->code,
+            'model_identifier' => $model->model_identifier,
+            'provider' => $model->provider ? [
+                'id' => (int) $model->provider->id,
+                'name' => $model->provider->name,
+                'code' => $model->provider->code,
+                'driver' => $model->provider->driver,
+            ] : null,
+        ];
+    }
+
+    private function serializeRuntimeModel(?AiModel $model): ?array
+    {
+        if (! $model || ! $model->is_active || ! $model->provider || ! $model->provider->is_active) {
+            return null;
+        }
+
+        $credentials = $model->provider->credentials ?? [];
+
+        return [
+            'id' => (int) $model->id,
+            'name' => $model->name,
+            'model_identifier' => $model->model_identifier,
+            'provider' => [
+                'id' => (int) $model->provider->id,
+                'name' => $model->provider->name,
+                'code' => $model->provider->code,
+                'driver' => $model->provider->driver,
+                'base_url' => $model->provider->base_url,
+                'api_key' => $credentials['api_key'] ?? null,
+                'timeout_seconds' => (int) $model->provider->timeout_seconds,
+                'verify_tls' => (bool) $model->provider->verify_tls,
+            ],
+        ];
     }
 
     private function agent(string $agent): string
