@@ -67,45 +67,45 @@ Route::prefix('v1')->group(function (): void {
         Route::put('ai/models/{aiModel}', [AiProviderController::class, 'updateModel'])->middleware('permission:ai.manage');
         Route::delete('ai/models/{aiModel}', [AiProviderController::class, 'destroyModel'])->middleware('permission:ai.manage');
 
-        Route::get('communications/providers', [CommunicationProviderController::class, 'index']);
-        Route::get('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'show']);
-        Route::post('communications/providers', [CommunicationProviderController::class, 'store']);
-        Route::put('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'update']);
-        Route::delete('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'destroy']);
+        Route::get('communications/providers', [CommunicationProviderController::class, 'index'])->middleware('permission:channels.view');
+        Route::get('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'show'])->middleware('permission:channels.view');
+        Route::post('communications/providers', [CommunicationProviderController::class, 'store'])->middleware('permission:channels.manage');
+        Route::put('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'update'])->middleware('permission:channels.manage');
+        Route::delete('communications/providers/{communicationProvider}', [CommunicationProviderController::class, 'destroy'])->middleware('permission:channels.manage');
 
-        Route::get('commercial/quotes', [CommercialQuoteController::class, 'index']);
-        Route::get('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'show']);
-        Route::put('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'update']);
-        Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve']);
-        Route::get('commercial/appointments', [CommercialAppointmentController::class, 'index']);
+        Route::get('commercial/quotes', [CommercialQuoteController::class, 'index'])->middleware('permission:commercial.quotes.view');
+        Route::get('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'show'])->middleware('permission:commercial.quotes.view');
+        Route::put('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'update'])->middleware('permission:commercial.quotes.manage');
+        Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve'])->middleware('permission:commercial.quotes.manage');
+        Route::get('commercial/appointments', [CommercialAppointmentController::class, 'index'])->middleware('permission:commercial.appointments.view');
 
-        Route::get('agents/jorge/research', [JorgeResearchController::class, 'show']);
-        Route::post('agents/jorge/research/play', [JorgeResearchController::class, 'play']);
-        Route::post('agents/jorge/research/pause', [JorgeResearchController::class, 'pause']);
-        Route::post('agents/jorge/research/stop', [JorgeResearchController::class, 'stop']);
+        Route::get('agents/jorge/research', [JorgeResearchController::class, 'show'])->middleware('permission:agents.view');
+        Route::post('agents/jorge/research/play', [JorgeResearchController::class, 'play'])->middleware('permission:agents.manage');
+        Route::post('agents/jorge/research/pause', [JorgeResearchController::class, 'pause'])->middleware('permission:agents.manage');
+        Route::post('agents/jorge/research/stop', [JorgeResearchController::class, 'stop'])->middleware('permission:agents.manage');
 
-        Route::get('catalog/items', [CatalogController::class, 'index']);
-        Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show']);
-        Route::post('catalog/items', [CatalogController::class, 'store']);
-        Route::put('catalog/items/{catalogItem}', [CatalogController::class, 'update']);
-        Route::delete('catalog/items/{catalogItem}', [CatalogController::class, 'destroy']);
-        Route::post('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'uploadGallery']);
-        Route::put('catalog/items/{catalogItem}/gallery/primary', [CatalogController::class, 'setPrimaryGalleryImage']);
-        Route::delete('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'destroyGalleryImage']);
-        Route::get('catalog/categories', [CatalogController::class, 'categories']);
-        Route::get('catalog/categories/{catalogCategory}', [CatalogController::class, 'showCategory']);
-        Route::post('catalog/categories', [CatalogController::class, 'storeCategory']);
-        Route::put('catalog/categories/{catalogCategory}', [CatalogController::class, 'updateCategory']);
-        Route::delete('catalog/categories/{catalogCategory}', [CatalogController::class, 'destroyCategory']);
+        Route::get('catalog/items', [CatalogController::class, 'index'])->middleware('permission:catalog.view');
+        Route::get('catalog/items/{catalogItem}', [CatalogController::class, 'show'])->middleware('permission:catalog.view');
+        Route::post('catalog/items', [CatalogController::class, 'store'])->middleware('permission:catalog.manage');
+        Route::put('catalog/items/{catalogItem}', [CatalogController::class, 'update'])->middleware('permission:catalog.manage');
+        Route::delete('catalog/items/{catalogItem}', [CatalogController::class, 'destroy'])->middleware('permission:catalog.manage');
+        Route::post('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'uploadGallery'])->middleware('permission:catalog.manage');
+        Route::put('catalog/items/{catalogItem}/gallery/primary', [CatalogController::class, 'setPrimaryGalleryImage'])->middleware('permission:catalog.manage');
+        Route::delete('catalog/items/{catalogItem}/gallery', [CatalogController::class, 'destroyGalleryImage'])->middleware('permission:catalog.manage');
+        Route::get('catalog/categories', [CatalogController::class, 'categories'])->middleware('permission:catalog.view');
+        Route::get('catalog/categories/{catalogCategory}', [CatalogController::class, 'showCategory'])->middleware('permission:catalog.view');
+        Route::post('catalog/categories', [CatalogController::class, 'storeCategory'])->middleware('permission:catalog.manage');
+        Route::put('catalog/categories/{catalogCategory}', [CatalogController::class, 'updateCategory'])->middleware('permission:catalog.manage');
+        Route::delete('catalog/categories/{catalogCategory}', [CatalogController::class, 'destroyCategory'])->middleware('permission:catalog.manage');
 
-        Route::get('content/posts', [PostController::class, 'index']);
-        Route::get('content/posts/{post}', [PostController::class, 'show']);
-        Route::post('content/posts', [PostController::class, 'store']);
-        Route::put('content/posts/{post}', [PostController::class, 'update']);
-        Route::delete('content/posts/{post}', [PostController::class, 'destroy']);
-        Route::get('content/post-categories', [PostController::class, 'categories']);
-        Route::post('content/post-categories', [PostController::class, 'storeCategory']);
-        Route::put('content/post-categories/{postCategory}', [PostController::class, 'updateCategory']);
+        Route::get('content/posts', [PostController::class, 'index'])->middleware('permission:content.view');
+        Route::get('content/posts/{post}', [PostController::class, 'show'])->middleware('permission:content.view');
+        Route::post('content/posts', [PostController::class, 'store'])->middleware('permission:content.manage');
+        Route::put('content/posts/{post}', [PostController::class, 'update'])->middleware('permission:content.manage');
+        Route::delete('content/posts/{post}', [PostController::class, 'destroy'])->middleware('permission:content.manage');
+        Route::get('content/post-categories', [PostController::class, 'categories'])->middleware('permission:content.view');
+        Route::post('content/post-categories', [PostController::class, 'storeCategory'])->middleware('permission:content.manage');
+        Route::put('content/post-categories/{postCategory}', [PostController::class, 'updateCategory'])->middleware('permission:content.manage');
 
 
         Route::get('security/users', [UserAccessController::class, 'users'])->middleware('permission:security.users.view');
@@ -118,10 +118,10 @@ Route::prefix('v1')->group(function (): void {
         Route::delete('security/roles/{role}', [UserAccessController::class, 'destroyRole'])->middleware('permission:security.roles.manage');
         Route::get('security/permissions', [UserAccessController::class, 'permissions'])->middleware('permission:security.roles.view');
 
-        Route::get('seo/redirects', [SeoRedirectController::class, 'index']);
-        Route::get('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'show']);
-        Route::post('seo/redirects', [SeoRedirectController::class, 'store']);
-        Route::put('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'update']);
-        Route::delete('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'destroy']);
+        Route::get('seo/redirects', [SeoRedirectController::class, 'index'])->middleware('permission:seo.view');
+        Route::get('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'show'])->middleware('permission:seo.view');
+        Route::post('seo/redirects', [SeoRedirectController::class, 'store'])->middleware('permission:seo.manage');
+        Route::put('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'update'])->middleware('permission:seo.manage');
+        Route::delete('seo/redirects/{seoRedirect}', [SeoRedirectController::class, 'destroy'])->middleware('permission:seo.manage');
     });
 });
