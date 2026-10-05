@@ -446,15 +446,16 @@ Reglas obligatorias:
 - esta capacidad no puede extenderse a `admin` ni a permisos configurables sin una decisión explícita del responsable del proyecto.
 
 
-## 21. Administración de heroes del home
+## 21. Constructor reutilizable de heroes
 
-Los carruseles del home deben administrarse desde `/dashboard/heroes` y no volver a depender de cambios manuales de código para contenido operativo.
+Los heroes y carruseles administrables deben gestionarse desde `/dashboard/heroes`. El constructor es reutilizable por ubicación mediante `section_key`; `home.hero` es la primera ubicación conectada, no una restricción del módulo.
 
 Reglas:
 
-- los slides administrados se almacenan en `hero_slides`;
+- los slides administrados se almacenan en `hero_slides` y cada registro pertenece a una ubicación mediante `section_key`;
 - el home consume únicamente slides activos y respeta su orden;
-- las propuestas 2, 3 y 5 utilizan el contenido administrado y conservan fallback en código si la API pública falla;
+- el home consulta explícitamente `section_key=home.hero`; las propuestas 2, 3 y 5 utilizan ese contenido administrado y conservan fallback en código si la API pública falla;
+- nuevas páginas pueden reutilizar el mismo constructor definiendo claves como `productos.hero`, `servicios.hero`, `gaspro-notas.hero` o cualquier clave válida acordada;
 - cada slide puede gestionar imagen, posición de fondo, badge, título, texto destacado, descripción, CTAs, tres bloques derechos, orden, estado e intervalo;
 - las imágenes cargadas desde el dashboard se almacenan en el backend y se sirven por una ruta pública controlada;
 - `heroes.view` permite consultar el módulo;
