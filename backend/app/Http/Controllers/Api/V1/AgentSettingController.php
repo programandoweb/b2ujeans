@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 
 class AgentSettingController extends Controller
 {
-    private const AGENTS = ['cristina', 'jorge', 'claudio', 'sofia'];
+    private const AGENTS = ['cristina', 'jorge', 'claudio', 'sofia', 'lucia'];
 
     public function show(string $agent): JsonResponse
     {
