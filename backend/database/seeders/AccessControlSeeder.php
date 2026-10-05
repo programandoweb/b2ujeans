@@ -39,11 +39,7 @@ class AccessControlSeeder extends Seeder
         $admin = Role::findOrCreate('admin', 'api');
 
         $root->syncPermissions(Permission::where('guard_name', 'api')->get());
-        $admin->syncPermissions(Permission::where('guard_name', 'api')
-            ->whereNotIn('name', [
-                'security.users.manage',
-                'security.roles.manage',
-            ])->get());
+        $admin->syncPermissions(Permission::where('guard_name', 'api')->get());
 
         $rootUser = User::query()->where('email', 'lic.jorgemendez@gmail.com')->first();
         if ($rootUser) {
