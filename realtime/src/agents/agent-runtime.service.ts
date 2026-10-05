@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { AgentRegistryService } from "./agent-registry.service";
 import { GeminiService, type GeminiContent, type GeminiFunctionDeclaration } from "./gemini.service";
-import { OpenAiCompatibleService } from "./openai-compatible.service";
+import { OpenAiCompatibleService, type OpenAiMessage } from "./openai-compatible.service";
 import type { RuntimeAiModel } from "./laravel-agent-settings.client";
 import { LaravelAgentSettingsClient } from "./laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./laravel-commercial.client";
@@ -78,6 +78,20 @@ const CLAUDIO_FUNCTIONS: GeminiFunctionDeclaration[] = [
       },
     },
   },
+  {
+    name: "handoff_to_human",
+    description: "Escala la conversación a un asesor humano y deja el lead preparado para seguimiento.",
+    parameters: {
+      type: "OBJECT",
+      required: ["name", "email", "whatsapp"],
+      properties: {
+        name: { type: "STRING" },
+        email: { type: "STRING" },
+        whatsapp: { type: "STRING" },
+        notes: { type: "STRING" },
+      },
+    },
+  },
 ];
 
 const SOFIA_FUNCTIONS: GeminiFunctionDeclaration[] = [
@@ -145,97 +159,203 @@ export class AgentRuntimeService {
       "\nResponde siempre en español salvo que el usuario solicite otro idioma.",
     ].join("\n").trim();
 
-    if (agent.id !== "sofia") {
-      const routedModels = [credentials.primary, credentials.fallback].filter(
-        (item): item is RuntimeAiModel => Boolean(item),
-      );
+    const routedModels = [credentials.primary, credentials.fallback].filter(
+      (item): item is RuntimeAiModel => Boolean(item),
+    );
 
-      if (routedModels.length) {
-        let lastError: unknown = null;
+    if (routedModels.length) {
+      let lastError: unknown = null;
 
-        for (const routedModel of routedModels) {
-          try {
-            const answer = await this.generateWithRoutedModel(routedModel, system, message);
-            return this.finish(requestId, agent, message, answer, startedAt);
-          } catch (error) {
-            lastError = error;
-          }
+      for (const routedModel of routedModels) {
+        try {
+          const answer = ["claudio", "sofia"].includes(agent.id)
+            ? await this.generateWithTools(
+                agent.id,
+                routedModel,
+                system,
+                message,
+                input.history ?? [],
+              )
+            : await this.generateWithRoutedModel(routedModel, system, message);
+
+          return this.finish(requestId, agent, message, answer, startedAt);
+        } catch (error) {
+          lastError = error;
         }
-
-        throw lastError instanceof Error
-          ? lastError
-          : new Error("No fue posible obtener respuesta de los modelos configurados.");
       }
 
-      if (!credentials.api_key) {
-        return {
-          requestId,
-          agent: { id: agent.id, name: agent.name, role: agent.role },
-          message: `${agent.name} no tiene un modelo principal configurado ni una API key heredada de Gemini.`,
-          status: "configuration_required",
-        };
-      }
-
-      const answer = await this.gemini.generate({
-        apiKey: credentials.api_key,
-        model: credentials.model,
-        system,
-        message,
-      });
-      return this.finish(requestId, agent, message, answer, startedAt);
+      throw lastError instanceof Error
+        ? lastError
+        : new Error("No fue posible obtener respuesta de los modelos configurados.");
     }
 
-    const legacyGeminiApiKey = credentials.api_key;
-
-    if (!legacyGeminiApiKey) {
+    if (!credentials.api_key) {
       return {
         requestId,
         agent: { id: agent.id, name: agent.name, role: agent.role },
-        message: `${agent.name} todavía requiere una API key de Gemini para sus herramientas actuales.`,
+        message: `${agent.name} no tiene un modelo principal configurado.`,
         status: "configuration_required",
       };
     }
 
+    const answer = ["claudio", "sofia"].includes(agent.id)
+      ? await this.generateLegacyGeminiWithTools(
+          agent.id,
+          credentials.api_key,
+          credentials.model,
+          system,
+          message,
+          input.history ?? [],
+        )
+      : await this.gemini.generate({
+          apiKey: credentials.api_key,
+          model: credentials.model,
+          system,
+          message,
+        });
+
+    return this.finish(requestId, agent, message, answer, startedAt);
+  }
+
+  private async generateWithTools(
+    agentId: string,
+    model: RuntimeAiModel,
+    system: string,
+    message: string,
+    history: Array<{ role: "user" | "assistant"; content: string }>,
+  ): Promise<string> {
+    const functions = agentId === "claudio" ? CLAUDIO_FUNCTIONS : SOFIA_FUNCTIONS;
+
+    if (model.provider.driver === "gemini") {
+      if (!model.provider.api_key) {
+        throw new Error(`El proveedor ${model.provider.name} no tiene API key configurada.`);
+      }
+
+      return this.runGeminiToolLoop(
+        agentId,
+        model.provider.api_key,
+        model.model_identifier,
+        system,
+        message,
+        history,
+        functions,
+      );
+    }
+
+    if (model.provider.driver === "openai_compatible") {
+      const messages: OpenAiMessage[] = [
+        ...history.slice(-20).map(item => ({
+          role: item.role,
+          content: item.content,
+        } as OpenAiMessage)),
+        { role: "user", content: message },
+      ];
+
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const turn = await this.openAiCompatible.generateTurn({
+          model,
+          system,
+          messages,
+          functions,
+        });
+
+        messages.push(turn.message);
+
+        if (turn.type === "text") {
+          return turn.text;
+        }
+
+        const result = await this.executeTool(agentId, turn.name, turn.args);
+        messages.push({
+          role: "tool",
+          tool_call_id: turn.toolCallId,
+          content: JSON.stringify(result),
+        });
+      }
+
+      throw new Error(`${agentId} excedió el límite de operaciones de herramienta para este mensaje.`);
+    }
+
+    throw new Error(`El driver ${model.provider.driver} no soporta herramientas de agentes.`);
+  }
+
+  private async generateLegacyGeminiWithTools(
+    agentId: string,
+    apiKey: string,
+    model: string,
+    system: string,
+    message: string,
+    history: Array<{ role: "user" | "assistant"; content: string }>,
+  ): Promise<string> {
+    const functions = agentId === "claudio" ? CLAUDIO_FUNCTIONS : SOFIA_FUNCTIONS;
+
+    return this.runGeminiToolLoop(
+      agentId,
+      apiKey,
+      model,
+      system,
+      message,
+      history,
+      functions,
+    );
+  }
+
+  private async runGeminiToolLoop(
+    agentId: string,
+    apiKey: string,
+    model: string,
+    system: string,
+    message: string,
+    history: Array<{ role: "user" | "assistant"; content: string }>,
+    functions: GeminiFunctionDeclaration[],
+  ): Promise<string> {
     const contents: GeminiContent[] = [
-      ...(input.history ?? []).slice(-20).map(item => ({
+      ...history.slice(-20).map(item => ({
         role: item.role === "assistant" ? "model" as const : "user" as const,
         parts: [{ text: item.content }],
       })),
       { role: "user", parts: [{ text: message }] },
     ];
 
-    const functions = agent.id === "claudio" ? CLAUDIO_FUNCTIONS : SOFIA_FUNCTIONS;
-
     for (let attempt = 0; attempt < 8; attempt++) {
       const turn = await this.gemini.generateTurn({
-        apiKey: legacyGeminiApiKey,
-        model: credentials.model,
+        apiKey,
+        model,
         system,
         contents,
         functions,
-        googleSearch: agent.id === "sofia",
+        googleSearch: agentId === "sofia",
       });
 
       contents.push(turn.content);
 
       if (turn.type === "text") {
-        return this.finish(requestId, agent, message, turn.text, startedAt);
+        return turn.text;
       }
 
-      let result: unknown;
-      if (agent.id === "claudio" && ["catalog_search", "create_quote", "create_appointment", "handoff_to_human"].includes(turn.name)) {
-        result = await this.commercial.execute(agent.id, turn.name, turn.args);
-      } else {
-        result = await this.knowledge.execute(agent.id, turn.name, turn.args);
-      }
-
+      const result = await this.executeTool(agentId, turn.name, turn.args);
       contents.push({
         role: "user",
         parts: [{ functionResponse: { name: turn.name, response: result } }],
       });
     }
 
-    throw new Error(`${agent.name} excedió el límite de operaciones de herramienta para este mensaje.`);
+    throw new Error(`${agentId} excedió el límite de operaciones de herramienta para este mensaje.`);
+  }
+
+  private async executeTool(
+    agentId: string,
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<unknown> {
+    if (
+      agentId === "claudio"
+      && ["catalog_search", "create_quote", "create_appointment", "handoff_to_human"].includes(name)
+    ) {
+      return this.commercial.execute(agentId, name, args);
+    }
+
+    return this.knowledge.execute(agentId, name, args);
   }
 
   private async generateWithRoutedModel(
