@@ -5,6 +5,7 @@ import { GeminiService, type GeminiContent, type GeminiFunctionDeclaration } fro
 import { LaravelAgentSettingsClient } from "./laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./laravel-commercial.client";
 import { LaravelKnowledgeClient } from "./laravel-knowledge.client";
+import { LaravelAgentAnalyticsClient } from "./laravel-agent-analytics.client";
 import type { AgentMessageInput, AgentResponse } from "./agent.types";
 
 const CLAUDIO_FUNCTIONS: GeminiFunctionDeclaration[] = [
@@ -120,6 +121,7 @@ export class AgentRuntimeService {
     private readonly gemini: GeminiService,
     private readonly commercial: LaravelCommercialClient,
     private readonly knowledge: LaravelKnowledgeClient,
+    private readonly analytics: LaravelAgentAnalyticsClient,
   ) {}
 
   async execute(agentId: string, input: AgentMessageInput): Promise<AgentResponse> {
@@ -129,6 +131,7 @@ export class AgentRuntimeService {
     const message = String(input?.message ?? "").trim();
     if (!message) throw new Error("El mensaje es obligatorio.");
 
+    const startedAt = Date.now();
     const requestId = input.requestId?.trim() || randomUUID();
     const credentials = await this.settings.credentials(agent.id);
 
@@ -155,7 +158,7 @@ export class AgentRuntimeService {
         system,
         message,
       });
-      return this.response(requestId, agent, answer);
+      return this.finish(requestId, agent, message, answer, startedAt);
     }
 
     const contents: GeminiContent[] = [
@@ -181,7 +184,7 @@ export class AgentRuntimeService {
       contents.push(turn.content);
 
       if (turn.type === "text") {
-        return this.response(requestId, agent, turn.text);
+        return this.finish(requestId, agent, message, turn.text, startedAt);
       }
 
       let result: unknown;
@@ -200,12 +203,26 @@ export class AgentRuntimeService {
     throw new Error(`${agent.name} excedió el límite de operaciones de herramienta para este mensaje.`);
   }
 
-  private response(requestId: string, agent: { id: string; name: string; role: string }, message: string): AgentResponse {
+  private async finish(
+    requestId:string,
+    agent:{id:string;name:string;role:string},
+    question:string,
+    answer:string,
+    startedAt:number,
+  ):Promise<AgentResponse>{
+    await this.analytics.log(agent.id,{
+      request_id:requestId,
+      question,
+      answer,
+      status:"completed",
+      duration_ms:Date.now()-startedAt,
+    });
+
     return {
       requestId,
-      agent: { id: agent.id, name: agent.name, role: agent.role },
-      message,
-      status: "completed",
+      agent:{id:agent.id,name:agent.name,role:agent.role},
+      message:answer,
+      status:"completed",
     };
   }
 }
