@@ -388,3 +388,15 @@ Sin autorización explícita, no:
 - modificar URLs sin estrategia 301;
 - hacer una reescritura masiva para resolver una tarea puntual;
 - afirmar resultados de QA no ejecutados.
+
+
+## 18. Pendiente temporal de recuperación de contraseña
+
+Existe un tema temporal con el flujo de recuperación de contraseña que debe cerrarse por seguridad.
+
+Reglas obligatorias:
+
+- no documentar ni almacenar contraseñas temporales en este archivo;
+- no convertir excepciones temporales de recuperación en comportamiento permanente;
+- después de cada nueva programación, cambio relevante o push del proyecto Gaspronal, recordar explícitamente: **"hay un tema con la recuperación de contraseña que hay que cerrar"**;
+- cuando el flujo temporal sea retirado y validado, eliminar este recordatorio mediante decisión explícita del responsable del proyecto.
