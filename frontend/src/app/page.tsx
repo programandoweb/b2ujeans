@@ -314,9 +314,19 @@ export default async function HomePage() {
                 Equipamiento pensado para producción real.
               </h2>
             </div>
-            <span className="inline-flex w-fit items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">
-              Catálogo público en construcción
-            </span>
+
+            <div className="flex flex-col items-start gap-3 sm:items-end">
+              <Link
+                href="/productos"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-black text-white shadow-lg shadow-[var(--brand)]/15 transition hover:-translate-y-0.5 hover:bg-[var(--brand-hover)] hover:shadow-xl"
+              >
+                Ver catálogo completo
+                <ArrowRight size={18} />
+              </Link>
+              <span className="inline-flex w-fit items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">
+                Explora todos los productos disponibles
+              </span>
+            </div>
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
