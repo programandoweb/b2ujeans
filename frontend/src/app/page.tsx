@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";\nimport HomeHeroVariants from "@/components/public/HomeHeroVariants";
+import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
+import HomeHeroVariants from "@/components/public/HomeHeroVariants";
 import {
   ArrowRight,
   Building2,
@@ -82,8 +83,11 @@ const advantages = [
   "Asesoría técnica desde la necesidad hasta la operación",
 ];
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ option?: string }> }) {
   const useCases = await getUseCases();
+  const params = await searchParams;
+  const requestedOption = Number(params.option ?? "1");
+  const heroOption = Number.isInteger(requestedOption) && requestedOption >= 1 && requestedOption <= 5 ? requestedOption : 1;
   return (
     <main className="min-h-screen overflow-hidden bg-white text-[var(--foreground)]">
       <div className="bg-[var(--brand)] text-white">
@@ -168,7 +172,9 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <HomeHeroVariants option={heroOption} />\n\n      <section className="border-b border-slate-200 bg-white">
+      <HomeHeroVariants option={heroOption} />
+
+      <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
           {[
             ["Fabricación", "Equipos industriales"],
