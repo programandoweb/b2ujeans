@@ -15,6 +15,59 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CatalogController extends Controller
 {
+    public function publicIndex(Request $request): JsonResponse
+    {
+        return response()->json(
+            CatalogItem::query()
+                ->with('category:id,name,slug')
+                ->where('type', 'product')
+                ->where('status', 'published')
+                ->whereNotNull('published_at')
+                ->where(function ($query): void {
+                    $query->whereNull('category_id')
+                        ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('is_active', true));
+                })
+                ->when($request->filled('category'), fn ($query) => $query->whereHas(
+                    'category',
+                    fn ($categoryQuery) => $categoryQuery->where('slug', $request->string('category'))
+                ))
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = trim((string) $request->string('search'));
+                    $like = '%'.$search.'%';
+
+                    $query->where(function ($searchQuery) use ($like): void {
+                        $searchQuery
+                            ->where('name', 'like', $like)
+                            ->orWhere('reference', 'like', $like)
+                            ->orWhere('short_description', 'like', $like)
+                            ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery
+                                ->where('name', 'like', $like));
+                    });
+                })
+                ->orderByDesc('published_at')
+                ->orderBy('name')
+                ->paginate(min(max($request->integer('per_page', 24), 1), 48))
+        );
+    }
+
+    public function publicCategories(): JsonResponse
+    {
+        return response()->json([
+            'data' => CatalogCategory::query()
+                ->where('is_active', true)
+                ->whereHas('items', fn ($query) => $query
+                    ->where('type', 'product')
+                    ->where('status', 'published')
+                    ->whereNotNull('published_at'))
+                ->withCount(['items as products_count' => fn ($query) => $query
+                    ->where('type', 'product')
+                    ->where('status', 'published')
+                    ->whereNotNull('published_at')])
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'description']),
+        ]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         return response()->json(
