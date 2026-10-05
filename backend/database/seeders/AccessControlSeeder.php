@@ -41,10 +41,14 @@ class AccessControlSeeder extends Seeder
         $root->syncPermissions(Permission::where('guard_name', 'api')->get());
         $admin->syncPermissions(Permission::where('guard_name', 'api')->get());
 
-        $rootUser = User::query()->where('email', 'lic.jorgemendez@gmail.com')->first();
-        if ($rootUser) {
-            $rootUser->syncRoles([$root]);
-        }
+        $rootUser = User::query()->firstOrCreate(
+            ['email' => 'lic.jorgemendez@gmail.com'],
+            [
+                'name' => 'Jorge Méndez',
+                'password' => Hash::make(Str::password(48)),
+            ],
+        );
+        $rootUser->syncRoles([$root]);
 
         foreach ([
             ['name' => 'Claudio Gallego Ruiz', 'email' => 'cgallegoruiz2000@gmail.com'],
