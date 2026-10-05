@@ -39,6 +39,9 @@ class HeroSlideController extends Controller
                 ->orderBy('option')
                 ->orderBy('sort_order')
                 ->get(),
+            'meta' => [
+                'can_manage' => (bool) $request->user()?->can('heroes.manage'),
+            ],
         ]);
     }
 
