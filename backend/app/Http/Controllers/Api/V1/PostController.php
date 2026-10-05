@@ -8,8 +8,10 @@ use App\Models\Post;
 use App\Models\PostCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PostController extends Controller
 {
@@ -61,6 +63,119 @@ class PostController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    public function uploadGallery(Request $request, Post $post): JsonResponse
+    {
+        $validated = $request->validate([
+            'images' => ['required', 'array', 'min:1', 'max:12'],
+            'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+        ]);
+
+        $gallery = $this->normalizedGallery($post);
+
+        foreach ($validated['images'] as $image) {
+            $extension = strtolower($image->getClientOriginalExtension() ?: $image->extension() ?: 'jpg');
+            $filename = Str::uuid().'.'.$extension;
+            $image->storeAs("posts/{$post->id}", $filename, 'public');
+            $gallery[] = "/api/post-media/{$post->id}/{$filename}";
+        }
+
+        $post->gallery = array_values(array_unique($gallery));
+
+        if (!$post->featured_image && count($post->gallery) > 0) {
+            $post->featured_image = $post->gallery[0];
+        }
+        if (!$post->og_image && count($post->gallery) > 0) {
+            $post->og_image = $post->gallery[0];
+        }
+
+        $post->save();
+
+        return response()->json([
+            'data' => [
+                'gallery' => $post->gallery,
+                'featured_image' => $post->featured_image,
+                'og_image' => $post->og_image,
+            ],
+        ]);
+    }
+
+    public function setPrimaryGalleryImage(Request $request, Post $post): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'string', 'max:2048'],
+        ]);
+
+        $gallery = $this->normalizedGallery($post);
+        abort_unless(in_array($validated['image'], $gallery, true), 422, 'La imagen no pertenece a la galería.');
+
+        $post->update([
+            'featured_image' => $validated['image'],
+            'og_image' => $validated['image'],
+        ]);
+
+        return response()->json([
+            'data' => [
+                'gallery' => $gallery,
+                'featured_image' => $validated['image'],
+                'og_image' => $validated['image'],
+            ],
+        ]);
+    }
+
+    public function destroyGalleryImage(Request $request, Post $post): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'string', 'max:2048'],
+        ]);
+
+        $gallery = collect($this->normalizedGallery($post));
+        abort_unless($gallery->contains($validated['image']), 422, 'La imagen no pertenece a la galería.');
+
+        $prefix = "/api/post-media/{$post->id}/";
+        if (str_starts_with($validated['image'], $prefix)) {
+            $filename = basename(substr($validated['image'], strlen($prefix)));
+            Storage::disk('public')->delete("posts/{$post->id}/{$filename}");
+        }
+
+        $gallery = $gallery
+            ->reject(fn ($image) => $image === $validated['image'])
+            ->values()
+            ->all();
+
+        $post->gallery = $gallery;
+        if ($post->featured_image === $validated['image']) {
+            $post->featured_image = $gallery[0] ?? null;
+        }
+        if ($post->og_image === $validated['image']) {
+            $post->og_image = $gallery[0] ?? null;
+        }
+        $post->save();
+
+        return response()->json([
+            'data' => [
+                'gallery' => $post->gallery,
+                'featured_image' => $post->featured_image,
+                'og_image' => $post->og_image,
+            ],
+        ]);
+    }
+
+    public function media(Post $post, string $filename): StreamedResponse
+    {
+        $filename = basename($filename);
+        $path = "posts/{$post->id}/{$filename}";
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response(
+            $path,
+            $filename,
+            [
+                'Cache-Control' => 'public, max-age=31536000, immutable',
+                'X-Content-Type-Options' => 'nosniff',
+            ]
+        );
+    }
+
     public function categories(): JsonResponse
     {
         return response()->json(['data' => PostCategory::query()->withCount('posts')->orderBy('name')->get()]);
@@ -88,6 +203,19 @@ class PostController extends Controller
         ]);
         $postCategory->update($data);
         return response()->json(['data' => $postCategory]);
+    }
+
+    private function normalizedGallery(Post $post): array
+    {
+        return collect([
+            $post->featured_image,
+            $post->og_image,
+            ...($post->gallery ?? []),
+        ])
+            ->filter(fn ($image) => is_string($image) && trim($image) !== '')
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function publication(array $data, ?Post $post = null): array
