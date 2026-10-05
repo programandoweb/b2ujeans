@@ -13,8 +13,6 @@ import {
   Menu,
   Phone,
   Settings,
-  ShieldCheck,
-  Sparkles,
   Wrench,
   Wind,
 } from "lucide-react";
