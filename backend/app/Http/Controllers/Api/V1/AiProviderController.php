@@ -115,26 +115,43 @@ class AiProviderController extends Controller
             }
         }
 
-        return response()->json([
-            'data' => AiModel::query()
-                ->where('is_active', true)
-                ->whereHas('provider', fn ($query) => $query->where('is_active', true))
-                ->with('provider:id,name,code,driver,is_active')
-                ->orderBy('priority')
-                ->orderBy('name')
-                ->get(),
-        ]);
+        $activeProviders = AiProvider::query()
+            ->where('is_active', true)
+            ->get(['id', 'name', 'code', 'driver', 'is_active'])
+            ->keyBy('id');
+
+        $models = AiModel::query()
+            ->where('is_active', true)
+            ->whereIn('ai_provider_id', $activeProviders->keys())
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (AiModel $model) => $this->serializeModel(
+                $model,
+                $activeProviders->get($model->ai_provider_id),
+            ))
+            ->values();
+
+        return response()->json(['data' => $models]);
     }
 
     public function models(): JsonResponse
     {
-        return response()->json([
-            'data' => AiModel::query()
-                ->with('provider:id,name,code,driver,is_active')
-                ->orderBy('priority')
-                ->orderBy('name')
-                ->get(),
-        ]);
+        $providers = AiProvider::query()
+            ->get(['id', 'name', 'code', 'driver', 'is_active'])
+            ->keyBy('id');
+
+        $models = AiModel::query()
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (AiModel $model) => $this->serializeModel(
+                $model,
+                $providers->get($model->ai_provider_id),
+            ))
+            ->values();
+
+        return response()->json(['data' => $models]);
     }
 
     public function storeModel(Request $request): JsonResponse
@@ -200,6 +217,28 @@ class AiProviderController extends Controller
             'capabilities.*' => ['string', 'max:80'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+    }
+
+    private function serializeModel(AiModel $model, ?AiProvider $provider): array
+    {
+        return [
+            'id' => (int) $model->id,
+            'ai_provider_id' => (int) $model->ai_provider_id,
+            'code' => $model->code,
+            'name' => $model->name,
+            'model_identifier' => $model->model_identifier,
+            'priority' => (int) $model->priority,
+            'capabilities' => $model->capabilities ?? [],
+            'settings' => $model->settings ?? [],
+            'is_active' => (bool) $model->is_active,
+            'provider' => $provider ? [
+                'id' => (int) $provider->id,
+                'name' => $provider->name,
+                'code' => $provider->code,
+                'driver' => $provider->driver,
+                'is_active' => (bool) $provider->is_active,
+            ] : null,
+        ];
     }
 
     private function serializeProvider(AiProvider $provider): array
