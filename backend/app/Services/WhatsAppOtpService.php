@@ -44,7 +44,7 @@ class WhatsAppOtpService
         }
 
         $user = User::query()->where('whatsapp', $phone)->first();
-        if (! $user) {
+        if (! $user || ($user->hasRole('cliente') && ! $user->hasAnyRole(['root', 'admin']))) {
             return;
         }
 
@@ -94,7 +94,7 @@ class WhatsAppOtpService
         }
 
         $user = User::query()->where('whatsapp', $phone)->first();
-        if (! $user) {
+        if (! $user || ($user->hasRole('cliente') && ! $user->hasAnyRole(['root', 'admin']))) {
             return null;
         }
 
