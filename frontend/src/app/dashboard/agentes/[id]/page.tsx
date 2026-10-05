@@ -19,7 +19,7 @@ type AiModelOption = {
   name:string;
   model_identifier:string;
   is_active:boolean;
-  provider?:{id:number;name:string;code:string;driver:string}|null;
+  provider?:{id:number;name:string;code:string;driver:string;is_active?:boolean}|null;
 };
 type ChatMessage = { id:string; role:"user"|"assistant"; content:string; error?:boolean };
 type AgentResponse = {
@@ -91,7 +91,9 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       setAgent(found);
 
       if(modelsResponse.ok){
-        setAiModels((modelsJson.data??[]).filter((item:AiModelOption)=>item.is_active));
+        setAiModels((modelsJson.data??[]).filter(
+          (item:AiModelOption)=>item.is_active&&item.provider?.is_active!==false
+        ));
       }
 
       if(settingsResponse.ok&&settingsJson.data){
