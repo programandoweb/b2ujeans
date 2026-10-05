@@ -328,25 +328,27 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const name=agent?.name??id.charAt(0).toUpperCase()+id.slice(1);
 
   return <div className="w-full max-w-none space-y-6">
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <Link href="/dashboard/agentes" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-medium">
+    <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="grid size-12 place-items-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]"><Bot size={24}/></div>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Agente Gaspronal</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-3xl font-bold">{name}</h1>
+              <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${transport==="socket.io"?"border-emerald-200 bg-emerald-50 text-emerald-700":"border-amber-200 bg-amber-50 text-amber-800"}`}>
+                <PlugZap size={14}/>{transport==="connecting"?"Conectando…":transport==="socket.io"?"Socket.IO":"REST fallback"}
+              </span>
+            </div>
+          </div>
+        </div>
+        {agent?.role&&<p className="mt-3 text-sm text-[var(--muted)]">{agent.role}</p>}
+        {socketMessage&&<p className="mt-2 text-xs text-[var(--muted)]">{socketMessage}</p>}
+      </div>
+
+      <Link href="/dashboard/agentes" className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-medium">
         <ArrowLeft size={16}/>Agentes
       </Link>
-      <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${transport==="socket.io"?"border-emerald-200 bg-emerald-50 text-emerald-700":"border-amber-200 bg-amber-50 text-amber-800"}`}>
-        <PlugZap size={14}/>{transport==="connecting"?"Conectando…":transport==="socket.io"?"Socket.IO":"REST fallback"}
-      </span>
-    </div>
-
-    <header>
-      <div className="flex items-center gap-3">
-        <div className="grid size-12 place-items-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]"><Bot size={24}/></div>
-        <div>
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Agente Gaspronal</span>
-          <h1 className="text-3xl font-bold">{name}</h1>
-        </div>
-      </div>
-      {agent?.role&&<p className="mt-3 text-sm text-[var(--muted)]">{agent.role}</p>}
-      {socketMessage&&<p className="mt-2 text-xs text-[var(--muted)]">{socketMessage}</p>}
     </header>
 
     <section className="grid gap-6 xl:grid-cols-[1.55fr_.75fr]">
