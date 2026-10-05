@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bot, BookOpen, Boxes, BrainCircuit, CalendarDays, CornerDownRight, FileCheck2, LayoutDashboard, LogOut, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import { Bot, BookOpen, Boxes, BrainCircuit, CalendarDays, CornerDownRight, ExternalLink, FileCheck2, LayoutDashboard, LogOut, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
@@ -250,6 +250,17 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
           <div className="ml-3 min-w-0">
             <p className="truncate text-sm font-semibold">Gaspronal Industrias y Servicios S.A.S.</p>
           </div>
+
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold text-[var(--brand)] transition hover:border-[var(--brand)] hover:bg-[var(--brand-soft)]"
+            title="Abrir sitio público"
+          >
+            <span className="hidden sm:inline">Ver sitio</span>
+            <ExternalLink size={17} />
+          </a>
         </header>
 
         <main className="w-full max-w-none px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
