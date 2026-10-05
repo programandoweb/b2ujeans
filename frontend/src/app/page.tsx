@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
@@ -21,6 +22,41 @@ const whatsappHref =
   "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
+const publicBackendUrl = (
+  process.env.PUBLIC_BACKEND_URL ?? "https://backend.gaspronal.programandoweb.net"
+).replace(/\/$/, "");
+const homeOpenGraphImage = `${publicBackendUrl}/programandoweb/opengraph/home-opengraph.jpg`;
+
+export const metadata: Metadata = {
+  title: "Gaspronal | Equipos industriales y soluciones a gas",
+  description:
+    "Fabricación de equipos industriales en acero inoxidable, redes de gas, extracción industrial, mantenimiento y soluciones especiales a medida.",
+  openGraph: {
+    title: "Gaspronal | Equipos industriales y soluciones a gas",
+    description:
+      "Fabricación, instalación y servicio técnico para cocinas profesionales, industria de alimentos, redes de gas y extracción.",
+    url: "https://gaspronal.programandoweb.net/",
+    siteName: "Gaspronal",
+    locale: "es_CO",
+    type: "website",
+    images: [
+      {
+        url: homeOpenGraphImage,
+        width: 1200,
+        height: 630,
+        alt: "Fabricación industrial en acero inoxidable Gaspronal",
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gaspronal | Equipos industriales y soluciones a gas",
+    description:
+      "Fabricación, instalación y servicio técnico para cocinas profesionales, industria de alimentos, redes de gas y extracción.",
+    images: [homeOpenGraphImage],
+  },
+};
 
 async function getUseCases(): Promise<UseCaseProduct[]> {
   try {
