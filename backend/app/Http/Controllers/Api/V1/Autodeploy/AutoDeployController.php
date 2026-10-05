@@ -14,15 +14,8 @@ class AutoDeployController extends Controller
 {
     public function store(Request $request, DeploymentService $service): JsonResponse
     {
-        if (! (bool) config('autodeploy.enabled', false)) {
-            return response()->json(['message' => 'Autodeploy deshabilitado.'], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
-
-        $configuredToken = trim((string) config('autodeploy.token', ''));
-        $providedToken = trim((string) $request->bearerToken());
-
-        if ($configuredToken === '' || $providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {
-            return response()->json(['message' => 'No autorizado.'], Response::HTTP_UNAUTHORIZED);
+        if ($unauthorized = $this->authorizeRequest($request)) {
+            return $unauthorized;
         }
 
         $configuration = $service->publicConfiguration();
@@ -64,5 +57,40 @@ class AutoDeployController extends Controller
             'deployment_id' => $deployment->id,
             'status' => $deployment->status,
         ], Response::HTTP_ACCEPTED);
+    }
+
+    public function show(Request $request, Deployment $deployment): JsonResponse
+    {
+        if ($unauthorized = $this->authorizeRequest($request)) {
+            return $unauthorized;
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $deployment->id,
+                'status' => $deployment->status,
+                'started_at' => $deployment->started_at,
+                'finished_at' => $deployment->finished_at,
+                'exit_code' => $deployment->exit_code,
+                'failure_message' => $deployment->failure_message,
+                'output' => $deployment->output,
+            ],
+        ]);
+    }
+
+    private function authorizeRequest(Request $request): ?JsonResponse
+    {
+        if (! (bool) config('autodeploy.enabled', false)) {
+            return response()->json(['message' => 'Autodeploy deshabilitado.'], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        $configuredToken = trim((string) config('autodeploy.token', ''));
+        $providedToken = trim((string) $request->bearerToken());
+
+        if ($configuredToken === '' || $providedToken === '' || ! hash_equals($configuredToken, $providedToken)) {
+            return response()->json(['message' => 'No autorizado.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return null;
     }
 }
