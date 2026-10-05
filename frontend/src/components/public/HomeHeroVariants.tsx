@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -20,6 +24,11 @@ const heroBackgroundOne =
 const heroBackgroundTwo =
   "https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web-2.jpg?1791214773955";
 
+type HeroSlide = {
+  src: string;
+  position?: string;
+};
+
 function HeroBackground({
   src,
   overlay = "bg-[#082237]/75",
@@ -37,6 +46,67 @@ function HeroBackground({
       />
       <div className={"absolute inset-0 " + overlay} />
     </div>
+  );
+}
+
+function HeroCarouselBackground({
+  slides,
+  overlay,
+}: {
+  slides: HeroSlide[];
+  overlay: string;
+}) {
+  const [active, setActive] = useState(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion || slides.length < 2) return;
+
+    const timer = window.setInterval(() => {
+      setActive((current) => (current + 1) % slides.length);
+    }, 3000);
+
+    return () => window.clearInterval(timer);
+  }, [reduceMotion, slides.length]);
+
+  const current = slides[active];
+
+  return (
+    <>
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        <AnimatePresence initial={false} mode="sync">
+          <motion.div
+            key={active}
+            className="absolute inset-0 bg-cover bg-no-repeat"
+            style={{
+              backgroundImage: `url("${current.src}")`,
+              backgroundPosition: current.position ?? "center",
+            }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 1.045 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.02 }}
+            transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </AnimatePresence>
+        <div className={"absolute inset-0 " + overlay} />
+      </div>
+
+      <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-[#082237]/55 px-3 py-2 backdrop-blur-md">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            onClick={() => setActive(index)}
+            className={
+              "h-2 rounded-full transition-all duration-300 " +
+              (active === index ? "w-7 bg-[var(--accent)]" : "w-2 bg-white/55 hover:bg-white")
+            }
+            aria-label={"Mostrar slide " + (index + 1)}
+            aria-current={active === index ? "true" : undefined}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -95,13 +165,27 @@ function ProposalSelector({ option }: { option: number }) {
   );
 }
 
-export default function HomeHeroVariants({ option }: { option: number }) {
+export default function HomeHeroVariants({
+  option,
+  publicBackendUrl,
+}: {
+  option: number;
+  publicBackendUrl: string;
+}) {
   const selector = <ProposalSelector option={option} />;
+  const carouselSlides: HeroSlide[] = [
+    { src: heroBackgroundOne, position: "center 38%" },
+    { src: heroBackgroundTwo, position: "center" },
+    {
+      src: publicBackendUrl.replace(/\/$/, "") + "/programandoweb/opengraph/home-opengraph.jpg",
+      position: "center",
+    },
+  ];
 
   if (option === 2) {
     return (
       <section className="relative overflow-hidden border-b border-slate-200 bg-[#f7fafc]">
-        <HeroBackground src={heroBackgroundTwo} overlay="bg-white/88" position="center" />
+        <HeroCarouselBackground slides={carouselSlides} overlay="bg-white/84" />
         {selector}
         <div className="mx-auto grid max-w-[1440px] items-stretch pt-14 lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
           <div className="flex items-center px-4 py-14 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
@@ -179,7 +263,7 @@ export default function HomeHeroVariants({ option }: { option: number }) {
   if (option === 3) {
     return (
       <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-        <HeroBackground src={heroBackgroundOne} overlay="bg-white/90" position="center 35%" />
+        <HeroCarouselBackground slides={carouselSlides} overlay="bg-white/87" />
         {selector}
         <div className="mx-auto max-w-[1440px] px-4 pb-14 pt-24 sm:px-6 sm:pb-20 lg:px-10 lg:pb-24">
           <div className="grid items-end gap-10 lg:grid-cols-[1.12fr_0.88fr]">
@@ -294,7 +378,7 @@ export default function HomeHeroVariants({ option }: { option: number }) {
   if (option === 5) {
     return (
       <section className="relative overflow-hidden border-b border-slate-200 bg-[#f6f9fb]">
-        <HeroBackground src={heroBackgroundOne} overlay="bg-[#edf4f8]/88" position="center 40%" />
+        <HeroCarouselBackground slides={carouselSlides} overlay="bg-[#edf4f8]/84" />
         {selector}
         <div className="mx-auto max-w-[1440px] px-4 pb-16 pt-24 sm:px-6 lg:px-10 lg:pb-24">
           <div className="rounded-[2.5rem] bg-white p-6 shadow-[0_30px_80px_rgba(13,43,64,0.10)] sm:p-10 lg:p-14">
