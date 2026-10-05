@@ -21,7 +21,7 @@ type AiModelOption = {
   is_active:boolean;
   provider?:{id:number;name:string;code:string;driver:string;is_active?:boolean}|null;
 };
-type ChatMessage = { id:string; role:"user"|"assistant"; content:string; error?:boolean };
+type ChatMessage = { id:string; role:"user"|"assistant"; content:string; error?:boolean; progress?:boolean };
 type AgentResponse = {
   requestId:string;
   agent:Agent;
@@ -134,6 +134,15 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           if(!active)return;
           setTransport("rest");
           setSocketMessage("Socket.IO no disponible; REST fallback activo.");
+        });
+        socket.on("agent:progress",(payload:{requestId?:string;agentId?:string;message?:string})=>{
+          if(!active||!payload?.message)return;
+          setMessages(current=>[...current,{
+            id:crypto.randomUUID(),
+            role:"assistant",
+            content:payload.message,
+            progress:true,
+          }]);
         });
         socket.on("agent:response",(response:AgentResponse)=>{
           if(!active)return;
@@ -304,7 +313,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
 
     const socket=socketRef.current;
     if(transport==="socket.io"&&socket?.connected){
-      socket.emit("agent:message",{agentId:id,message,requestId,history:messages.map(({role,content})=>({role,content}))});
+      socket.emit("agent:message",{agentId:id,message,requestId,history:messages.filter(item=>!item.progress).map(({role,content})=>({role,content}))});
       return;
     }
 
@@ -312,7 +321,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       const response=await fetch(`/api/agents/${id}/messages`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message,requestId,history:messages.map(({role,content})=>({role,content}))}),
+        body:JSON.stringify({message,requestId,history:messages.filter(item=>!item.progress).map(({role,content})=>({role,content}))}),
       });
       const json=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(json.message??"No fue posible consultar el agente.");
@@ -364,9 +373,11 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{settings?.primary_ai_model_id?"El modelo principal seleccionado está listo para este agente.":settings?.has_api_key?"Gemini está configurado para este agente.":"Configura primero un modelo principal en el panel lateral."}</p>
           </div>}
           {messages.map(message=><div key={message.id} className={`flex ${message.role==="user"?"justify-end":"justify-start"}`}>
-            <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${message.role==="user"?"bg-[var(--brand)] text-white":message.error?"border border-red-200 bg-red-50 text-red-800":"bg-[var(--app-bg)] text-[var(--app-fg)]"}`}>{message.content}</div>
+            <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${message.role==="user"?"bg-[var(--brand)] text-white":message.error?"border border-red-200 bg-red-50 text-red-800":message.progress?"border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]":"bg-[var(--app-bg)] text-[var(--app-fg)]"}`}>
+              {message.progress?<span className="inline-flex items-start gap-2"><LoaderCircle size={15} className="mt-1 shrink-0 animate-spin text-[var(--brand)]"/><span>{message.content}</span></span>:message.content}
+            </div>
           </div>)}
-          {sending&&<div className="flex justify-start"><div className="inline-flex items-center gap-2 rounded-2xl bg-[var(--app-bg)] px-4 py-3 text-sm text-[var(--muted)]"><LoaderCircle size={16} className="animate-spin"/>{name} está respondiendo…</div></div>}
+          {sending&&id!=="lucia"&&<div className="flex justify-start"><div className="inline-flex items-center gap-2 rounded-2xl bg-[var(--app-bg)] px-4 py-3 text-sm text-[var(--muted)]"><LoaderCircle size={16} className="animate-spin"/>{name} está respondiendo…</div></div>}
           <div ref={bottomRef}/>
         </div>
 
