@@ -11,6 +11,8 @@ class AgentSetting extends Model
         'provider',
         'api_key',
         'model',
+        'primary_ai_model_id',
+        'fallback_ai_model_id',
     ];
 
     protected $hidden = [
@@ -22,5 +24,15 @@ class AgentSetting extends Model
         return [
             'api_key' => 'encrypted',
         ];
+    }
+
+    public function primaryAiModel()
+    {
+        return $this->belongsTo(AiModel::class, 'primary_ai_model_id');
+    }
+
+    public function fallbackAiModel()
+    {
+        return $this->belongsTo(AiModel::class, 'fallback_ai_model_id');
     }
 }
