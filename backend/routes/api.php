@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('heroes/public', [HeroSlideController::class, 'publicIndex']);
     Route::get('heroes/media/{heroSlide}/{filename}', [HeroSlideController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('catalog/items/{catalogItem}/media/{filename}', [CatalogController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
+    Route::get('content/posts/{post}/media/{filename}', [PostController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('internal/agents/{agent}/credentials', [AgentSettingController::class, 'internalCredentials']);
     Route::post('internal/agents/{agent}/commercial-tools', [InternalAgentCommercialController::class, 'execute']);
     Route::post('internal/agents/{agent}/knowledge-tools', [InternalAgentKnowledgeController::class, 'execute']);
@@ -130,6 +131,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('content/posts', [PostController::class, 'store'])->middleware('permission:content.manage');
         Route::put('content/posts/{post}', [PostController::class, 'update'])->middleware('permission:content.manage');
         Route::delete('content/posts/{post}', [PostController::class, 'destroy'])->middleware('permission:content.manage');
+        Route::post('content/posts/{post}/gallery', [PostController::class, 'uploadGallery'])->middleware('permission:content.manage');
+        Route::put('content/posts/{post}/gallery/primary', [PostController::class, 'setPrimaryGalleryImage'])->middleware('permission:content.manage');
+        Route::delete('content/posts/{post}/gallery', [PostController::class, 'destroyGalleryImage'])->middleware('permission:content.manage');
         Route::get('content/post-categories', [PostController::class, 'categories'])->middleware('permission:content.view');
         Route::post('content/post-categories', [PostController::class, 'storeCategory'])->middleware('permission:content.manage');
         Route::put('content/post-categories/{postCategory}', [PostController::class, 'updateCategory'])->middleware('permission:content.manage');
