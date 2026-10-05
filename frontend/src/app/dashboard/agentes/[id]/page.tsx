@@ -273,7 +273,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
     setSaving(true);
     setSettingsMessage("");
 
-    const usesCentralModels=!["claudio","sofia"].includes(id);
+    const usesCentralModels=id!=="sofia";
     const payload:Record<string,unknown>=usesCentralModels
       ? {
           primary_ai_model_id:primaryAiModelId?Number(primaryAiModelId):null,
@@ -298,7 +298,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
 
     setSettings(json.data);
     setApiKey("");
-    setSettingsMessage(!["claudio","sofia"].includes(id)
+    setSettingsMessage(id!=="sofia"
       ?"Modelos del agente actualizados."
       :"Configuración guardada. La API key quedó cifrada en Laravel.");
   }
@@ -487,7 +487,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           {researchMessage&&<p className="text-xs font-medium text-[var(--brand)]">{researchMessage}</p>}
         </section>}
 
-        {!["claudio","sofia"].includes(id)?(
+        {id!=="sofia"?(
           <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
             <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Modelo de IA</h2></div>
             <p className="text-sm leading-6 text-[var(--muted)]">
