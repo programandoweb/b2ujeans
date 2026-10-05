@@ -498,3 +498,17 @@ El agente `lucia` utiliza `extensions/gaspronal-browser-collector` para recolect
 - El backend expone lectura pública mediante `/api/v1/content/public/posts` y `/api/v1/content/public/posts/{slug}`; borradores y archivados nunca deben aparecer en estas rutas.
 - El header público reserva su altura en el flujo y, después de comenzar el scroll, pasa a `position: fixed` en `top: 0` para evitar que un ancestro con overflow anule el comportamiento sticky.
 - Los enlaces de secciones del header usan rutas absolutas del home (`/#productos`, `/#servicios`, etc.) para funcionar también desde Gaspro-notas y otras páginas públicas.
+
+## 24. Open Graph y SEO editorial de Gaspro-notas
+
+Las Gaspro-notas son contenido comercial público y su presentación al compartir enlaces es una capacidad crítica del producto.
+
+- Cada `/gaspro-notas/{slug}` debe emitir canonical absoluto, title, description, robots, Open Graph de tipo `article` y Twitter Card `summary_large_image`.
+- La tarjeta social se genera en `/api/og/gaspro-notas/{slug}` con formato exacto 1200×630, identidad visual Gaspronal, título de la nota, resumen y la imagen principal cuando exista.
+- El `og:image` debe ser una URL absoluta, pública y sin autenticación. Debe declarar ancho 1200, alto 630 y MIME `image/png`.
+- La URL del `og:image` incorpora una versión derivada de `updated_at` o `published_at` para invalidar cachés sociales cuando la nota cambia.
+- Las URLs sociales y canonical se construyen con el host real de la solicitud pública, respetando `X-Forwarded-Host` y `X-Forwarded-Proto`, para no publicar accidentalmente URLs internas o de otro dominio.
+- Cada artículo incluye JSON-LD `Article` y `BreadcrumbList`, con fecha de publicación/modificación, imágenes, autor y publisher Gaspronal.
+- El metadata global mantiene `metadataBase`, identidad de autor/editor y directivas para permitir previews grandes de imagen.
+- No depender únicamente de la imagen editorial original como `og:image`: WhatsApp y redes deben recibir la tarjeta de marca generada específicamente para social sharing.
+
