@@ -2,12 +2,11 @@
 
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +31,7 @@ export default function LoginPage() {
       return;
     }
 
-    const requestedNext = searchParams.get("next");
+    const requestedNext = new URLSearchParams(window.location.search).get("next");
     const safeNext = requestedNext?.startsWith("/dashboard") ? requestedNext : "/dashboard";
     router.replace(safeNext);
     router.refresh();
