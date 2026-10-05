@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('health', HealthController::class);
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
     Route::get('catalog/public/items', [CatalogController::class, 'publicIndex']);
+    Route::get('catalog/public/use-cases', [CatalogController::class, 'publicUseCases']);
     Route::get('catalog/public/items/{slug}', [CatalogController::class, 'publicShow']);
     Route::get('catalog/public/categories', [CatalogController::class, 'publicCategories']);
     Route::get('catalog/items/{catalogItem}/media/{filename}', [CatalogController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
