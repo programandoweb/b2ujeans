@@ -132,7 +132,24 @@ echo "[health] Realtime..."
 compose exec -T realtime node -e "fetch('http://127.0.0.1:4100/health').then(async r=>{if(!r.ok)process.exit(1);console.log(await r.text())}).catch(()=>process.exit(1))"
 
 echo "[health] Frontend..."
-compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/
+FRONTEND_HEALTH_OK=0
+for attempt in $(seq 1 30); do
+  if compose exec -T frontend wget -q -O /dev/null http://127.0.0.1:3000/; then
+    FRONTEND_HEALTH_OK=1
+    echo "[health] Frontend disponible (intento $attempt/30)."
+    break
+  fi
+
+  echo "[health] Frontend aún iniciando (intento $attempt/30)..."
+  sleep 2
+done
+
+if [[ "$FRONTEND_HEALTH_OK" -ne 1 ]]; then
+  echo "[health] Frontend no respondió después de 60 segundos."
+  compose ps frontend
+  compose logs frontend --tail=100
+  exit 1
+fi
 
 echo "[deploy] Estado de servicios:"
 compose ps
