@@ -5,6 +5,7 @@ import { AgentGateway } from "./agents/agent.gateway";
 import { AgentRegistryService } from "./agents/agent-registry.service";
 import { AgentRuntimeService } from "./agents/agent-runtime.service";
 import { GeminiService } from "./agents/gemini.service";
+import { OpenAiCompatibleService } from "./agents/openai-compatible.service";
 import { LaravelAgentSettingsClient } from "./agents/laravel-agent-settings.client";
 import { LaravelCommercialClient } from "./agents/laravel-commercial.client";
 import { LaravelKnowledgeClient } from "./agents/laravel-knowledge.client";
@@ -22,6 +23,7 @@ import { LaravelChannelsClient } from "./channels/laravel-channels.client";
     AgentRegistryService,
     AgentRuntimeService,
     GeminiService,
+    OpenAiCompatibleService,
     LaravelAgentSettingsClient,
     LaravelCommercialClient,
     LaravelKnowledgeClient,
