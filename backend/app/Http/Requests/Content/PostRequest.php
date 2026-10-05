@@ -13,6 +13,8 @@ class PostRequest extends FormRequest {
    'excerpt'=>['nullable','string'],
    'content'=>['nullable','string'],
    'featured_image'=>['nullable','string','max:2048'],
+   'gallery'=>['nullable','array','max:20'],
+   'gallery.*'=>['string','max:2048'],
    'status'=>['required',Rule::in(['draft','published','archived'])],
    'seo_title'=>['nullable','string','max:190'],
    'seo_description'=>['nullable','string'],
