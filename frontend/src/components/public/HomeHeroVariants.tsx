@@ -5,13 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import {
   ArrowRight,
-  ChefHat,
   Flame,
-  Gauge,
   Hammer,
   Settings,
   ShieldCheck,
-  Sparkles,
   Wind,
   Wrench,
 } from "lucide-react";
@@ -24,9 +21,18 @@ const heroBackgroundOne =
 const heroBackgroundTwo =
   "https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web-2.jpg?1791214773955";
 
-type HeroSlide = {
+type FullHeroSlide = {
   src: string;
   position?: string;
+  eyebrow: string;
+  title: string;
+  accent: string;
+  description: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+  cards: Array<[string, string]>;
 };
 
 function HeroBackground({
@@ -49,12 +55,12 @@ function HeroBackground({
   );
 }
 
-function HeroCarouselBackground({
+function FullHeroCarousel({
+  option,
   slides,
-  overlay,
 }: {
-  slides: HeroSlide[];
-  overlay: string;
+  option: number;
+  slides: FullHeroSlide[];
 }) {
   const [active, setActive] = useState(0);
   const reduceMotion = useReducedMotion();
@@ -69,29 +75,100 @@ function HeroCarouselBackground({
     return () => window.clearInterval(timer);
   }, [reduceMotion, slides.length]);
 
-  const current = slides[active];
+  const slide = slides[active];
 
   return (
-    <>
-      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-        <AnimatePresence initial={false} mode="sync">
-          <motion.div
-            key={active}
-            className="absolute inset-0 bg-cover bg-no-repeat"
-            style={{
-              backgroundImage: `url("${current.src}")`,
-              backgroundPosition: current.position ?? "center",
-            }}
-            initial={reduceMotion ? false : { opacity: 0, scale: 1.045 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.02 }}
-            transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
-          />
-        </AnimatePresence>
-        <div className={"absolute inset-0 " + overlay} />
-      </div>
+    <section className="relative overflow-hidden bg-[#0b2b40] text-white">
+      <AnimatePresence initial={false} mode="sync">
+        <motion.div
+          key={"bg-" + active}
+          className="absolute inset-0 bg-cover bg-no-repeat"
+          style={{
+            backgroundImage: `url("${slide.src}")`,
+            backgroundPosition: slide.position ?? "center",
+          }}
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.045 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.02 }}
+          transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden="true"
+        />
+      </AnimatePresence>
 
-      <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-[#082237]/55 px-3 py-2 backdrop-blur-md">
+      <div className="absolute inset-0 bg-[#082237]/76" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#061d30]/70 via-[#0b2b40]/34 to-[#0b2b40]/58" />
+      <div className="absolute right-[-8%] top-[-18%] size-[620px] rounded-full border-[120px] border-white/[0.035]" />
+      <div className="absolute bottom-[-28%] left-[18%] size-[520px] rounded-full border-[100px] border-white/[0.03]" />
+
+      <ProposalSelector option={option} />
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={"content-" + active}
+          className="relative mx-auto grid min-h-[760px] max-w-[1440px] gap-10 px-4 pb-20 pt-24 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-10"
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
+          transition={{ duration: reduceMotion ? 0 : 0.65, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="max-w-5xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/80 backdrop-blur">
+              <ShieldCheck size={15} className="text-[#ff9a5b]" />
+              {slide.eyebrow}
+            </div>
+
+            <h1 className="mt-7 text-[clamp(3.4rem,8vw,8rem)] font-black leading-[0.84] tracking-[-0.075em]">
+              {slide.title} <span className="text-[#ff8a47]">{slide.accent}</span>
+            </h1>
+
+            <p className="mt-8 max-w-2xl text-base leading-7 text-slate-200 sm:text-xl sm:leading-8">
+              {slide.description}
+            </p>
+
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <a
+                href={slide.primaryHref}
+                target={slide.primaryHref.startsWith("http") ? "_blank" : undefined}
+                rel={slide.primaryHref.startsWith("http") ? "noreferrer" : undefined}
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-7 text-sm font-black text-white transition hover:bg-[var(--accent-hover)]"
+              >
+                {slide.primaryLabel} <ArrowRight size={18} />
+              </a>
+              <a
+                href={slide.secondaryHref}
+                className="inline-flex min-h-14 items-center justify-center rounded-full border border-white/25 bg-white/5 px-7 text-sm font-black text-white backdrop-blur transition hover:bg-white/10"
+              >
+                {slide.secondaryLabel}
+              </a>
+            </div>
+          </div>
+
+          <div className="grid gap-3 self-end lg:self-center">
+            {slide.cards.map(([title, text], index) => (
+              <motion.div
+                key={title}
+                className={
+                  "rounded-[1.75rem] border p-6 backdrop-blur-md " +
+                  (index === 0
+                    ? "border-[#ff9a5b]/50 bg-[#ff9a5b]/10"
+                    : "border-white/15 bg-white/[0.08]")
+                }
+                initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: reduceMotion ? 0 : 0.08 + index * 0.08, duration: 0.45 }}
+              >
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+                  0{index + 1}
+                </span>
+                <strong className="mt-3 block text-2xl font-black">{title}</strong>
+                <span className="mt-2 block text-sm leading-6 text-slate-200">{text}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-[#082237]/60 px-3 py-2 backdrop-blur-md">
         {slides.map((_, index) => (
           <button
             key={index}
@@ -99,43 +176,16 @@ function HeroCarouselBackground({
             onClick={() => setActive(index)}
             className={
               "h-2 rounded-full transition-all duration-300 " +
-              (active === index ? "w-7 bg-[var(--accent)]" : "w-2 bg-white/55 hover:bg-white")
+              (active === index ? "w-8 bg-[var(--accent)]" : "w-2 bg-white/50 hover:bg-white")
             }
             aria-label={"Mostrar slide " + (index + 1)}
             aria-current={active === index ? "true" : undefined}
           />
         ))}
       </div>
-    </>
+    </section>
   );
 }
-
-const services = [
-  {
-    icon: Hammer,
-    title: "Fabricación industrial",
-    description:
-      "Equipos en acero inoxidable diseñados para restaurantes, panaderías, comidas rápidas y procesos de alimentos.",
-  },
-  {
-    icon: Flame,
-    title: "Redes de gas",
-    description:
-      "Instalación de redes de gas propano y natural para aplicaciones comerciales, industriales y residenciales.",
-  },
-  {
-    icon: Wind,
-    title: "Extracción industrial",
-    description:
-      "Montaje de sistemas de extracción para cocinas y espacios que exigen evacuación eficiente de humos.",
-  },
-  {
-    icon: Wrench,
-    title: "Servicio técnico",
-    description:
-      "Mantenimiento, reparación e instalación de equipos a gas domésticos e industriales.",
-  },
-];
 
 function ProposalSelector({ option }: { option: number }) {
   return (
@@ -173,157 +223,186 @@ export default function HomeHeroVariants({
   publicBackendUrl: string;
 }) {
   const selector = <ProposalSelector option={option} />;
-  const carouselSlides: HeroSlide[] = [
-    { src: heroBackgroundOne, position: "center 38%" },
-    { src: heroBackgroundTwo, position: "center" },
+  const industrialImage =
+    publicBackendUrl.replace(/\/$/, "") + "/programandoweb/opengraph/home-opengraph.jpg";
+
+  const option2Slides: FullHeroSlide[] = [
     {
-      src: publicBackendUrl.replace(/\/$/, "") + "/programandoweb/opengraph/home-opengraph.jpg",
+      src: heroBackgroundOne,
+      position: "center 38%",
+      eyebrow: "Industria alimentaria · Gas · Extracción",
+      title: "Ingeniería que",
+      accent: "mueve tu negocio.",
+      description:
+        "Diseñamos y fabricamos equipos industriales en acero inoxidable, instalamos redes de gas y desarrollamos soluciones de extracción para operaciones que exigen rendimiento.",
+      primaryLabel: "Cotizar mi proyecto",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Ver productos",
+      secondaryHref: "#productos",
+      cards: [
+        ["Fabricamos", "Equipos industriales en acero inoxidable"],
+        ["Instalamos", "Gas natural, propano y extracción"],
+        ["Respondemos", "Servicio técnico y mantenimiento"],
+      ],
+    },
+    {
+      src: heroBackgroundTwo,
       position: "center",
+      eyebrow: "Cocinas profesionales · Producción",
+      title: "Equipos hechos para",
+      accent: "trabajar de verdad.",
+      description:
+        "Soluciones robustas para restaurantes, panaderías y procesos de alimentos que necesitan continuidad, seguridad y alto rendimiento.",
+      primaryLabel: "Hablar con un asesor",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Conocer servicios",
+      secondaryHref: "#servicios",
+      cards: [
+        ["Diseñamos", "Según capacidad, espacio y proceso"],
+        ["Construimos", "Acero inoxidable para trabajo continuo"],
+        ["Acompañamos", "Instalación, puesta en marcha y soporte"],
+      ],
+    },
+    {
+      src: industrialImage,
+      position: "center",
+      eyebrow: "Fabricación · Precisión · Experiencia",
+      title: "Acero, técnica y",
+      accent: "precisión industrial.",
+      description:
+        "Convertimos requerimientos técnicos en equipos y soluciones listas para integrarse a tu operación diaria.",
+      primaryLabel: "Diseñar mi solución",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Ver ingeniería",
+      secondaryHref: "#ingenieria",
+      cards: [
+        ["A medida", "Desarrollo según tu necesidad"],
+        ["AISI 304", "Material para aplicaciones de alimentos"],
+        ["Integración", "Equipos, gas, extracción y soporte"],
+      ],
+    },
+  ];
+
+  const option3Slides: FullHeroSlide[] = [
+    {
+      src: industrialImage,
+      position: "center",
+      eyebrow: "Catálogo industrial Gaspronal",
+      title: "El equipo correcto para",
+      accent: "cada operación.",
+      description:
+        "Encuentra soluciones para cocción, preparación, producción y extracción, con fabricación especial cuando el proceso lo requiere.",
+      primaryLabel: "Explorar catálogo",
+      primaryHref: "#productos",
+      secondaryLabel: "Pedir recomendación",
+      secondaryHref: whatsappHref,
+      cards: [
+        ["Cocción", "Estufas, hornos y planchas"],
+        ["Producción", "Marmitas, freidoras y equipos especiales"],
+        ["Preparación", "Mesas, mesones y estaciones de trabajo"],
+      ],
+    },
+    {
+      src: heroBackgroundOne,
+      position: "center 38%",
+      eyebrow: "Equipamiento para producción real",
+      title: "Más rendimiento en",
+      accent: "menos espacio.",
+      description:
+        "Configuramos estaciones y equipos pensando en flujo de trabajo, capacidad, consumo energético y facilidad de mantenimiento.",
+      primaryLabel: "Ver productos",
+      primaryHref: "#productos",
+      secondaryLabel: "Cotizar proyecto",
+      secondaryHref: whatsappHref,
+      cards: [
+        ["Rendimiento", "Equipos pensados para operación continua"],
+        ["Distribución", "Soluciones adaptadas al espacio disponible"],
+        ["Soporte", "Instalación y mantenimiento técnico"],
+      ],
+    },
+    {
+      src: heroBackgroundTwo,
+      position: "center",
+      eyebrow: "Soluciones estándar y especiales",
+      title: "Tu proceso define",
+      accent: "el equipo.",
+      description:
+        "Si el catálogo no resuelve exactamente tu necesidad, diseñamos una solución especial con las dimensiones y prestaciones que necesitas.",
+      primaryLabel: "Solicitar asesoría",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Ver capacidades",
+      secondaryHref: "#servicios",
+      cards: [
+        ["Diagnóstico", "Revisamos necesidad y capacidad"],
+        ["Diseño", "Definimos configuración y dimensiones"],
+        ["Fabricación", "Construimos e instalamos la solución"],
+      ],
+    },
+  ];
+
+  const option5Slides: FullHeroSlide[] = [
+    {
+      src: heroBackgroundTwo,
+      position: "center",
+      eyebrow: "Gaspronal Industrias y Servicios",
+      title: "Una empresa para resolver",
+      accent: "toda tu operación.",
+      description:
+        "Fabricación de equipos, redes de gas, extracción, instalación y soporte técnico con un mismo equipo especializado.",
+      primaryLabel: "Hablar con un asesor",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Ver servicios",
+      secondaryHref: "#servicios",
+      cards: [
+        ["Equipos", "Fabricación industrial en acero inoxidable"],
+        ["Infraestructura", "Gas y sistemas de extracción"],
+        ["Postventa", "Servicio técnico y mantenimiento"],
+      ],
+    },
+    {
+      src: industrialImage,
+      position: "center",
+      eyebrow: "Ingeniería aplicada a tu negocio",
+      title: "De la necesidad a",
+      accent: "la operación.",
+      description:
+        "Integramos diseño, fabricación e instalación para que cada solución llegue lista para aportar productividad a tu negocio.",
+      primaryLabel: "Contar mi proyecto",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Conocer Gaspronal",
+      secondaryHref: "#nosotros",
+      cards: [
+        ["Planeamos", "Necesidad, espacio y requerimientos"],
+        ["Ejecutamos", "Fabricación e instalación coordinadas"],
+        ["Soportamos", "Acompañamiento después de la entrega"],
+      ],
+    },
+    {
+      src: heroBackgroundOne,
+      position: "center 38%",
+      eyebrow: "Soluciones que trabajan juntas",
+      title: "Menos proveedores.",
+      accent: "Más control.",
+      description:
+        "Centraliza fabricación, instalación de gas, extracción y mantenimiento con un único aliado técnico para tu operación.",
+      primaryLabel: "Solicitar asesoría",
+      primaryHref: whatsappHref,
+      secondaryLabel: "Ver productos",
+      secondaryHref: "#productos",
+      cards: [
+        ["Un solo equipo", "Coordinación técnica de principio a fin"],
+        ["Más trazabilidad", "Responsabilidad clara sobre la solución"],
+        ["Más continuidad", "Soporte para mantener la operación activa"],
+      ],
     },
   ];
 
   if (option === 2) {
-    return (
-      <section className="relative overflow-hidden border-b border-slate-200 bg-[#f7fafc]">
-        <HeroCarouselBackground slides={carouselSlides} overlay="bg-white/84" />
-        {selector}
-        <div className="mx-auto grid max-w-[1440px] items-stretch pt-14 lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
-          <div className="flex items-center px-4 py-14 sm:px-6 sm:py-20 lg:px-10 lg:py-24">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/15 bg-white px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm">
-                <Sparkles size={15} />
-                Ingeniería para cocinas y procesos industriales
-              </div>
-              <h1 className="mt-7 max-w-[850px] text-[clamp(3.1rem,7vw,7.4rem)] font-black leading-[0.9] tracking-[-0.065em] text-[#102d42]">
-                Equipos que están hechos para <span className="text-[var(--brand)]">trabajar.</span>
-              </h1>
-              <p className="mt-7 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-                Diseñamos, fabricamos, instalamos y mantenemos soluciones para cocinas profesionales,
-                producción de alimentos, redes de gas y extracción industrial.
-              </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#productos"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-bold text-white transition hover:bg-[var(--brand-hover)]"
-                >
-                  Conocer soluciones <ArrowRight size={18} />
-                </a>
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-slate-800 transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                >
-                  Cuéntanos tu proyecto
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative min-h-[520px] overflow-hidden bg-[#0d2b40] lg:min-h-full">
-            <div className="absolute inset-x-0 top-0 h-2 bg-[var(--accent)]" />
-            <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full border-[60px] border-white/5" />
-            <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full border-[70px] border-white/5" />
-            <div className="relative flex h-full min-h-[520px] flex-col justify-between p-6 sm:p-10 lg:p-12">
-              <div className="flex items-start justify-between gap-4">
-                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white/75">
-                  Gaspronal · Industria
-                </span>
-                <ShieldCheck className="text-[var(--accent)]" size={34} />
-              </div>
-
-              <div className="my-12">
-                <p className="max-w-xl text-4xl font-black leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-                  Acero, calor y precisión para operaciones que no pueden parar.
-                </p>
-                <p className="mt-6 max-w-lg text-base leading-7 text-slate-300">
-                  Esta opción conserva el concepto visual que ya tiene la página, pero lo presenta como una propuesta de hero formal.
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  ["AISI 304", "Acero inoxidable"],
-                  ["Gas", "Natural y propano"],
-                  ["A medida", "Diseño especial"],
-                ].map(([value, label]) => (
-                  <div key={value} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
-                    <strong className="block text-xl font-black text-white">{value}</strong>
-                    <span className="mt-1 block text-xs font-medium text-slate-300">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+    return <FullHeroCarousel option={2} slides={option2Slides} />;
   }
 
   if (option === 3) {
-    return (
-      <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-        <HeroCarouselBackground slides={carouselSlides} overlay="bg-white/87" />
-        {selector}
-        <div className="mx-auto max-w-[1440px] px-4 pb-14 pt-24 sm:px-6 sm:pb-20 lg:px-10 lg:pb-24">
-          <div className="grid items-end gap-10 lg:grid-cols-[1.12fr_0.88fr]">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--accent)]">
-                Catálogo industrial Gaspronal
-              </p>
-              <h1 className="mt-5 max-w-5xl text-[clamp(3rem,7vw,7rem)] font-black leading-[0.9] tracking-[-0.065em] text-[#102d42]">
-                El equipo correcto para <span className="text-[var(--brand)]">cada operación.</span>
-              </h1>
-            </div>
-
-            <div className="lg:pb-2">
-              <p className="max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-                Explora líneas de producto o cuéntanos qué necesitas producir. Fabricamos equipos estándar y soluciones especiales en acero inoxidable.
-              </p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#productos"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-black text-white"
-                >
-                  Explorar catálogo <ArrowRight size={18} />
-                </a>
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-13 items-center justify-center rounded-full border border-slate-300 px-6 text-sm font-black text-[#102d42]"
-                >
-                  Pedir recomendación
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <a href="#productos" className="rounded-[1.75rem] border border-slate-200 bg-[#f7fafc] p-6 transition hover:-translate-y-1 hover:border-[var(--brand)] hover:bg-white hover:shadow-xl">
-              <Flame className="text-[var(--brand)]" size={25} />
-              <strong className="mt-8 block text-xl font-black text-[#102d42]">Cocción</strong>
-              <span className="mt-2 block text-sm text-slate-500">Estufas · hornos · planchas</span>
-            </a>
-            <a href="#productos" className="rounded-[1.75rem] border border-slate-200 bg-[#f7fafc] p-6 transition hover:-translate-y-1 hover:border-[var(--brand)] hover:bg-white hover:shadow-xl">
-              <Gauge className="text-[var(--brand)]" size={25} />
-              <strong className="mt-8 block text-xl font-black text-[#102d42]">Producción</strong>
-              <span className="mt-2 block text-sm text-slate-500">Marmitas · freidoras</span>
-            </a>
-            <a href="#productos" className="rounded-[1.75rem] border border-slate-200 bg-[#f7fafc] p-6 transition hover:-translate-y-1 hover:border-[var(--brand)] hover:bg-white hover:shadow-xl">
-              <ChefHat className="text-[var(--brand)]" size={25} />
-              <strong className="mt-8 block text-xl font-black text-[#102d42]">Preparación</strong>
-              <span className="mt-2 block text-sm text-slate-500">Mesas · mesones</span>
-            </a>
-            <a href="#productos" className="rounded-[1.75rem] border border-slate-200 bg-[#f7fafc] p-6 transition hover:-translate-y-1 hover:border-[var(--brand)] hover:bg-white hover:shadow-xl">
-              <Wind className="text-[var(--brand)]" size={25} />
-              <strong className="mt-8 block text-xl font-black text-[#102d42]">Ambiente</strong>
-              <span className="mt-2 block text-sm text-slate-500">Campanas · extracción</span>
-            </a>
-          </div>
-        </div>
-      </section>
-    );
+    return <FullHeroCarousel option={3} slides={option3Slides} />;
   }
 
   if (option === 4) {
@@ -376,58 +455,7 @@ export default function HomeHeroVariants({
   }
 
   if (option === 5) {
-    return (
-      <section className="relative overflow-hidden border-b border-slate-200 bg-[#f6f9fb]">
-        <HeroCarouselBackground slides={carouselSlides} overlay="bg-[#edf4f8]/84" />
-        {selector}
-        <div className="mx-auto max-w-[1440px] px-4 pb-16 pt-24 sm:px-6 lg:px-10 lg:pb-24">
-          <div className="rounded-[2.5rem] bg-white p-6 shadow-[0_30px_80px_rgba(13,43,64,0.10)] sm:p-10 lg:p-14">
-            <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">
-                  Gaspronal Industrias y Servicios
-                </p>
-                <h1 className="mt-5 text-[clamp(2.8rem,6vw,6rem)] font-black leading-[0.92] tracking-[-0.06em] text-[#102d42]">
-                  Una sola empresa para resolver tu <span className="text-[var(--brand)]">operación industrial.</span>
-                </h1>
-                <p className="mt-7 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-                  Fabricación de equipos, redes de gas, extracción, instalación y soporte técnico con un mismo equipo.
-                </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-black text-white"
-                  >
-                    Hablar con un asesor <ArrowRight size={18} />
-                  </a>
-                  <a
-                    href="#servicios"
-                    className="inline-flex min-h-13 items-center justify-center rounded-full border border-slate-300 px-6 text-sm font-black text-[#102d42]"
-                  >
-                    Ver capacidades
-                  </a>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {services.map((service) => {
-                  const Icon = service.icon;
-                  return (
-                    <div key={service.title} className="rounded-[1.75rem] border border-slate-200 bg-[#f7fafc] p-6">
-                      <Icon size={24} className="text-[var(--brand)]" />
-                      <strong className="mt-7 block text-lg font-black text-[#102d42]">{service.title}</strong>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">{service.description}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+    return <FullHeroCarousel option={5} slides={option5Slides} />;
   }
 
   return (
