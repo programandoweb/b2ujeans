@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
-import HomeHeroVariants from "@/components/public/HomeHeroVariants";
+import HomeHeroVariants, { type FullHeroSlide } from "@/components/public/HomeHeroVariants";
 import {
   ArrowRight,
   Building2,
@@ -57,6 +57,52 @@ export const metadata: Metadata = {
     images: [homeOpenGraphImage],
   },
 };
+
+async function getManagedHeroes(): Promise<Record<number, FullHeroSlide[]>> {
+  try {
+    const response = await fetch(`${backendUrl}/api/v1/heroes/public`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) return {};
+
+    const payload = await response.json();
+    const result: Record<number, FullHeroSlide[]> = {};
+
+    for (const [option, slides] of Object.entries(payload.data ?? {})) {
+      result[Number(option)] = (slides as Array<Record<string, unknown>>).map((slide) => {
+        const rawUrl = String(slide.image_url ?? "");
+        const src = rawUrl.startsWith("/") ? publicBackendUrl + rawUrl : rawUrl;
+        const cards = Array.isArray(slide.cards)
+          ? slide.cards.map((card) => {
+              const item = card as { title?: string; text?: string };
+              return [String(item.title ?? ""), String(item.text ?? "")] as [string, string];
+            })
+          : [];
+
+        return {
+          src,
+          position: String(slide.background_position ?? "center"),
+          eyebrow: String(slide.eyebrow ?? ""),
+          title: String(slide.title ?? ""),
+          accent: String(slide.accent ?? ""),
+          description: String(slide.description ?? ""),
+          primaryLabel: String(slide.primary_label ?? ""),
+          primaryHref: String(slide.primary_href ?? "#"),
+          secondaryLabel: String(slide.secondary_label ?? ""),
+          secondaryHref: String(slide.secondary_href ?? "#"),
+          cards,
+          intervalMs: Number(slide.interval_ms ?? 3000),
+        };
+      });
+    }
+
+    return result;
+  } catch {
+    return {};
+  }
+}
 
 async function getUseCases(): Promise<UseCaseProduct[]> {
   try {
@@ -118,7 +164,7 @@ const advantages = [
 ];
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ option?: string }> }) {
-  const useCases = await getUseCases();
+  const [useCases, managedHeroes] = await Promise.all([getUseCases(), getManagedHeroes()]);
   const params = await searchParams;
   const requestedOption = Number(params.option ?? "1");
   const heroOption = Number.isInteger(requestedOption) && requestedOption >= 1 && requestedOption <= 5 ? requestedOption : 1;
@@ -206,7 +252,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </header>
 
-      <HomeHeroVariants option={heroOption} publicBackendUrl={publicBackendUrl} />
+      <HomeHeroVariants option={heroOption} publicBackendUrl={publicBackendUrl} managedSlides={managedHeroes} />
 
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
