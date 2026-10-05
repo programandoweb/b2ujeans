@@ -168,7 +168,7 @@ export class AgentRuntimeService {
 
       for (const routedModel of routedModels) {
         try {
-          const answer = ["claudio", "sofia"].includes(agent.id)
+          const answer = this.isToolAgent(agent.id)
             ? await this.generateWithTools(
                 agent.id,
                 routedModel,
@@ -198,7 +198,7 @@ export class AgentRuntimeService {
       };
     }
 
-    const answer = ["claudio", "sofia"].includes(agent.id)
+    const answer = this.isToolAgent(agent.id)
       ? await this.generateLegacyGeminiWithTools(
           agent.id,
           credentials.api_key,
@@ -217,8 +217,12 @@ export class AgentRuntimeService {
     return this.finish(requestId, agent, message, answer, startedAt);
   }
 
+  private isToolAgent(agentId: string): agentId is "claudio" | "sofia" {
+    return agentId === "claudio" || agentId === "sofia";
+  }
+
   private async generateWithTools(
-    agentId: string,
+    agentId: "claudio" | "sofia",
     model: RuntimeAiModel,
     system: string,
     message: string,
@@ -280,7 +284,7 @@ export class AgentRuntimeService {
   }
 
   private async generateLegacyGeminiWithTools(
-    agentId: string,
+    agentId: "claudio" | "sofia",
     apiKey: string,
     model: string,
     system: string,
@@ -301,7 +305,7 @@ export class AgentRuntimeService {
   }
 
   private async runGeminiToolLoop(
-    agentId: string,
+    agentId: "claudio" | "sofia",
     apiKey: string,
     model: string,
     system: string,
