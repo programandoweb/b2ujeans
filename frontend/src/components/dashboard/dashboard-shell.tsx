@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bot, BookOpen, Boxes, BrainCircuit, CalendarDays, CornerDownRight, ExternalLink, FileCheck2, LayoutDashboard, LogOut, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, Settings, X } from "lucide-react";
+import { Bot, BookOpen, Boxes, BrainCircuit, CalendarDays, CornerDownRight, ExternalLink, FileCheck2, LayoutDashboard, LogOut, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type User = {
   name: string;
   email: string;
+  roles: string[];
+  permissions: string[];
 };
 
 const navItems = [
@@ -15,7 +17,7 @@ const navItems = [
     href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    exact: true,
+    exact: true,\n    permission: "dashboard.view",
   },
   {
     href: "/dashboard/catalogo",
@@ -163,7 +165,7 @@ export function DashboardShell({ children, user }: { children: React.ReactNode; 
           </p>
 
           <div className="space-y-1">
-            {navItems.map((item) => {
+            {navItems.filter((item) => user.permissions.includes(item.permission)).map((item) => {
               const Icon = item.icon;
               const active = item.exact
                 ? pathname === item.href
