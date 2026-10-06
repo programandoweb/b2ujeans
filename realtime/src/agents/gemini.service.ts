@@ -87,14 +87,26 @@ export class GeminiService {
   }
   async generateImage(input: { apiKey: string; model: string; prompt: string }): Promise<{ data: string; mimeType: string }> {
     const model = encodeURIComponent(input.model || "gemini-3.1-flash-image");
-    const { response, json } = await this.requestWithRetry(
+    const { response, json } = await this.requestWithRetry<{
+      candidates?: Array<{
+        content?: {
+          parts?: Array<{
+            inlineData?: {
+              data?: string;
+              mimeType?: string;
+            };
+          }>;
+        };
+      }>;
+      error?: { message?: string };
+    }>(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       input.apiKey,
       { contents: [{ role: "user", parts: [{ text: input.prompt }] }], generationConfig: { responseModalities: ["IMAGE"] } },
       "Gemini Image",
     );
     if (!response.ok) throw new Error(json?.error?.message ?? `Gemini Image respondió HTTP ${response.status}.`);
-    const image = (json?.candidates?.[0]?.content?.parts ?? []).find((part: any) => part?.inlineData?.data);
+    const image = (json.candidates?.[0]?.content?.parts ?? []).find(part => Boolean(part.inlineData?.data));
     if (!image?.inlineData?.data) throw new Error("Gemini Image respondió sin imagen.");
     return { data: String(image.inlineData.data), mimeType: String(image.inlineData.mimeType || "image/png") };
   }
