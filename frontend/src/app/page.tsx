@@ -1,458 +1,269 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import ProductUseCasesCarousel, { type UseCaseProduct } from "@/components/public/ProductUseCasesCarousel";
-import HomeHeroVariants, { type FullHeroSlide } from "@/components/public/HomeHeroVariants";
+import { ArrowRight, Instagram, MapPin, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import PublicHeader from "@/components/public/PublicHeader";
 import { GASPRONAL_WHATSAPP_HREF } from "@/lib/public-contact";
-import {
-  ArrowRight,
-  Building2,
-  Check,
-  ChefHat,
-  Flame,
-  Gauge,
-  Hammer,
-  Settings,
-  Wrench,
-  Wind,
-} from "lucide-react";
 
-const whatsappHref = GASPRONAL_WHATSAPP_HREF;
-
-const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
-const publicBackendUrl = (
-  process.env.PUBLIC_BACKEND_URL ?? "https://backend.gaspronal.programandoweb.net"
-).replace(/\/$/, "");
-const homeOpenGraphImage = `${publicBackendUrl}/programandoweb/opengraph/home-opengraph.jpg`;
-
-export const metadata: Metadata = {
-  title: "Gaspronal | Equipos industriales y soluciones a gas",
-  description:
-    "Fabricación de equipos industriales en acero inoxidable, redes de gas, extracción industrial, mantenimiento y soluciones especiales a medida.",
-  openGraph: {
-    title: "Gaspronal | Equipos industriales y soluciones a gas",
-    description:
-      "Fabricación, instalación y servicio técnico para cocinas profesionales, industria de alimentos, redes de gas y extracción.",
-    url: "https://gaspronal.programandoweb.net/",
-    siteName: "Gaspronal",
-    locale: "es_CO",
-    type: "website",
-    images: [
-      {
-        url: homeOpenGraphImage,
-        width: 1200,
-        height: 630,
-        alt: "Fabricación industrial en acero inoxidable Gaspronal",
-        type: "image/jpeg",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Gaspronal | Equipos industriales y soluciones a gas",
-    description:
-      "Fabricación, instalación y servicio técnico para cocinas profesionales, industria de alimentos, redes de gas y extracción.",
-    images: [homeOpenGraphImage],
-  },
+type Product = {
+  id: number;
+  name: string;
+  slug: string;
+  reference?: string | null;
+  short_description?: string | null;
+  og_image?: string | null;
+  gallery?: string[] | null;
+  category?: { id: number; name: string; slug: string } | null;
 };
 
-async function getManagedHeroes(): Promise<Record<number, FullHeroSlide[]>> {
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+  products_count?: number;
+};
+
+const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
+
+export const metadata: Metadata = {
+  title: "B2U Jeans | Nueva Colección",
+  description:
+    "Explora el universo B2U Jeans: nueva colección, denim femenino y estilos pensados para acompañarte todos los días.",
+};
+
+async function getStorefront() {
   try {
-    const response = await fetch(`${backendUrl}/api/v1/heroes/public?section=home.hero`, {
-      cache: "no-store",
-      headers: { Accept: "application/json" },
-    });
+    const [productsResponse, categoriesResponse] = await Promise.all([
+      fetch(`${backendUrl}/api/v1/catalog/public/items?per_page=8&page=1`, {
+        next: { revalidate: 300 },
+        headers: { Accept: "application/json" },
+      }),
+      fetch(`${backendUrl}/api/v1/catalog/public/categories`, {
+        next: { revalidate: 300 },
+        headers: { Accept: "application/json" },
+      }),
+    ]);
 
-    if (!response.ok) return {};
+    const productsPayload = productsResponse.ok ? await productsResponse.json() : { data: [] };
+    const categoriesPayload = categoriesResponse.ok ? await categoriesResponse.json() : { data: [] };
 
-    const payload = await response.json();
-    const result: Record<number, FullHeroSlide[]> = {};
-
-    for (const [option, slides] of Object.entries(payload.data ?? {})) {
-      result[Number(option)] = (slides as Array<Record<string, unknown>>).map((slide) => {
-        const rawUrl = String(slide.image_url ?? "");
-        const src = rawUrl.startsWith("/") ? publicBackendUrl + rawUrl : rawUrl;
-        const cards = Array.isArray(slide.cards)
-          ? slide.cards.map((card) => {
-              const item = card as { title?: string; text?: string };
-              return [String(item.title ?? ""), String(item.text ?? "")] as [string, string];
-            })
-          : [];
-
-        return {
-          src,
-          position: String(slide.background_position ?? "center"),
-          eyebrow: String(slide.eyebrow ?? ""),
-          title: String(slide.title ?? ""),
-          accent: String(slide.accent ?? ""),
-          description: String(slide.description ?? ""),
-          primaryLabel: String(slide.primary_label ?? ""),
-          primaryHref: String(slide.primary_href ?? "#"),
-          secondaryLabel: String(slide.secondary_label ?? ""),
-          secondaryHref: String(slide.secondary_href ?? "#"),
-          cards,
-          intervalMs: Number(slide.interval_ms ?? 3000),
-        };
-      });
-    }
-
-    return result;
+    return {
+      products: (productsPayload.data ?? []) as Product[],
+      categories: (categoriesPayload.data ?? []) as Category[],
+    };
   } catch {
-    return {};
+    return { products: [] as Product[], categories: [] as Category[] };
   }
 }
 
-async function getUseCases(): Promise<UseCaseProduct[]> {
-  try {
-    const response = await fetch(`${backendUrl}/api/v1/catalog/public/use-cases`, {
-      cache: "no-store",
-      headers: { Accept: "application/json" },
-    });
-
-    if (!response.ok) return [];
-
-    const payload = await response.json();
-    return payload.data ?? [];
-  } catch {
-    return [];
-  }
+function productImage(product: Product) {
+  return product.og_image || product.gallery?.[0] || null;
 }
 
-const services = [
-  {
-    icon: Hammer,
-    title: "Fabricación industrial",
-    description:
-      "Equipos en acero inoxidable diseñados para restaurantes, panaderías, comidas rápidas y procesos de alimentos.",
-  },
-  {
-    icon: Flame,
-    title: "Redes de gas",
-    description:
-      "Instalación de redes de gas propano y natural para aplicaciones comerciales, industriales y residenciales.",
-  },
-  {
-    icon: Wind,
-    title: "Extracción industrial",
-    description:
-      "Montaje de sistemas de extracción para cocinas y espacios que exigen evacuación eficiente de humos.",
-  },
-  {
-    icon: Wrench,
-    title: "Servicio técnico",
-    description:
-      "Mantenimiento, reparación e instalación de equipos a gas domésticos e industriales.",
-  },
-];
+export default async function HomePage() {
+  const { products, categories } = await getStorefront();
 
-const categories = [
-  { icon: ChefHat, name: "Estufas industriales", detail: "Alto rendimiento para operación continua" },
-  { icon: Gauge, name: "Freidoras", detail: "Control térmico y recuperación rápida" },
-  { icon: Flame, name: "Hornos industriales", detail: "Soluciones para producción y cocción" },
-  { icon: Wind, name: "Campanas extractoras", detail: "Extracción para cocinas profesionales" },
-  { icon: Settings, name: "Equipos mixtos", detail: "Múltiples procesos en una sola estación" },
-  { icon: Building2, name: "Mesas y mesones", detail: "Superficies robustas en acero inoxidable" },
-];
-
-const advantages = [
-  "Desarrollo de equipos especiales a medida",
-  "Acero inoxidable para aplicaciones de alimentos",
-  "Soluciones para gas natural y propano",
-  "Asesoría técnica desde la necesidad hasta la operación",
-];
-
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ option?: string }> }) {
-  const [useCases, managedHeroes] = await Promise.all([getUseCases(), getManagedHeroes()]);
-  const params = await searchParams;
-  const requestedOption = Number(params.option ?? "1");
-  const heroOption = Number.isInteger(requestedOption) && requestedOption >= 1 && requestedOption <= 5 ? requestedOption : 1;
   return (
-    <main className="min-h-screen overflow-hidden bg-white text-[var(--foreground)]">
-      <div className="bg-[var(--brand)] text-white">
-        <div className="mx-auto flex min-h-9 max-w-[1440px] items-center justify-center px-4 text-center text-[11px] font-semibold tracking-[0.12em] sm:text-xs">
-          FABRICACIÓN · SERVICIO TÉCNICO · GAS · EXTRACCIÓN INDUSTRIAL
-        </div>
+    <main className="min-h-screen bg-white text-black">
+      <div className="bg-black px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[.18em] text-white">
+        Envíos a nivel nacional
       </div>
 
-      <PublicHeader whatsappHref={whatsappHref} />
+      <PublicHeader whatsappHref={GASPRONAL_WHATSAPP_HREF} />
 
-      <HomeHeroVariants option={heroOption} publicBackendUrl={publicBackendUrl} managedSlides={managedHeroes} />
+      <section className="relative min-h-[68vh] overflow-hidden bg-neutral-900 lg:min-h-[76vh]">
+        <img
+          src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg"
+          alt="Tienda B2U Jeans"
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-80"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
+        <div className="relative mx-auto flex min-h-[68vh] max-w-[1480px] items-end px-5 pb-14 pt-28 sm:px-8 lg:min-h-[76vh] lg:px-12 lg:pb-20">
+          <div className="max-w-2xl text-white">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[.26em]">B2U Jeans · 2026</p>
+            <h1 className="b2u-serif text-5xl leading-[.94] tracking-[-.045em] sm:text-7xl lg:text-[92px]">
+              Nueva<br />Colección
+            </h1>
+            <p className="mt-6 max-w-md text-sm leading-6 text-white/80 sm:text-base">
+              Denim contemporáneo, siluetas femeninas y piezas hechas para acompañarte todos los días.
+            </p>
+            <Link
+              href="/productos"
+              className="mt-8 inline-flex min-h-12 items-center gap-3 bg-white px-6 text-[12px] font-bold uppercase tracking-[.14em] text-black transition hover:bg-neutral-200"
+            >
+              Descubrir colección <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-[1440px] grid-cols-2 divide-x divide-y divide-slate-200 border-x border-slate-200 sm:grid-cols-4 sm:divide-y-0">
+      <section className="border-b border-black/10 bg-white">
+        <div className="mx-auto grid max-w-[1480px] grid-cols-2 lg:grid-cols-4">
           {[
-            ["Fabricación", "Equipos industriales"],
-            ["Ingeniería", "Soluciones a medida"],
-            ["Instalación", "Redes y extracción"],
-            ["Soporte", "Mantenimiento técnico"],
-          ].map(([title, text]) => (
-            <div key={title} className="px-5 py-7 sm:px-7">
-              <strong className="block text-sm font-black text-[var(--steel)]">{title}</strong>
-              <span className="mt-1 block text-xs leading-5 text-slate-500">{text}</span>
-            </div>
+            ["Mom Jeans", "Clásicos de B2U"],
+            ["Wide Leg", "Volumen y caída"],
+            ["Flared Jeans", "Silueta icónica"],
+            ["Cargo Jeans", "Actitud urbana"],
+          ].map(([name, detail], index) => (
+            <Link
+              key={name}
+              href="/productos"
+              className={`group border-black/10 px-5 py-8 transition hover:bg-neutral-50 sm:px-8 ${index < 3 ? "border-r" : ""}`}
+            >
+              <span className="block text-[11px] font-semibold uppercase tracking-[.16em] text-neutral-500">{detail}</span>
+              <span className="mt-2 flex items-center justify-between text-xl font-semibold tracking-[-.03em]">
+                {name} <ArrowRight size={17} className="transition group-hover:translate-x-1" />
+              </span>
+            </Link>
           ))}
         </div>
       </section>
 
-      <section id="servicios" className="scroll-mt-28 bg-white py-20 sm:py-28">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Qué hacemos</p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
-                Una solución completa, no solo un equipo.
-              </h2>
-              <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-                Gaspronal integra fabricación, gas, extracción y soporte técnico para resolver necesidades
-                reales de operación.
-              </p>
-            </div>
-
-            <div className="grid gap-px overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-200 sm:grid-cols-2">
-              {services.map((service) => {
-                const Icon = service.icon;
-                return (
-                  <article key={service.title} className="bg-white p-7 sm:p-8">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                      <Icon size={23} />
-                    </div>
-                    <h3 className="mt-6 text-xl font-black tracking-[-0.02em] text-[var(--steel)]">{service.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">{service.description}</p>
-                  </article>
-                );
-              })}
-            </div>
+      <section className="mx-auto max-w-[1480px] px-4 py-16 sm:px-6 lg:px-10 lg:py-24">
+        <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[.22em] text-neutral-500">Nueva colección</p>
+            <h2 className="b2u-serif mt-3 text-4xl tracking-[-.04em] sm:text-5xl">Productos destacados</h2>
           </div>
+          <Link href="/productos" className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[.14em]">
+            Ver todo <ArrowRight size={15} />
+          </Link>
         </div>
-      </section>
 
-      <section id="productos" className="scroll-mt-28 bg-[var(--surface-muted)] py-20 sm:py-28">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Catálogo Gaspronal</p>
-              <h2 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
-                Equipamiento pensado para producción real.
-              </h2>
-            </div>
-
-            <div className="flex flex-col items-start gap-3 sm:items-end">
-              <Link
-                href="/productos"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--brand)] px-6 text-sm font-black text-white shadow-lg shadow-[var(--brand)]/15 transition hover:-translate-y-0.5 hover:bg-[var(--brand-hover)] hover:shadow-xl"
-              >
-                Ver catálogo completo
-                <ArrowRight size={18} />
-              </Link>
-              <span className="inline-flex w-fit items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">
-                Explora todos los productos disponibles
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category, index) => {
-              const Icon = category.icon;
+        {products.length > 0 ? (
+          <div className="grid grid-cols-2 gap-x-3 gap-y-9 sm:gap-x-5 lg:grid-cols-4">
+            {products.slice(0, 8).map((product) => {
+              const image = productImage(product);
               return (
-                <article
-                  key={category.name}
-                  className={"group relative min-h-[260px] overflow-hidden rounded-[2rem] border p-7 transition duration-300 hover:-translate-y-1 hover:shadow-xl " +
-                    (index === 0
-                      ? "border-[var(--brand)] bg-[var(--brand)] text-white"
-                      : "border-slate-200 bg-white text-[var(--steel)]")}
-                >
-                  <div className="flex items-start justify-between gap-5">
-                    <div
-                      className={"flex h-12 w-12 items-center justify-center rounded-2xl " +
-                        (index === 0 ? "bg-white/10 text-white" : "bg-[var(--brand-soft)] text-[var(--brand)]")}
-                    >
-                      <Icon size={23} />
+                <article key={product.id} className="group">
+                  <Link href={`/productos/${product.slug}`} className="block">
+                    <div className="relative overflow-hidden bg-[#f2f1ed]">
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={product.name}
+                          className="b2u-product-image h-full w-full transition duration-500 group-hover:scale-[1.025]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex aspect-[3/4] items-center justify-center text-neutral-400">
+                          <ShoppingBag size={44} strokeWidth={1.2} />
+                        </div>
+                      )}
+                      <span className="absolute left-3 top-3 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.14em]">
+                        Nuevo
+                      </span>
                     </div>
-                    <ArrowRight
-                      size={22}
-                      className={"transition group-hover:translate-x-1 " + (index === 0 ? "text-white/70" : "text-slate-400")}
-                    />
-                  </div>
-                  <div className="absolute inset-x-7 bottom-7">
-                    <p className={"text-xs font-bold uppercase tracking-[0.14em] " + (index === 0 ? "text-white/60" : "text-slate-400")}>
-                      Línea de producto
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black tracking-[-0.03em]">{category.name}</h3>
-                    <p className={"mt-2 text-sm leading-6 " + (index === 0 ? "text-white/75" : "text-slate-500")}>
-                      {category.detail}
-                    </p>
-                  </div>
+                    <div className="pt-4">
+                      {product.category ? (
+                        <p className="text-[10px] font-semibold uppercase tracking-[.13em] text-neutral-500">{product.category.name}</p>
+                      ) : null}
+                      <h3 className="mt-1 text-sm font-semibold uppercase tracking-[.035em] sm:text-base">{product.name}</h3>
+                      <span className="mt-2 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.12em] text-neutral-600">
+                        Ver producto <ArrowRight size={13} />
+                      </span>
+                    </div>
+                  </Link>
                 </article>
               );
             })}
           </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {["Wide Leg", "Flared", "Mom Jeans", "Cargo Jeans"].map((name) => (
+              <div key={name} className="aspect-[3/4] bg-[#f2f1ed] p-6">
+                <span className="text-xs font-semibold uppercase tracking-[.14em]">{name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
-          <p className="mt-7 text-sm leading-6 text-slate-500">
-            El catálogo histórico incluye además carros para comidas y bebidas, baño maría, marmitas,
-            fábricas de arepas, asadores, planchas y equipos para panadería.
-          </p>
+      <section id="b2u" className="grid bg-[#efeee9] lg:grid-cols-2">
+        <div className="min-h-[440px] lg:min-h-[640px]">
+          <img
+            src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg"
+            alt="B2U Jeans"
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex items-center px-6 py-14 sm:px-10 lg:px-16">
+          <div className="max-w-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[.22em] text-neutral-500">Desde Venezuela</p>
+            <h2 className="b2u-serif mt-4 text-4xl leading-[1.02] tracking-[-.04em] sm:text-6xl">
+              La prenda perfecta para la mujer venezolana.
+            </h2>
+            <p className="mt-6 text-base leading-7 text-neutral-600">
+              B2U Jeans nació en 2015 con una idea clara: crear denim con identidad propia, calidad y siluetas que conectan con la mujer actual.
+            </p>
+            <Link href="/productos" className="mt-8 inline-flex items-center gap-3 border-b border-black pb-1 text-[12px] font-bold uppercase tracking-[.14em]">
+              Explorar B2U <ArrowRight size={15} />
+            </Link>
+          </div>
         </div>
       </section>
 
-      <ProductUseCasesCarousel products={useCases} />
-
-      <section id="ingenieria" className="scroll-mt-28 bg-[var(--steel)] py-20 text-white sm:py-28">
-        <div className="mx-auto grid max-w-[1440px] gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Desarrollo especial</p>
-            <h2 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.05em] sm:text-6xl">
-              Si el equipo que necesitas no existe, lo desarrollamos contigo.
-            </h2>
+      {categories.length > 0 ? (
+        <section className="mx-auto max-w-[1480px] px-4 py-16 sm:px-6 lg:px-10 lg:py-24">
+          <p className="text-center text-[11px] font-semibold uppercase tracking-[.22em] text-neutral-500">Explora por categoría</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-4">
+            {categories.slice(0, 12).map((category) => (
+              <Link
+                key={category.id}
+                href={`/productos/categoria/${category.slug}`}
+                className="b2u-serif text-2xl tracking-[-.03em] transition hover:opacity-45 sm:text-3xl"
+              >
+                {category.name}
+              </Link>
+            ))}
           </div>
-          <div className="lg:pt-10">
-            <p className="text-base leading-7 text-slate-300 sm:text-lg">
-              Gaspronal desarrolla equipos especiales en acero inoxidable a partir de las necesidades de
-              operación de cada negocio: arepas, panadería, restaurantes, comidas rápidas y otros procesos
-              de la industria de alimentos.
+        </section>
+      ) : null}
+
+      <section className="border-y border-black/10 bg-white">
+        <div className="mx-auto grid max-w-[1480px] divide-y divide-black/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {[
+            [Truck, "Envío seguro", "Tus compras en buenas manos."],
+            [ShieldCheck, "Compras seguras", "Atención directa y confiable."],
+            [ShoppingBag, "Calidad B2U", "Denim pensado para ti."],
+          ].map(([Icon, title, text]) => {
+            const FeatureIcon = Icon as typeof Truck;
+            return (
+              <div key={String(title)} className="px-6 py-10 text-center">
+                <FeatureIcon className="mx-auto" size={24} strokeWidth={1.5} />
+                <h3 className="mt-4 text-[12px] font-bold uppercase tracking-[.15em]">{String(title)}</h3>
+                <p className="mt-2 text-sm text-neutral-500">{String(text)}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <footer id="contacto" className="bg-black text-white">
+        <div className="mx-auto grid max-w-[1480px] gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_.8fr_.8fr] lg:px-10">
+          <div>
+            <img src="/b2u/logo-b2u.svg" alt="B2U Jeans" className="w-[150px] invert" />
+            <p className="mt-5 max-w-sm text-sm leading-6 text-white/60">
+              Tienda en línea B2U Jeans. Denim hecho para ti.
             </p>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
-            >
-              Hablemos de tu proyecto
-              <ArrowRight size={18} />
+          </div>
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-[.18em]">Contacto</h3>
+            <div className="mt-5 space-y-3 text-sm text-white/65">
+              <p className="flex gap-2"><MapPin size={17} className="mt-0.5 shrink-0" /> Caracas, Venezuela</p>
+              <a href={GASPRONAL_WHATSAPP_HREF} target="_blank" rel="noreferrer" className="block hover:text-white">
+                Atención por WhatsApp
+              </a>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-[.18em]">Síguenos</h3>
+            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm text-white/65 hover:text-white">
+              <Instagram size={18} /> Instagram
             </a>
           </div>
         </div>
-      </section>
-
-      <section id="nosotros" className="scroll-mt-28 bg-white py-20 sm:py-28">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="grid overflow-hidden rounded-[2.25rem] border border-slate-200 lg:grid-cols-2">
-            <div className="p-7 sm:p-10 lg:p-14">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspronal</p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
-                Tecnología aplicada a la operación.
-              </h2>
-              <p className="mt-6 text-base leading-7 text-slate-600">
-                La experiencia de Gaspronal conecta diseño, fabricación, instalación y mantenimiento para
-                entregar soluciones integrales relacionadas con gas propano, gas natural y equipos
-                industriales.
-              </p>
-              <div className="mt-8 grid gap-3">
-                {advantages.map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm font-semibold text-slate-700">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex min-h-[420px] flex-col justify-between bg-[var(--surface-muted)] p-7 sm:p-10 lg:p-14">
-              <div>
-                <span className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[var(--brand)] shadow-sm">
-                  Caso de aplicación
-                </span>
-                <h3 className="mt-6 text-3xl font-black tracking-[-0.035em] text-[var(--steel)] sm:text-4xl">
-                  Diseño de cocina, fabricación y extracción trabajando como un solo proyecto.
-                </h3>
-              </div>
-              <div className="mt-10 border-l-4 border-[var(--accent)] pl-5">
-                <p className="text-sm leading-6 text-slate-600">
-                  El sitio histórico documenta proyectos donde Gaspronal ha integrado diseño de cocina,
-                  equipos industriales en acero inoxidable y sistemas de extracción.
-                </p>
-                <p className="mt-4 text-sm font-black text-[var(--steel)]">Gaspro-notas · Casos de éxito</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="contacto" className="scroll-mt-28 border-t border-slate-200 bg-[var(--surface-muted)] py-20 sm:py-24">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Contacto</p>
-              <h2 className="mt-4 max-w-xl text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
-                Empecemos por entender qué necesitas producir.
-              </h2>
-              <p className="mt-5 max-w-lg text-base leading-7 text-slate-600">
-                Un asesor puede orientarte sobre equipos, fabricación especial, redes de gas, instalación o
-                servicio técnico.
-              </p>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
-              >
-                Solicitar asesoría
-                <ArrowRight size={18} />
-              </a>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <article className="rounded-[2rem] border border-slate-200 bg-white p-7">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">Medellín, Antioquia</p>
-                <h3 className="mt-4 text-xl font-black text-[var(--steel)]">Sede Gaspronal</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-600">
-                  Carrera 45 No. 40-61<br />
-                  Sector El Palo con Los Huesos
-                </p>
-                <div className="mt-6 space-y-2 text-sm font-semibold text-slate-700">
-                  <a className="block hover:text-[var(--brand)]" href="tel:+573045527575">Ventas: 304 552 7575</a>
-                  <a className="block hover:text-[var(--brand)]" href="tel:+573165251351">Servicio técnico: 316 525 1351</a>
-                  <a className="block break-all hover:text-[var(--brand)]" href="mailto:servicioalcliente@gaspronal.com">
-                    servicioalcliente@gaspronal.com
-                  </a>
-                </div>
-              </article>
-
-              <article className="rounded-[2rem] border border-slate-200 bg-white p-7">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">Caucasia, Antioquia</p>
-                <h3 className="mt-4 text-xl font-black text-[var(--steel)]">Almacén industrial</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-600">
-                  Carrera 9 No. 22-40<br />
-                  Barrio Kennedy
-                </p>
-                <p className="mt-6 text-sm leading-6 text-slate-500">
-                  Atención de lunes a sábado. Consulta disponibilidad y horario antes de desplazarte.
-                </p>
-              </article>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-[var(--steel)] text-white">
-        <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_auto] lg:px-10">
-          <div>
-            <Image
-              src="/programandoweb/brand/logo-gaspronal-horizontal-white.png"
-              alt="Gaspronal"
-              width={220}
-              height={78}
-              className="h-auto w-[180px] brightness-0 invert"
-            />
-            <p className="mt-5 max-w-xl text-sm leading-6 text-slate-300">
-              Soluciones industriales en fabricación de equipos, gas, extracción y servicio técnico.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-x-10 gap-y-3 text-sm font-semibold text-slate-300">
-            <a className="hover:text-white" href="#productos">Productos</a>
-            <a className="hover:text-white" href="#servicios">Servicios</a>
-            <a className="hover:text-white" href="#ingenieria">A medida</a>
-            <Link className="hover:text-white" href="/gaspro-notas">Gaspro-notas</Link>
-            <a className="hover:text-white" href="#contacto">Contacto</a>
-          </div>
-        </div>
-        <div className="border-t border-white/10">
-          <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-4 py-5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10">
-            <span>© {new Date().getFullYear()} Gaspronal Industrias y Servicios S.A.S.</span>
-            <span>Medellín · Colombia</span>
-          </div>
+        <div className="border-t border-white/10 px-5 py-5 text-center text-[10px] uppercase tracking-[.14em] text-white/40">
+          B2U Jeans · Automatización y experiencia digital
         </div>
       </footer>
     </main>
