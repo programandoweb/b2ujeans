@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: "Productos industriales",
   description:
     "Catálogo público de equipos industriales Gaspronal para cocinas profesionales, industria de alimentos y soluciones fabricadas en acero inoxidable.",
+  alternates:{canonical:"/productos"},
+  robots:{index:true,follow:true},
 };
 
 type Category = {
@@ -176,7 +178,7 @@ export default async function ProductsPage({
           {categories.map((item) => (
             <Link
               key={item.id}
-              href={`/productos?categoria=${encodeURIComponent(item.slug)}`}
+              href={`/productos/categoria/${item.slug}`}
               className={
                 "inline-flex whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition " +
                 (category === item.slug
