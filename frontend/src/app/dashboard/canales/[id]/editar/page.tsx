@@ -101,7 +101,7 @@ export default function EditChannelPage({params}:{params:Promise<{id:string}>}){
       driver:form.driver,
       priority:link?9999:Number(form.priority),
       is_fallback:link?false:form.is_fallback,
-      enabled:form.enabled,
+      enabled:link?true:form.enabled,
       auto_connect:link?false:form.auto_connect,
       settings:link
         ?{whatsapp:`+${form.whatsapp.replace(/\D/g,"")}`}
@@ -193,10 +193,10 @@ export default function EditChannelPage({params}:{params:Promise<{id:string}>}){
           <input type="number" min={1} value={form.priority} onChange={e=>setForm({...form,priority:Number(e.target.value)})} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"/>
         </label>}
 
-        <div className="grid content-end gap-2 pb-1">
+        {!link&&<div className="grid content-end gap-2 pb-1">
           <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={form.enabled} onChange={e=>setForm({...form,enabled:e.target.checked})}/><FiCheckCircle className="text-[var(--brand)]"/>Habilitado</label>
-          {!link&&<label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={form.is_fallback} onChange={e=>setForm({...form,is_fallback:e.target.checked})}/><FiShield className="text-[var(--brand)]"/>Fallback</label>}
-        </div>
+          <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={form.is_fallback} onChange={e=>setForm({...form,is_fallback:e.target.checked})}/><FiShield className="text-[var(--brand)]"/>Fallback</label>
+        </div>}
       </div>
 
       {whatsapp&&(
