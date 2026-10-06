@@ -201,10 +201,6 @@ export default async function ProductsPage({
                       ) : (
                         <div className="flex h-full items-center justify-center text-neutral-400"><ShoppingBag size={44} strokeWidth={1.2} /></div>
                       )}
-
-                      {product.category ? (
-                        
-                      ) : null}
                     </div>
 
                     <div className="pt-4">
@@ -216,9 +212,6 @@ export default async function ProductsPage({
                       <h2 className="mt-1 text-sm font-semibold uppercase tracking-[.035em] sm:text-base">
                         {product.name}
                       </h2>
-                      {product.short_description ? (
-                        
-                      ) : null}
 
                       <Link
                         href={`/productos/${product.slug}`}
