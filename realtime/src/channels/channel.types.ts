@@ -1,5 +1,5 @@
 export type Channel = "whatsapp" | "email";
-export type ChannelDriver = "baileys" | "smtp";
+export type ChannelDriver = "baileys" | "smtp" | "whatsapp_link";
 export type ChannelRuntimeStatus =
   | "disconnected"
   | "connecting"
