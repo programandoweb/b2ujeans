@@ -28,8 +28,8 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
     return {title:"Categoría no encontrada",robots:{index:false,follow:false}};
   }
 
-  const title=`${category.name} | Productos Gaspronal`;
-  const description=category.description||`Productos Gaspronal de la categoría ${category.name}.`;
+  const title=`${category.name} | B2U Jeans`;
+  const description=category.description||`Descubre ${category.name} en B2U Jeans.`;
 
   return {
     title,
