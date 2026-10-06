@@ -13,8 +13,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->runOnce(GasproNotasSeeder::class);
         $this->runOnce(GoogleIndexedGasproNotasSeeder::class);
-        $this->runOnce(LegacyProductsSeeder::class);
-        $this->runOnce(LegacyServicesSeeder::class);
+        // Catálogo B2U: importación remota completa desde el sitemap oficial.
+        // Se ejecuta una sola vez en el flujo general; puede relanzarse manualmente
+        // llamando directamente B2UJeanCatalogSeeder si se necesita resincronizar.
+        $this->runOnce(B2UJeanCatalogSeeder::class, transactional: false);
         $this->runOnce(AiProviderSeeder::class);
         $this->runOnce(GeminiProviderSeeder::class);
         $this->runOnce(AiModelSeeder::class);
@@ -43,7 +45,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Ejecuta cada seeder de datos una sola vez por base de datos.
      */
-    private function runOnce(string $seederClass): void
+    private function runOnce(string $seederClass, bool $transactional = true): void
     {
         if (DB::table('seeder_runs')->where('seeder', $seederClass)->exists()) {
             $this->command?->info("Seeder omitido (ya ejecutado): {$seederClass}");
@@ -51,13 +53,21 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
-        DB::transaction(function () use ($seederClass): void {
+        $run = function () use ($seederClass): void {
             $this->call($seederClass);
 
             DB::table('seeder_runs')->insert([
                 'seeder' => $seederClass,
                 'executed_at' => now(),
             ]);
-        });
+        };
+
+        if ($transactional) {
+            DB::transaction($run);
+
+            return;
+        }
+
+        $run();
     }
 }
