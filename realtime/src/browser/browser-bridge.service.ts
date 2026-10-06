@@ -15,6 +15,7 @@ export class BrowserBridgeService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(BrowserBridgeService.name);
   private readonly clients = new Set<WebSocket>();
   private readonly heartbeats = new Map<WebSocket, NodeJS.Timeout>();
+  private readonly lastSeen = new Map<WebSocket, number>();
   private readonly pending = new Map<string, PendingTask>();
   private wss?: WebSocketServer;
   private upgradeHandler?: (request: IncomingMessage, socket: any, head: Buffer) => void;
@@ -63,7 +64,9 @@ export class BrowserBridgeService implements OnModuleInit, OnModuleDestroy {
   }
 
   async scrape(url: string): Promise<Record<string, unknown>> {
-    const client = [...this.clients].find((item) => item.readyState === WebSocket.OPEN);
+    const client = [...this.clients]
+      .filter((item) => item.readyState === WebSocket.OPEN)
+      .sort((a, b) => (this.lastSeen.get(b) ?? 0) - (this.lastSeen.get(a) ?? 0))[0];
     if (!client) throw new Error("La extensión Gaspronal Browser Collector no está conectada.");
 
     const taskId = randomUUID();
@@ -82,6 +85,7 @@ export class BrowserBridgeService implements OnModuleInit, OnModuleDestroy {
 
   private attach(client: WebSocket): void {
     this.clients.add(client);
+    this.lastSeen.set(client, Date.now());
     client.send(JSON.stringify({ event: "browser:ready", data: { collector: "gaspronal" } }));
 
     const heartbeat = setInterval(() => {
@@ -98,8 +102,15 @@ export class BrowserBridgeService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
+      this.lastSeen.set(client, Date.now());
+
       if (envelope?.event === "browser:hello") {
         this.logger.log(`Recolector conectado: ${String(envelope?.data?.name || "Chrome")}`);
+        return;
+      }
+
+      if (envelope?.event === "browser:task-accepted") {
+        this.logger.log(`Recolector aceptó tarea ${String(envelope?.data?.taskId || "")}: ${String(envelope?.data?.url || "")}`);
         return;
       }
 
@@ -127,6 +138,7 @@ export class BrowserBridgeService implements OnModuleInit, OnModuleDestroy {
 
     const cleanup = () => {
       this.clients.delete(client);
+      this.lastSeen.delete(client);
       const timer = this.heartbeats.get(client);
       if (timer) clearInterval(timer);
       this.heartbeats.delete(client);
