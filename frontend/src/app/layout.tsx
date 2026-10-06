@@ -3,28 +3,28 @@ import { Source_Sans_3 } from "next/font/google";
 import PublicWhatsAppButton from "@/components/public/PublicWhatsAppButton";
 import "./globals.css";
 
-const sourceSans = Source_Sans_3({
+const b2uFont = Source_Sans_3({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-source-sans",
+  variable: "--font-b2u",
 });
 
 export const viewport: Viewport = {
-  themeColor: "#005C99",
+  themeColor: "#111111",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://gaspronal.programandoweb.net"),
-  applicationName: "Gaspronal",
-  authors: [{ name: "Gaspronal Industrias y Servicios S.A.S." }],
-  creator: "Gaspronal Industrias y Servicios S.A.S.",
-  publisher: "Gaspronal Industrias y Servicios S.A.S.",
+  applicationName: "B2U Jeans",
+  authors: [{ name: "B2U Jeans" }],
+  creator: "B2U Jeans",
+  publisher: "B2U Jeans",
   title: {
-    default: "Gaspronal | Equipos industriales y soluciones a gas",
-    template: "%s | Gaspronal",
+    default: "B2U Jeans | Denim hecho para ti",
+    template: "%s | B2U Jeans",
   },
   description:
-    "Fabricación de equipos industriales en acero inoxidable, redes de gas, extracción industrial, mantenimiento y soluciones especiales a medida.",
+    "B2U Jeans. Nueva colección, denim para mujer y catálogo de estilos B2U.",
   robots: {
     index: true,
     follow: true,
@@ -37,11 +37,10 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Gaspronal | Equipos industriales y soluciones a gas",
-    description:
-      "Fabricación, instalación y servicio técnico para cocinas profesionales, industria de alimentos, redes de gas y extracción.",
-    siteName: "Gaspronal",
-    locale: "es_CO",
+    title: "B2U Jeans | Denim hecho para ti",
+    description: "Descubre la nueva colección y los estilos B2U Jeans.",
+    siteName: "B2U Jeans",
+    locale: "es_VE",
     type: "website",
   },
 };
@@ -51,7 +50,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body className={sourceSans.variable}>
+      <body className={b2uFont.variable}>
         {children}
         <PublicWhatsAppButton />
       </body>
