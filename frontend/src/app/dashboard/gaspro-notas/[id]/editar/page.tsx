@@ -212,6 +212,16 @@ export default function EditGasproNotaPage({ params }:{ params:Promise<{id:strin
         <FiImage size={16}/>Galería
         {gallery.length>0&&<span className="rounded-full bg-[var(--brand-soft)] px-2 py-0.5 text-[11px] font-bold text-[var(--brand)]">{gallery.length}</span>}
       </button>
+      {publicUrl&&(
+        <a
+          href={publicUrl.startsWith("http")?publicUrl:`https://gaspronal.programandoweb.net${publicUrl}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center gap-2 border-b-2 border-transparent px-4 text-sm font-semibold text-[var(--muted)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+        >
+          <FiExternalLink size={16}/>Ver noticia
+        </a>
+      )}
     </div>
 
     {activeTab==="form"&&<form onSubmit={save} className="space-y-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
