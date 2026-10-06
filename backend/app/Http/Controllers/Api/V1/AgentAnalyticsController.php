@@ -38,7 +38,7 @@ class AgentAnalyticsController extends Controller
             ? AgentUnansweredQuestion::query()->where('status', 'pending')->count()
             : 0;
         $configuredAgents = $hasSettings
-            ? DB::table('agent_settings')->whereNotNull('api_key')->where('api_key', '<>', '')->count()
+            ? DB::table('agent_settings')->whereNotNull('primary_ai_model_id')->count()
             : 0;
 
         $activity = collect(range(0, 6))->map(function (int $offset) use ($since7, $hasInteractions): array {
@@ -64,13 +64,18 @@ class AgentAnalyticsController extends Controller
 
         $settings = $hasSettings
             ? DB::table('agent_settings')
-                ->select(['agent_id', 'model'])
-                ->selectRaw("CASE WHEN api_key IS NOT NULL AND api_key <> '' THEN 1 ELSE 0 END as has_api_key")
+                ->leftJoin('ai_models', 'ai_models.id', '=', 'agent_settings.primary_ai_model_id')
+                ->select([
+                    'agent_settings.agent_id',
+                    'agent_settings.primary_ai_model_id',
+                    'ai_models.name as assigned_model_name',
+                ])
+                ->selectRaw("CASE WHEN agent_settings.api_key IS NOT NULL AND agent_settings.api_key <> '' THEN 1 ELSE 0 END as has_api_key")
                 ->get()
                 ->keyBy('agent_id')
             : collect();
 
-        $agents = collect(['claudio', 'cristina', 'jorge', 'sofia'])->map(function (string $agent) use ($byAgent, $settings, $hasKnowledge, $hasUnanswered): array {
+        $agents = collect(['claudio', 'cristina', 'jorge', 'sofia', 'lucia'])->map(function (string $agent) use ($byAgent, $settings, $hasKnowledge, $hasUnanswered): array {
             $knowledge = $agent === 'claudio' && $hasKnowledge
                 ? AgentKnowledgeEntry::query()->where('agent_id', 'claudio')->where('status', 'published')->count()
                 : 0;
@@ -84,7 +89,7 @@ class AgentAnalyticsController extends Controller
                 'interactions_30d' => (int) ($byAgent->get($agent)?->total ?? 0),
                 'last_activity' => $byAgent->get($agent)?->last_activity,
                 'has_api_key' => (bool) ($settings->get($agent)?->has_api_key ?? false),
-                'model' => $settings->get($agent)?->model ?? 'gemini-2.5-flash',
+                'model' => $settings->get($agent)?->assigned_model_name,
                 'knowledge_count' => $knowledge,
                 'pending_questions' => $pending,
             ];
