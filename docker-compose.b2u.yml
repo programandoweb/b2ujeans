@@ -1,0 +1,111 @@
+name: b2ujeans
+
+services:
+  b2u-mariadb:
+    image: mariadb:11.4
+    container_name: b2u-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-b2u}
+      MARIADB_USER: ${DB_USERNAME:-b2u}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD debe existir en backend/.env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-b2u_root_change_me}
+    volumes:
+      - b2u_mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$$MARIADB_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - b2ujeans
+
+  b2u-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: b2ujeans-backend:latest
+    container_name: b2u-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: b2u-mariadb
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-b2u}
+      DB_USERNAME: ${DB_USERNAME:-b2u}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD debe existir en backend/.env}
+      DEPLOYMENT_ENABLED: "false"
+      AUTODEPLOY_ENABLED: "false"
+    depends_on:
+      b2u-mariadb:
+        condition: service_healthy
+    volumes:
+      - ./backend:/var/www/html
+      - b2u_backend_vendor:/var/www/html/vendor
+      - b2u_backend_storage:/var/www/html/storage
+    networks:
+      - b2ujeans
+
+  b2u-backend-nginx:
+    image: nginx:1.27-alpine
+    container_name: b2u-backend-nginx
+    restart: unless-stopped
+    depends_on:
+      - b2u-backend
+    ports:
+      - "6501:80"
+    volumes:
+      - ./backend/public:/var/www/html/public:ro
+      - ./backend/docker/nginx/b2u.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/api/v1/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - b2ujeans
+
+  b2u-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${FRONTEND_URL:-https://demo.pereira.expert}
+        NEXT_PUBLIC_REALTIME_URL: ""
+    image: b2ujeans-frontend:latest
+    container_name: b2ujeans-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      LARAVEL_API_URL: http://b2u-backend-nginx
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://backend-demo.pereira.expert}
+      NEXT_PUBLIC_SITE_URL: ${FRONTEND_URL:-https://demo.pereira.expert}
+      NEXT_PUBLIC_REALTIME_URL: ""
+    depends_on:
+      b2u-backend-nginx:
+        condition: service_healthy
+    ports:
+      - "6500:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - b2ujeans
+
+volumes:
+  b2u_mariadb:
+  b2u_backend_vendor:
+  b2u_backend_storage:
+
+networks:
+  b2ujeans:
+    name: b2ujeans
