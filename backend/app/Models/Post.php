@@ -7,5 +7,5 @@ class Post extends Model {
  protected $casts=['published_at'=>'datetime','gallery'=>'array'];
  protected $appends=['public_url'];
  public function category():BelongsTo{return $this->belongsTo(PostCategory::class,'category_id');}
- public function getPublicUrlAttribute():string{$slug=$this->relationLoaded('category')?$this->category?->slug:null;return '/2019/'.($slug?:'gaspro-notas')."/{$this->slug}";}
+ public function getPublicUrlAttribute():string{return "/gaspro-notas/{$this->slug}";}
 }
