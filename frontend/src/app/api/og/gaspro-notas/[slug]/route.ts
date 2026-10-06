@@ -52,7 +52,8 @@ export async function GET(
     .replace(/\s+/g," ")
     .trim()
     .slice(0,220);
-  const image=sourceImageUrl(post?.og_image||post?.featured_image,origin);\n  const logoUrl=`${origin}/programandoweb/brand/logo-gaspronal-horizontal-white.png`;
+  const image=sourceImageUrl(post?.og_image||post?.featured_image,origin);
+  const logoUrl=`${origin}/programandoweb/brand/logo-gaspronal-horizontal-white.png`;
 
   return new ImageResponse(
     GasproNotaOgCard({title,excerpt,image,logoUrl}),
