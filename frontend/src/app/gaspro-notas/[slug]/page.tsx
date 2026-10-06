@@ -5,8 +5,8 @@ import { notFound, permanentRedirect } from "next/navigation";
 import PublicHeader from "@/components/public/PublicHeader";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
-const whatsappHref =
-  "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
+const fallbackWhatsappNumber = "573045527575";
+const whatsappMessage = "Hola Gaspronal, quiero recibir asesoría para mi proyecto.";
 
 type Post = {
   title:string;
@@ -21,6 +21,27 @@ type Post = {
   published_at?:string|null;
   updated_at?:string|null;
 };
+
+
+async function getWhatsappNumber():Promise<string>{
+  try{
+    const response=await fetch(`${backendUrl}/api/v1/communications/public/whatsapp-link`,{
+      cache:"no-store",
+      headers:{Accept:"application/json"},
+    });
+    if(!response.ok)return fallbackWhatsappNumber;
+    const payload=await response.json();
+    const raw=String(payload.data?.whatsapp??"");
+    const digits=raw.replace(/\D/g,"");
+    return digits||fallbackWhatsappNumber;
+  }catch{
+    return fallbackWhatsappNumber;
+  }
+}
+
+function buildWhatsappHref(number:string):string{
+  return `https://wa.me/${number}?text=${encodeURIComponent(whatsappMessage)}`;
+}
 
 async function requestSiteUrl():Promise<string>{
   const requestHeaders=await headers();
@@ -133,7 +154,11 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
     if(redirectTarget)permanentRedirect(redirectTarget);
     notFound();
   }
-  const siteUrl=await requestSiteUrl();
+  const [siteUrl,whatsappNumber]=await Promise.all([
+    requestSiteUrl(),
+    getWhatsappNumber(),
+  ]);
+  const whatsappHref=buildWhatsappHref(whatsappNumber);
 
   const gallery=Array.from(new Set([post.featured_image||"",...(post.gallery||[])].filter(Boolean)));
   const canonical=`${siteUrl}/gaspro-notas/${post.slug}`;
