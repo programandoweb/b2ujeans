@@ -391,7 +391,7 @@ function TabButton({active,onClick,children}:{active:boolean;onClick:()=>void;ch
   return <button type="button" onClick={onClick} className={`border-b-2 px-4 py-3 text-sm font-semibold ${active?"border-[var(--brand)] text-[var(--brand)]":"border-transparent text-[var(--muted)]"}`}>{children}</button>;
 }
 function Health({status}:{status:Provider["health_status"]}){
-  const cls=status==="healthy"?"bg-green-50 text-green-700":status==="unhealthy"?"bg-red-50 text-red-700":"bg-slate-100 text-slate-600";
+  const cls=status==="healthy"?"bg-green-50 text-green-700":status==="unhealthy"?"bg-red-50 text-red-700":"bg-[var(--surface-muted)] text-[var(--muted)]";
   const label=status==="healthy"?"Saludable":status==="unhealthy"?"Con error":"Sin probar";
   return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${cls}`}>{label}</span>;
 }

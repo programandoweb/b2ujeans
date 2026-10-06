@@ -52,10 +52,18 @@ La modernización se concentra en tecnología, velocidad, UX, SEO, conversión, 
 - No introducir un segundo framework visual.
 - No duplicar estilos locales que deban ser tokens o primitives.
 - Los colores base de la web actual de Gaspronal deben preservarse.
-- Los colores corporativos oficiales extraídos del arte `LOGO GASPRONAL 2026` son: azul `#025C99` y naranja `#EC7025`.
-- El azul `#025C99` es el color primario de interfaz y navegación; el naranja `#EC7025` funciona como acento de marca, énfasis y estados interactivos complementarios.
+- Los colores corporativos oficiales extraídos del arte `LOGO GASPRONAL 2026` son: azul `#005C99` y naranja `#F37021`.
+- El azul `#005C99` es el color primario de interfaz y navegación; el naranja `#F37021` funciona como acento de marca, énfasis y estados interactivos complementarios.
 - No inventar ni sustituir estos colores corporativos sin una decisión documentada basada en material oficial posterior.
 - La paleta se centraliza como tokens semánticos de Tailwind/CSS variables.
+- La fuente de verdad visual vigente es el manual oficial **Manual Uso Marca Gaspronal** y sus archivos maestros.
+- Color base **Acero Oscuro**: `#1F252B` (Pantone 432 C), usado para texto principal, fondos oscuros y contraste institucional.
+- En interfaces, **Source Sans 3** es la familia tipográfica corporativa de apoyo para títulos, textos, formularios, dashboard y contenido editorial.
+- Montserrat y Sinhala Sangam MN forman parte de la firma de marca y del descriptor en los archivos maestros; el logotipo no debe reconstruirse con texto HTML/CSS.
+- Sobre fondos claros se usa preferentemente el logotipo full color. Sobre fondos azul, acero oscuro o fotografía oscurecida se usa la versión blanca aprobada.
+- El logotipo completo no debe reproducirse por debajo de 120 px en pantalla. En espacios compactos se utiliza el isotipo aprobado, sin comprimir el logotipo.
+- Debe respetarse un área de reserva mínima equivalente a 1X alrededor de la firma y conservar siempre sus proporciones.
+- No aplicar al logotipo degradados, sombras, transparencias, contornos, recoloreados, filtros CSS ni deformaciones.
 
 Ejemplo conceptual, no valores definitivos:
 

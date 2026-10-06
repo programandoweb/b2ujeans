@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
     <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,0.9fr)_minmax(520px,1.1fr)]">
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-md">
-          <div className="mb-10 flex justify-center"><img src="/programandoweb/brand/main-logo-programandoweb.png" alt="Gaspronal" className="h-auto max-h-24 w-auto max-w-[330px] object-contain" /></div>
+          <div className="mb-10 flex justify-center"><img src="/programandoweb/brand/logo-gaspronal-vertical-full-color.png" alt="Gaspronal" className="h-auto max-h-24 w-auto max-w-[330px] object-contain" /></div>
           <Suspense fallback={<p className="text-sm text-[var(--muted)]">Validando enlace…</p>}><ResetPasswordForm /></Suspense>
         </div>
       </section>

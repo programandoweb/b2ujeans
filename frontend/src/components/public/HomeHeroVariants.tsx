@@ -34,7 +34,7 @@ export type FullHeroSlide = {
 
 function HeroBackground({
   src,
-  overlay = "bg-[#082237]/75",
+  overlay = "bg-[var(--steel)]/75",
   position = "center",
 }: {
   src: string;
@@ -75,7 +75,7 @@ function FullHeroCarousel({
   const slide = slides[active];
 
   return (
-    <section className="relative h-[1040px] overflow-hidden bg-[#0b2b40] text-white sm:h-[960px] lg:h-[760px] xl:h-[780px]">
+    <section className="relative h-[1040px] overflow-hidden bg-[var(--steel)] text-white sm:h-[960px] lg:h-[760px] xl:h-[780px]">
       <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={"bg-" + active}
@@ -94,8 +94,8 @@ function FullHeroCarousel({
         />
       </AnimatePresence>
 
-      <div className="absolute inset-0 bg-[#082237]/76" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#061d30]/70 via-[#0b2b40]/34 to-[#0b2b40]/58" />
+      <div className="absolute inset-0 bg-[var(--steel)]/76" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[var(--steel)]/70 via-[var(--steel)]/34 to-[var(--steel)]/58" />
       <div className="absolute right-[-8%] top-[-18%] size-[620px] rounded-full border-[120px] border-white/[0.035]" />
       <div className="absolute bottom-[-28%] left-[18%] size-[520px] rounded-full border-[100px] border-white/[0.03]" />
 
@@ -112,12 +112,12 @@ function FullHeroCarousel({
         >
           <div className="max-w-5xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/80 backdrop-blur">
-              <ShieldCheck size={15} className="text-[#ff9a5b]" />
+              <ShieldCheck size={15} className="text-[var(--accent)]" />
               {slide.eyebrow}
             </div>
 
             <h1 className="mt-7 text-[clamp(3.4rem,8vw,8rem)] font-black leading-[0.84] tracking-[-0.075em]">
-              {slide.title} <span className="text-[#ff8a47]">{slide.accent}</span>
+              {slide.title} <span className="text-[var(--accent)]">{slide.accent}</span>
             </h1>
 
             <p className="mt-8 max-w-2xl text-base leading-7 text-slate-200 sm:text-xl sm:leading-8">
@@ -151,7 +151,7 @@ function FullHeroCarousel({
                 className={
                   "rounded-[1.75rem] border p-6 backdrop-blur-md " +
                   (index === 0
-                    ? "border-[#ff9a5b]/50 bg-[#ff9a5b]/10"
+                    ? "border-[var(--accent)]/50 bg-[var(--accent)]/10"
                     : "border-white/15 bg-white/[0.08]")
                 }
                 initial={reduceMotion ? false : { opacity: 0, x: 24 }}
@@ -169,7 +169,7 @@ function FullHeroCarousel({
         </motion.div>
       </AnimatePresence>
 
-      <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-[#082237]/60 px-3 py-2 backdrop-blur-md">
+      <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-[var(--steel)]/60 px-3 py-2 backdrop-blur-md">
         {slides.map((_, index) => (
           <button
             key={index}
@@ -191,7 +191,7 @@ function FullHeroCarousel({
 function ProposalSelector({ option }: { option: number }) {
   return (
     <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
-      <div className="flex items-center gap-1 rounded-full border border-white/20 bg-[#0d2b40]/90 p-1 text-white shadow-xl backdrop-blur">
+      <div className="flex items-center gap-1 rounded-full border border-white/20 bg-[var(--steel)]/90 p-1 text-white shadow-xl backdrop-blur">
         <span className="hidden px-3 text-[10px] font-black uppercase tracking-[0.14em] text-white/55 sm:inline">
           Propuestas
         </span>
@@ -410,8 +410,8 @@ export default function HomeHeroVariants({
 
   if (option === 4) {
     return (
-      <section className="relative overflow-hidden bg-[#0b2b40] text-white">
-        <HeroBackground src={heroBackgroundTwo} overlay="bg-[#082237]/80" position="center" />
+      <section className="relative overflow-hidden bg-[var(--steel)] text-white">
+        <HeroBackground src={heroBackgroundTwo} overlay="bg-[var(--steel)]/80" position="center" />
         {selector}
         <div className="absolute inset-y-0 right-0 hidden w-[42%] bg-[var(--brand)]/70 lg:block" />
         <div className="absolute -left-24 top-32 size-72 rounded-full border-[70px] border-white/[0.035]" />
@@ -422,7 +422,7 @@ export default function HomeHeroVariants({
               <Settings size={15} /> Desarrollo especial
             </div>
             <h1 className="mt-7 text-[clamp(3.2rem,7vw,7.2rem)] font-black leading-[0.88] tracking-[-0.07em]">
-              Tu proceso primero. <span className="text-[#ff9a5b]">El equipo después.</span>
+              Tu proceso primero. <span className="text-[var(--accent)]">El equipo después.</span>
             </h1>
             <p className="mt-8 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
               Partimos de lo que necesitas producir, del espacio disponible y de tu operación para diseñar una solución industrial que realmente encaje.
@@ -445,7 +445,7 @@ export default function HomeHeroVariants({
                 ["03", "Fabricamos e instalamos", "Una solución lista para trabajar."],
               ].map(([number, title, text]) => (
                 <div key={number} className="rounded-[1.75rem] border border-white/15 bg-white/[0.08] p-6 backdrop-blur">
-                  <span className="text-xs font-black tracking-[0.18em] text-[#ffc09a]">{number}</span>
+                  <span className="text-xs font-black tracking-[0.18em] text-[var(--accent)]">{number}</span>
                   <strong className="mt-3 block text-xl font-black">{title}</strong>
                   <span className="mt-2 block text-sm leading-6 text-white/65">{text}</span>
                 </div>
@@ -462,8 +462,8 @@ export default function HomeHeroVariants({
   }
 
   return (
-    <section className="relative overflow-hidden bg-[#0b2b40] text-white">
-      <HeroBackground src={heroBackgroundOne} overlay="bg-[#082237]/78" position="center" />
+    <section className="relative overflow-hidden bg-[var(--steel)] text-white">
+      <HeroBackground src={heroBackgroundOne} overlay="bg-[var(--steel)]/78" position="center" />
       {selector}
       <div className="absolute inset-0">
         <div className="absolute right-[-8%] top-[-18%] size-[620px] rounded-full border-[120px] border-white/[0.035]" />
@@ -473,11 +473,11 @@ export default function HomeHeroVariants({
       <div className="relative mx-auto grid min-h-[760px] max-w-[1440px] gap-10 px-4 pb-16 pt-24 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-10">
         <div className="max-w-5xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/70">
-            <ShieldCheck size={15} className="text-[#ff9a5b]" />
+            <ShieldCheck size={15} className="text-[var(--accent)]" />
             Industria alimentaria · Gas · Extracción
           </div>
           <h1 className="mt-7 text-[clamp(3.4rem,8vw,8rem)] font-black leading-[0.84] tracking-[-0.075em]">
-            Ingeniería que <span className="text-[#ff9a5b]">mueve tu negocio.</span>
+            Ingeniería que <span className="text-[var(--accent)]">mueve tu negocio.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-8">
             Diseñamos y fabricamos equipos industriales en acero inoxidable, instalamos redes de gas y desarrollamos soluciones de extracción para operaciones que exigen rendimiento.
@@ -511,7 +511,7 @@ export default function HomeHeroVariants({
               className={
                 "rounded-[1.75rem] border p-6 backdrop-blur " +
                 (index === 0
-                  ? "border-[#ff9a5b]/40 bg-[#ff9a5b]/10"
+                  ? "border-[var(--accent)]/40 bg-[var(--accent)]/10"
                   : "border-white/10 bg-white/[0.05]")
               }
             >

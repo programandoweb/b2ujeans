@@ -118,7 +118,7 @@ export default async function ProductDetailPage({
         <div className="mx-auto flex min-h-[84px] max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
           <Link href="/">
             <Image
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
+              src="/programandoweb/brand/logo-gaspronal-horizontal-full-color.png"
               alt="Gaspronal"
               width={220}
               height={78}
@@ -136,7 +136,7 @@ export default async function ProductDetailPage({
         </div>
       </header>
 
-      <section className="border-b border-slate-200 bg-[#f6f9fb]">
+      <section className="border-b border-slate-200 bg-[var(--surface-muted)]">
         <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-10">
           <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
             <Link href="/" className="hover:text-[var(--brand)]">Inicio</Link>
@@ -159,7 +159,7 @@ export default async function ProductDetailPage({
 
       <section className="mx-auto grid max-w-[1440px] gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
         <div>
-          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[#eef4f8]">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[var(--brand-soft)]">
             {gallery[0] ? (
               <img
                 src={gallery[0]}
@@ -201,7 +201,7 @@ export default async function ProductDetailPage({
             </p>
           ) : null}
 
-          <h1 className="mt-3 text-4xl font-black leading-[0.98] tracking-[-0.05em] text-[#102d42] sm:text-6xl">
+          <h1 className="mt-3 text-4xl font-black leading-[0.98] tracking-[-0.05em] text-[var(--steel)] sm:text-6xl">
             {product.name}
           </h1>
 
@@ -222,7 +222,7 @@ export default async function ProductDetailPage({
 
           {applications.length > 0 ? (
             <div className="mt-10 border-t border-slate-200 pt-8">
-              <h2 className="text-lg font-black text-[#102d42]">Aplicaciones</h2>
+              <h2 className="text-lg font-black text-[var(--steel)]">Aplicaciones</h2>
               <div className="mt-4 grid gap-3">
                 {applications.map((item) => (
                   <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-700">
@@ -239,7 +239,7 @@ export default async function ProductDetailPage({
       </section>
 
       {product.description ? (
-        <section className="border-t border-slate-200 bg-[#f7fafc]">
+        <section className="border-t border-slate-200 bg-[var(--surface-muted)]">
           <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
             <div className="max-w-4xl">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">Descripción</p>
@@ -254,7 +254,7 @@ export default async function ProductDetailPage({
       {specs.length > 0 ? (
         <section className="border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
-            <h2 className="text-3xl font-black tracking-[-0.04em] text-[#102d42]">
+            <h2 className="text-3xl font-black tracking-[-0.04em] text-[var(--steel)]">
               Especificaciones técnicas
             </h2>
             <div className="mt-7 overflow-hidden rounded-[2rem] border border-slate-200">
@@ -263,7 +263,7 @@ export default async function ProductDetailPage({
                   key={`${label}-${index}`}
                   className="grid gap-2 border-b border-slate-200 px-5 py-4 last:border-b-0 sm:grid-cols-[0.4fr_0.6fr] sm:px-7"
                 >
-                  <strong className="text-sm text-[#102d42]">{label}</strong>
+                  <strong className="text-sm text-[var(--steel)]">{label}</strong>
                   <span className="text-sm leading-6 text-slate-600">{value}</span>
                 </div>
               ))}

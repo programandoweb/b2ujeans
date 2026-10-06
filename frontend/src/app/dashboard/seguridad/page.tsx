@@ -240,7 +240,7 @@ export default function SecurityPage() {
                           <button
                             onClick={() => void impersonateUser(user)}
                             disabled={impersonatingUserId === user.id}
-                            className="grid size-9 place-items-center rounded-lg border border-[var(--border)] text-[var(--accent)] transition hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
+                            className="grid size-9 place-items-center rounded-lg border border-[var(--border)] text-[var(--accent)] transition hover:bg-[var(--accent-soft)] disabled:cursor-wait disabled:opacity-50"
                             title={impersonatingUserId === user.id ? "Iniciando sesión…" : "Iniciar sesión como este usuario"}
                             aria-label={`Iniciar sesión como ${user.name}`}
                           >

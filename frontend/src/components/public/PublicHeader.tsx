@@ -57,8 +57,8 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
         >
           <Link href="/" aria-label="Gaspronal - Inicio" className="block">
             <Image
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
-              alt="Gaspronal Industrias y Servicios"
+              src="/programandoweb/brand/logo-gaspronal-horizontal-full-color.png"
+              alt="Gaspronal - Tecnología e Ingeniería Estratégica"
               width={220}
               height={78}
               priority
@@ -67,7 +67,7 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
           </Link>
         </motion.div>
 
-        <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-700 lg:flex">
+        <nav className="hidden items-center gap-6 text-sm font-semibold text-[var(--steel)] lg:flex">
           {navigation.map((item) => (
             <Link
               key={item.label}
@@ -87,7 +87,7 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
         >
           <a
             href="tel:+573045527575"
-            className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-[var(--border)] px-4 text-sm font-bold text-[var(--steel)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
           >
             <Phone size={17} />
             304 552 7575
@@ -104,7 +104,7 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
         </motion.div>
 
         <details className="group relative lg:hidden">
-          <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-slate-200 text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)] [&::-webkit-details-marker]:hidden">
+          <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-[var(--border)] text-[var(--steel)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] [&::-webkit-details-marker]:hidden">
             <Menu size={22} />
             <span className="sr-only">Abrir navegación</span>
           </summary>
@@ -112,14 +112,14 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 top-14 w-[min(88vw,340px)] rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl"
+            className="absolute right-0 top-14 w-[min(88vw,340px)] rounded-3xl border border-[var(--border)] bg-white p-3 shadow-2xl"
           >
             <nav className="grid gap-1 text-sm font-semibold">
               {navigation.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="rounded-2xl px-4 py-3 transition hover:bg-slate-50 hover:text-[var(--brand)]"
+                  className="rounded-2xl px-4 py-3 transition hover:bg-[var(--surface-muted)] hover:text-[var(--brand)]"
                 >
                   {item.label}
                 </Link>

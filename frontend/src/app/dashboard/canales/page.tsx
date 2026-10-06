@@ -251,7 +251,7 @@ export default function ChannelsPage(){
                         ?"bg-emerald-50 text-emerald-700"
                         :status==="error"
                           ?"bg-red-50 text-red-700"
-                          :"bg-slate-100 text-slate-600"
+                          :"bg-[var(--surface-muted)] text-[var(--muted)]"
                     }`}>
                       {isLink?<FiLink/>:connected?<FiWifi/>:<FiWifiOff/>}
                       {isLink?(provider.enabled?"Disponible para botones":"Deshabilitado"):status}

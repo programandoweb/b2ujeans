@@ -116,12 +116,15 @@ export function DashboardShell({ children, user, impersonating = false }: { chil
             aria-label="Ir al dashboard de Gaspronal"
           >
             <img
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
-              alt="Gaspronal"
+              src={collapsed
+                ? "/programandoweb/brand/isotipo-gaspronal-white.png"
+                : "/programandoweb/brand/logo-gaspronal-horizontal-white.png"}
+              alt="Gaspronal - Tecnología e Ingeniería Estratégica"
               className={[
-                "h-auto object-contain transition-all duration-200",
-                "w-full max-h-16 object-left",
-                collapsed ? "lg:max-h-11 lg:w-12 lg:object-center" : "",
+                "object-contain transition-all duration-200",
+                collapsed
+                  ? "h-11 w-11 object-center"
+                  : "h-auto max-h-14 w-full object-left",
               ].join(" ")}
             />
           </Link>
@@ -245,7 +248,7 @@ export function DashboardShell({ children, user, impersonating = false }: { chil
           </button>
 
           <div className="ml-3 min-w-0">
-            <p className="truncate text-sm font-semibold">Gaspronal Industrias y Servicios S.A.S.</p>
+            <p className="truncate text-sm font-semibold">Gaspronal · Tecnología e Ingeniería Estratégica</p>
           </div>
 
           <a

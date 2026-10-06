@@ -52,10 +52,10 @@ export async function GET(
     .replace(/\s+/g," ")
     .trim()
     .slice(0,220);
-  const image=sourceImageUrl(post?.og_image||post?.featured_image,origin);
+  const image=sourceImageUrl(post?.og_image||post?.featured_image,origin);\n  const logoUrl=`${origin}/programandoweb/brand/logo-gaspronal-horizontal-white.png`;
 
   return new ImageResponse(
-    GasproNotaOgCard({title,excerpt,image}),
+    GasproNotaOgCard({title,excerpt,image,logoUrl}),
     {
       width:1200,
       height:630,

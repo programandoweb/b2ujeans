@@ -1,6 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Source_Sans_3 } from "next/font/google";
 import PublicWhatsAppButton from "@/components/public/PublicWhatsAppButton";
 import "./globals.css";
+
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-source-sans",
+});
+
+export const viewport: Viewport = {
+  themeColor: "#005C99",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://gaspronal.programandoweb.net"),
@@ -40,7 +51,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body>
+      <body className={sourceSans.variable}>
         {children}
         <PublicWhatsAppButton />
       </body>

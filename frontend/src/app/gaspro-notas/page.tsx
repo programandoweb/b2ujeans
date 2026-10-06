@@ -45,10 +45,10 @@ export default async function GasproNotasPage(){
   return <main className="min-h-screen bg-white text-[var(--foreground)]">
     <PublicHeader whatsappHref={whatsappHref}/>
 
-    <section className="border-b border-slate-200 bg-[#f4f8fb]">
+    <section className="border-b border-slate-200 bg-[var(--surface-muted)]">
       <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 lg:px-10">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspro-notas</p>
-        <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-6xl">
+        <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-6xl">
           Ideas, casos y conocimiento aplicado a la operación.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600">
@@ -60,7 +60,7 @@ export default async function GasproNotasPage(){
     <section className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
       {posts.length===0?(
         <div className="rounded-[2rem] border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-          <h2 className="text-xl font-black text-[#102d42]">Aún no hay Gaspro-notas publicadas.</h2>
+          <h2 className="text-xl font-black text-[var(--steel)]">Aún no hay Gaspro-notas publicadas.</h2>
           <p className="mt-2 text-sm text-slate-500">Los borradores creados por Lucía aparecerán aquí cuando sean publicados.</p>
         </div>
       ):(
@@ -74,7 +74,7 @@ export default async function GasproNotasPage(){
                 </div>
                 <div className="p-6">
                   {post.published_at&&<div className="flex items-center gap-2 text-xs font-semibold text-slate-400"><CalendarDays size={14}/>{new Date(post.published_at).toLocaleDateString("es-CO")}</div>}
-                  <h2 className="mt-3 text-2xl font-black tracking-[-0.03em] text-[#102d42]">{post.title}</h2>
+                  <h2 className="mt-3 text-2xl font-black tracking-[-0.03em] text-[var(--steel)]">{post.title}</h2>
                   {post.excerpt&&<p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">{post.excerpt}</p>}
                   <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[var(--brand)]">Leer nota <ArrowRight size={16}/></span>
                 </div>

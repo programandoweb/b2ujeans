@@ -177,7 +177,7 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
       "@type":"Organization",
       name:"Gaspronal Industrias y Servicios S.A.S.",
       url:siteUrl,
-      logo:{"@type":"ImageObject",url:`${siteUrl}/programandoweb/brand/logo-gaspronal-2026-transparente.png`},
+      logo:{"@type":"ImageObject",url:`${siteUrl}/programandoweb/brand/logo-gaspronal-horizontal-full-color.png`},
     },
   };
   const breadcrumbs={
@@ -200,7 +200,7 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
 
     <article className="mx-auto max-w-[1100px] px-4 py-12 sm:px-6 sm:py-16 lg:px-10">
       <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspro-notas</p>
-      <h1 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-6xl">{post.title}</h1>
+      <h1 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-6xl">{post.title}</h1>
       {post.excerpt&&<p className="mt-6 text-lg leading-8 text-slate-600">{post.excerpt}</p>}
       {post.published_at&&<p className="mt-4 text-sm font-semibold text-slate-400">{new Date(post.published_at).toLocaleDateString("es-CO")}</p>}
 

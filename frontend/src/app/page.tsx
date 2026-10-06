@@ -188,7 +188,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             ["Soporte", "Mantenimiento técnico"],
           ].map(([title, text]) => (
             <div key={title} className="px-5 py-7 sm:px-7">
-              <strong className="block text-sm font-black text-[#102d42]">{title}</strong>
+              <strong className="block text-sm font-black text-[var(--steel)]">{title}</strong>
               <span className="mt-1 block text-xs leading-5 text-slate-500">{text}</span>
             </div>
           ))}
@@ -200,7 +200,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Qué hacemos</p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
                 Una solución completa, no solo un equipo.
               </h2>
               <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
@@ -217,7 +217,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
                       <Icon size={23} />
                     </div>
-                    <h3 className="mt-6 text-xl font-black tracking-[-0.02em] text-[#102d42]">{service.title}</h3>
+                    <h3 className="mt-6 text-xl font-black tracking-[-0.02em] text-[var(--steel)]">{service.title}</h3>
                     <p className="mt-3 text-sm leading-6 text-slate-600">{service.description}</p>
                   </article>
                 );
@@ -227,12 +227,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </section>
 
-      <section id="productos" className="scroll-mt-28 bg-[#f4f8fb] py-20 sm:py-28">
+      <section id="productos" className="scroll-mt-28 bg-[var(--surface-muted)] py-20 sm:py-28">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Catálogo Gaspronal</p>
-              <h2 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+              <h2 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
                 Equipamiento pensado para producción real.
               </h2>
             </div>
@@ -260,7 +260,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   className={"group relative min-h-[260px] overflow-hidden rounded-[2rem] border p-7 transition duration-300 hover:-translate-y-1 hover:shadow-xl " +
                     (index === 0
                       ? "border-[var(--brand)] bg-[var(--brand)] text-white"
-                      : "border-slate-200 bg-white text-[#102d42]")}
+                      : "border-slate-200 bg-white text-[var(--steel)]")}
                 >
                   <div className="flex items-start justify-between gap-5">
                     <div
@@ -297,10 +297,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <ProductUseCasesCarousel products={useCases} />
 
-      <section id="ingenieria" className="scroll-mt-28 bg-[#0d2b40] py-20 text-white sm:py-28">
+      <section id="ingenieria" className="scroll-mt-28 bg-[var(--steel)] py-20 text-white sm:py-28">
         <div className="mx-auto grid max-w-[1440px] gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff9a5b]">Desarrollo especial</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Desarrollo especial</p>
             <h2 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.05em] sm:text-6xl">
               Si el equipo que necesitas no existe, lo desarrollamos contigo.
             </h2>
@@ -329,7 +329,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="grid overflow-hidden rounded-[2.25rem] border border-slate-200 lg:grid-cols-2">
             <div className="p-7 sm:p-10 lg:p-14">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspronal</p>
-              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+              <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
                 Tecnología aplicada a la operación.
               </h2>
               <p className="mt-6 text-base leading-7 text-slate-600">
@@ -349,12 +349,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </div>
             </div>
 
-            <div className="flex min-h-[420px] flex-col justify-between bg-[#f4f8fb] p-7 sm:p-10 lg:p-14">
+            <div className="flex min-h-[420px] flex-col justify-between bg-[var(--surface-muted)] p-7 sm:p-10 lg:p-14">
               <div>
                 <span className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[var(--brand)] shadow-sm">
                   Caso de aplicación
                 </span>
-                <h3 className="mt-6 text-3xl font-black tracking-[-0.035em] text-[#102d42] sm:text-4xl">
+                <h3 className="mt-6 text-3xl font-black tracking-[-0.035em] text-[var(--steel)] sm:text-4xl">
                   Diseño de cocina, fabricación y extracción trabajando como un solo proyecto.
                 </h3>
               </div>
@@ -363,19 +363,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   El sitio histórico documenta proyectos donde Gaspronal ha integrado diseño de cocina,
                   equipos industriales en acero inoxidable y sistemas de extracción.
                 </p>
-                <p className="mt-4 text-sm font-black text-[#102d42]">Gaspro-notas · Casos de éxito</p>
+                <p className="mt-4 text-sm font-black text-[var(--steel)]">Gaspro-notas · Casos de éxito</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="contacto" className="scroll-mt-28 border-t border-slate-200 bg-[#f7fafc] py-20 sm:py-24">
+      <section id="contacto" className="scroll-mt-28 border-t border-slate-200 bg-[var(--surface-muted)] py-20 sm:py-24">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Contacto</p>
-              <h2 className="mt-4 max-w-xl text-4xl font-black tracking-[-0.045em] text-[#102d42] sm:text-5xl">
+              <h2 className="mt-4 max-w-xl text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-5xl">
                 Empecemos por entender qué necesitas producir.
               </h2>
               <p className="mt-5 max-w-lg text-base leading-7 text-slate-600">
@@ -396,7 +396,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <div className="grid gap-4 sm:grid-cols-2">
               <article className="rounded-[2rem] border border-slate-200 bg-white p-7">
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">Medellín, Antioquia</p>
-                <h3 className="mt-4 text-xl font-black text-[#102d42]">Sede Gaspronal</h3>
+                <h3 className="mt-4 text-xl font-black text-[var(--steel)]">Sede Gaspronal</h3>
                 <p className="mt-4 text-sm leading-6 text-slate-600">
                   Carrera 45 No. 40-61<br />
                   Sector El Palo con Los Huesos
@@ -412,7 +412,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
               <article className="rounded-[2rem] border border-slate-200 bg-white p-7">
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">Caucasia, Antioquia</p>
-                <h3 className="mt-4 text-xl font-black text-[#102d42]">Almacén industrial</h3>
+                <h3 className="mt-4 text-xl font-black text-[var(--steel)]">Almacén industrial</h3>
                 <p className="mt-4 text-sm leading-6 text-slate-600">
                   Carrera 9 No. 22-40<br />
                   Barrio Kennedy
@@ -426,11 +426,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </section>
 
-      <footer className="bg-[#092235] text-white">
+      <footer className="bg-[var(--steel)] text-white">
         <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_auto] lg:px-10">
           <div>
             <Image
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
+              src="/programandoweb/brand/logo-gaspronal-horizontal-white.png"
               alt="Gaspronal"
               width={220}
               height={78}

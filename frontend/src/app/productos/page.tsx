@@ -93,12 +93,12 @@ export default async function ProductsPage({
   const { products, categories } = await getCatalog(category, search, page);
 
   return (
-    <main className="min-h-screen bg-[#f5f8fb] text-[var(--foreground)]">
+    <main className="min-h-screen bg-[var(--surface-muted)] text-[var(--foreground)]">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-[84px] max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
           <Link href="/" aria-label="Volver al inicio">
             <Image
-              src="/programandoweb/brand/logo-gaspronal-2026-transparente.png"
+              src="/programandoweb/brand/logo-gaspronal-horizontal-full-color.png"
               alt="Gaspronal"
               width={220}
               height={78}
@@ -124,7 +124,7 @@ export default async function ProductsPage({
           </p>
           <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <h1 className="max-w-4xl text-4xl font-black tracking-[-0.05em] text-[#102d42] sm:text-6xl">
+              <h1 className="max-w-4xl text-4xl font-black tracking-[-0.05em] text-[var(--steel)] sm:text-6xl">
                 Equipos industriales para trabajo real.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
@@ -205,7 +205,7 @@ export default async function ProductsPage({
                     key={product.id}
                     className="group overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-[#eaf2f7]">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--brand-soft)]">
                       {image ? (
                         <img
                           src={image}
@@ -233,7 +233,7 @@ export default async function ProductsPage({
                           {product.reference}
                         </p>
                       ) : null}
-                      <h2 className="mt-2 text-xl font-black leading-tight tracking-[-0.025em] text-[#102d42]">
+                      <h2 className="mt-2 text-xl font-black leading-tight tracking-[-0.025em] text-[var(--steel)]">
                         {product.name}
                       </h2>
                       {product.short_description ? (
@@ -290,7 +290,7 @@ export default async function ProductsPage({
         ) : (
           <div className="rounded-[2rem] border border-slate-200 bg-white px-6 py-16 text-center">
             <Box size={46} className="mx-auto text-[var(--brand)]/40" />
-            <h2 className="mt-5 text-2xl font-black text-[#102d42]">No encontramos productos</h2>
+            <h2 className="mt-5 text-2xl font-black text-[var(--steel)]">No encontramos productos</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-600">
               Prueba otra búsqueda o elimina el filtro de categoría.
             </p>
