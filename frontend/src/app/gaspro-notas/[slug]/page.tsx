@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import PublicHeader from "@/components/public/PublicHeader";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
@@ -42,6 +42,17 @@ async function getPost(slug:string):Promise<Post|null>{
   if(!response.ok)return null;
   const payload=await response.json();
   return payload.data??null;
+}
+
+async function getRedirectTarget(slug:string):Promise<string|null>{
+  const sourcePath=`/gaspro-notas/${slug}`;
+  const response=await fetch(
+    `${backendUrl}/api/v1/seo/redirects/resolve?path=${encodeURIComponent(sourcePath)}`,
+    {cache:"no-store",headers:{Accept:"application/json"}},
+  );
+  if(!response.ok)return null;
+  const payload=await response.json();
+  return payload.data?.target_path??null;
 }
 
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
@@ -117,7 +128,11 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
 export default async function GasproNotaDetailPage({params}:{params:Promise<{slug:string}>}){
   const {slug}=await params;
   const post=await getPost(slug);
-  if(!post)notFound();
+  if(!post){
+    const redirectTarget=await getRedirectTarget(slug);
+    if(redirectTarget)permanentRedirect(redirectTarget);
+    notFound();
+  }
   const siteUrl=await requestSiteUrl();
 
   const gallery=Array.from(new Set([post.featured_image||"",...(post.gallery||[])].filter(Boolean)));
