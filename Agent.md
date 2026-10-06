@@ -553,3 +553,90 @@ Reglas:
 - Se utiliza como referencia administrable para botones/enlaces públicos de WhatsApp en Gaspro-notas, productos, servicios, heroes u otras secciones.
 - La interfaz de Canales debe mostrarlo como “WhatsApp · Botón / enlace” y ocultar acciones de conectar/probar.
 - No duplicar números de CTA dentro del frontend cuando exista un canal `whatsapp_link` destinado a ese uso.
+
+
+## 25. Rama B2U Jeans y despliegue aislado
+
+La rama `b2ujeans` es una adaptación visual y operativa separada de Gaspronal para el demo B2U Jeans. No debe mezclarse con el despliegue de `main` ni con los contenedores `gaspronal-*`.
+
+### Infraestructura vigente
+
+- rama obligatoria: `b2ujeans`;
+- ruta VPS: `/var/www/demo.pereira.expert/public`;
+- frontend público: `https://demo.pereira.expert`, host port `6500` -> container port `3000`;
+- backend público previsto: `https://backend-demo.pereira.expert`, host port `6501` -> Nginx port `80`;
+- backend PHP-FPM: servicio/container `b2u-backend`, puerto interno `9000`;
+- MariaDB aislada: servicio/container `b2u-mariadb`, base `b2u`;
+- archivo Compose canónico: `docker-compose.b2u.yml`;
+- configuración Nginx exclusiva de B2U: `backend/docker/nginx/b2u.conf`;
+- script canónico de despliegue: `deploy-b2ujeans.sh`.
+
+El realtime no forma parte todavía del despliegue B2U. Debe incorporarse únicamente cuando el responsable lo solicite; no reutilizar silenciosamente el realtime de Gaspronal.
+
+### Regla de despliegue B2U después de cada actualización
+
+Después de cada cambio/push destinado al demo B2U se debe desplegar ejecutando desde la raíz del VPS:
+
+```bash
+bash deploy-b2ujeans.sh
+```
+
+El script es la fuente de verdad del despliegue B2U y debe:
+
+1. adquirir un lock para impedir dos despliegues simultáneos;
+2. hacer `git fetch origin b2ujeans`;
+3. cambiar explícitamente a `b2ujeans` y sincronizar con `origin/b2ujeans` mediante `git reset --hard`;
+4. preservar `backend/.env`: nunca crearlo, reemplazarlo, imprimirlo ni versionar sus secretos;
+5. validar que exista una `APP_KEY` no corrupta; nunca regenerarla automáticamente en un despliegue normal porque existen datos cifrados que dependen de ella;
+6. construir las imágenes de backend y frontend;
+7. levantar la MariaDB aislada y recrear el backend con el entorno actual;
+8. garantizar permisos de `bootstrap/cache` y `storage` dentro del contenedor;
+9. ejecutar `composer install --no-dev --optimize-autoloader --no-interaction`;
+10. ejecutar `php artisan optimize:clear`;
+11. ejecutar siempre `php artisan migrate --force`;
+12. ejecutar siempre `php artisan db:seed --force`;
+13. generar caché de configuración y vistas de producción;
+14. publicar/recrear Nginx y frontend;
+15. verificar health local del backend en `127.0.0.1:6501/api/v1/health` y del frontend en `127.0.0.1:6500/`;
+16. terminar con error no-cero si cualquier etapa falla.
+
+### Seeders y repetibilidad
+
+El despliegue ejecuta los seeders en cada actualización. Por tanto, todo seeder nuevo que vaya a formar parte de `DatabaseSeeder` debe ser idempotente o quedar protegido por el mecanismo `seeder_runs`/`runOnce` cuando corresponda.
+
+Actualmente `DatabaseSeeder`:
+
+- protege con `runOnce` los seeders históricos de contenido/proveedores/modelos/permisos base;
+- usa `updateOrCreate` para la cuenta administrativa cuando las variables de entorno existen;
+- ejecuta `AccessControlSeeder` como sincronización idempotente de roles/permisos;
+- ejecuta `HeroSlideSeeder` de forma idempotente y no destructiva.
+
+No agregar al flujo automático seeders destructivos, truncados, borrados masivos ni fixtures de prueba.
+
+### Variables y secretos
+
+- `backend/.env` es el archivo real de configuración del backend B2U y se mantiene fuera de Git.
+- `docker-compose.b2u.yml` se ejecuta con `--env-file backend/.env` para interpolar las credenciales de base sin hardcodearlas en el repositorio.
+- `DB_HOST` dentro del contenedor siempre se fuerza a `b2u-mariadb`.
+- `DEPLOYMENT_ENABLED` y `AUTODEPLOY_ENABLED` permanecen desactivados en B2U.
+- No copiar claves, contraseñas, tokens SMTP, JWT, API keys o credenciales de Gaspronal al repositorio.
+- En una instalación nueva debe configurarse también `DB_ROOT_PASSWORD` antes de inicializar el volumen MariaDB. Un volumen ya inicializado conserva sus credenciales originales aunque cambie una variable posteriormente.
+
+### Decisiones tomadas durante la puesta en marcha del 6 de octubre de 2026
+
+- El frontend B2U quedó operativo en `6500`.
+- El backend B2U quedó operativo en `6501`.
+- Se creó una MariaDB independiente para B2U.
+- Se corrigió el upstream Nginx: B2U debe resolver `b2u-backend:9000`, no `backend:9000`.
+- Se comprobó comunicación frontend -> backend y health HTTP correcto.
+- Se corrigió la carga de entorno para usar `backend/.env` en lugar del antiguo `backend/.env.b2u`.
+- El entorno correcto es `APP_ENV=production`, `APP_DEBUG=false`, `APP_NAME=B2U Jeans` y el URL del backend B2U configurado por entorno.
+- La `APP_KEY` quedó corregida a una única clave válida; no debe volver a generarse durante despliegues ordinarios.
+- Las migraciones se ejecutaron correctamente y una segunda ejecución devolvió `Nothing to migrate`.
+- Los seeders terminaron correctamente y sus ejecuciones repetidas deben seguir siendo seguras.
+- El home público respondió HTTP 200 y mostró identidad B2U, sin referencias visibles a Gaspronal en el HTML comprobado.
+- Next.js puede advertir que imágenes de más de 2 MB no entran en Data Cache; esa advertencia no implica pérdida de conectividad con el backend y debe resolverse optimizando assets, no ocultando el error.
+
+### Compatibilidad con el despliegue manual previo
+
+Antes de introducir el Compose canónico, el frontend se levantó manualmente como `b2ujeans-frontend`. El script detecta ese contenedor heredado y lo elimina únicamente cuando no pertenece al proyecto Compose `b2ujeans`, evitando el conflicto de nombre durante la primera migración al despliegue automatizado.
