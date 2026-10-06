@@ -98,6 +98,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve'])->middleware('permission:commercial.quotes.manage');
         Route::get('commercial/appointments', [CommercialAppointmentController::class, 'index'])->middleware('permission:commercial.appointments.view');
 
+        Route::get('agents/lucia/content-run', [InternalContentCreatorController::class, 'latestRun'])->middleware('permission:agents.view');
         Route::get('agents/jorge/research', [JorgeResearchController::class, 'show'])->middleware('permission:agents.view');
         Route::post('agents/jorge/research/play', [JorgeResearchController::class, 'play'])->middleware('permission:agents.manage');
         Route::post('agents/jorge/research/pause', [JorgeResearchController::class, 'pause'])->middleware('permission:agents.manage');
