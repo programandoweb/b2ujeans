@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Content\PostRequest;
 use App\Models\Post;
 use App\Models\PostCategory;
+use App\Models\SeoRedirect;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -89,7 +91,35 @@ class PostController extends Controller
 
     public function update(PostRequest $request, Post $post): JsonResponse
     {
-        $post->update($this->publication($request->validated(), $post));
+        $data = $this->publication($request->validated(), $post);
+        $oldSlug = $post->slug;
+        $newSlug = $data['slug'] ?? $oldSlug;
+
+        DB::transaction(function () use ($post, $data, $oldSlug, $newSlug): void {
+            $post->update($data);
+
+            if ($oldSlug === $newSlug) {
+                return;
+            }
+
+            $oldPath = "/gaspro-notas/{$oldSlug}";
+            $newPath = "/gaspro-notas/{$newSlug}";
+
+            SeoRedirect::query()
+                ->where('target_path', $oldPath)
+                ->update(['target_path' => $newPath]);
+
+            SeoRedirect::query()->updateOrCreate(
+                ['source_path' => $oldPath],
+                [
+                    'target_path' => $newPath,
+                    'status_code' => 301,
+                    'is_active' => true,
+                    'reason' => 'Cambio histórico de slug de Gaspro-nota',
+                ],
+            );
+        });
+
         return response()->json(['data' => $post->fresh()->load('category:id,name,slug')]);
     }
 
