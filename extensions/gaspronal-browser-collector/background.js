@@ -119,10 +119,12 @@ async function executeTask(task) {
   publish({ running: true, collected: 0, error: null, phase: "Recolectando " + url });
 
   let tabId = null;
+  let temporaryWindowId = null;
 
   try {
-    const tab = await chrome.tabs.create({ url, active: false });
+    const { tab, windowId } = await createCollectorTab(url);
     tabId = tab.id;
+    temporaryWindowId = windowId;
     if (!tabId) throw new Error("No fue posible crear la pestaña.");
 
     await waitForTab(tabId);
@@ -142,9 +144,39 @@ async function executeTask(task) {
     publish({ error: error instanceof Error ? error.message : String(error) });
   } finally {
     if (tabId) await chrome.tabs.remove(tabId).catch(() => undefined);
+    if (temporaryWindowId) await chrome.windows.remove(temporaryWindowId).catch(() => undefined);
     running = false;
     publish({ running: false, phase: "Preparado para recolectar" });
   }
+}
+
+async function createCollectorTab(url) {
+  const windows = await chrome.windows.getAll({ windowTypes: ["normal"] }).catch(() => []);
+  const targetWindow = windows.find((item) => item.focused) || windows[0];
+
+  if (targetWindow?.id) {
+    const tab = await chrome.tabs.create({
+      windowId: targetWindow.id,
+      url,
+      active: false,
+    });
+
+    return { tab, windowId: null };
+  }
+
+  const createdWindow = await chrome.windows.create({
+    url,
+    focused: false,
+    type: "normal",
+  });
+
+  const tab = createdWindow.tabs?.[0];
+  if (!tab?.id || !createdWindow.id) {
+    if (createdWindow.id) await chrome.windows.remove(createdWindow.id).catch(() => undefined);
+    throw new Error("No fue posible crear una ventana para recolectar la fuente.");
+  }
+
+  return { tab, windowId: createdWindow.id };
 }
 
 function waitForTab(tabId) {
