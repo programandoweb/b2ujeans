@@ -6,6 +6,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiEdit2,
+  FiLink,
   FiMail,
   FiMessageCircle,
   FiPlus,
@@ -21,7 +22,7 @@ type Provider={
   id:string;
   name:string;
   channel:Channel;
-  driver:"baileys"|"smtp";
+  driver:"baileys"|"smtp"|"whatsapp_link";
   is_fallback:boolean;
   priority:number;
   auto_connect:boolean;
@@ -225,22 +226,24 @@ export default function ChannelsPage(){
 
             {!loading&&providers.map(provider=>{
               const runtimeProvider=runtimeMap.get(String(provider.id));
-              const status=runtimeProvider?.runtime_status??(provider.enabled&&provider.driver==="smtp"?"ready":"disconnected");
+              const isLink=provider.driver==="whatsapp_link";
+              const status=runtimeProvider?.runtime_status??(provider.enabled&&(provider.driver==="smtp"||isLink)?"ready":"disconnected");
               const connected=status==="connected"||status==="ready";
 
               return <tr key={provider.id} className="transition hover:bg-[var(--app-bg)]">
                 <td className="px-5 py-4">
                   <strong className="block text-sm">{provider.name}</strong>
-                  <span className="mt-1 block text-xs text-[var(--muted)]">{provider.driver.toUpperCase()}</span>
+                  <span className="mt-1 block text-xs text-[var(--muted)]">{isLink?"BOTÓN WHATSAPP":provider.driver.toUpperCase()}</span>
+                  {isLink&&<span className="mt-1 block text-xs font-medium text-[var(--brand)]">{String(provider.settings?.whatsapp??"")}</span>}
                 </td>
                 <td className="px-5 py-4">
                   <span className="inline-flex items-center gap-2 text-sm font-medium">
-                    {provider.channel==="whatsapp"?<FiMessageCircle className="text-[var(--brand)]"/>:<FiMail className="text-[var(--brand)]"/>}
-                    {provider.channel==="whatsapp"?"WhatsApp":"Email"}
+                    {isLink?<FiLink className="text-[var(--brand)]"/>:provider.channel==="whatsapp"?<FiMessageCircle className="text-[var(--brand)]"/>:<FiMail className="text-[var(--brand)]"/>}
+                    {isLink?"WhatsApp · Botón":provider.channel==="whatsapp"?"WhatsApp":"Email"}
                   </span>
                 </td>
-                <td className="px-5 py-4 text-sm">{provider.priority}</td>
-                <td className="px-5 py-4 text-sm">{provider.is_fallback?"Fallback":"Principal"}</td>
+                <td className="px-5 py-4 text-sm">{isLink?"—":provider.priority}</td>
+                <td className="px-5 py-4 text-sm">{isLink?"CTA público":provider.is_fallback?"Fallback":"Principal"}</td>
                 <td className="px-5 py-4">
                   <div className="space-y-3">
                     <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -250,8 +253,8 @@ export default function ChannelsPage(){
                           ?"bg-red-50 text-red-700"
                           :"bg-slate-100 text-slate-600"
                     }`}>
-                      {connected?<FiWifi/>:<FiWifiOff/>}
-                      {status}
+                      {isLink?<FiLink/>:connected?<FiWifi/>:<FiWifiOff/>}
+                      {isLink?(provider.enabled?"Disponible para botones":"Deshabilitado"):status}
                     </span>
                     {status==="qr_pending"&&runtimeProvider?.qr_data_url&&(
                       <div className="w-fit rounded-xl border border-[var(--border)] bg-white p-3">
@@ -266,24 +269,26 @@ export default function ChannelsPage(){
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={()=>void runtimeAction(provider,connected?"disconnect":"connect")}
-                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-                      title={connected?"Desconectar":"Conectar"}
-                      aria-label={connected?"Desconectar":"Conectar"}
-                    >
-                      {connected?<FiWifiOff/>:<FiWifi/>}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={()=>void test(provider)}
-                      className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-                      title="Probar canal"
-                      aria-label="Probar canal"
-                    >
-                      <FiSend/>
-                    </button>
+                    {!isLink&&<>
+                      <button
+                        type="button"
+                        onClick={()=>void runtimeAction(provider,connected?"disconnect":"connect")}
+                        className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                        title={connected?"Desconectar":"Conectar"}
+                        aria-label={connected?"Desconectar":"Conectar"}
+                      >
+                        {connected?<FiWifiOff/>:<FiWifi/>}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={()=>void test(provider)}
+                        className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                        title="Probar canal"
+                        aria-label="Probar canal"
+                      >
+                        <FiSend/>
+                      </button>
+                    </>}
                     <Link
                       href={`/dashboard/canales/${provider.id}/editar`}
                       className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
