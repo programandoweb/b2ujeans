@@ -41,6 +41,19 @@ type ResearchState = {
   pending_items:number;
   completed_items:number;
 };
+type LuciaRun = {
+  uuid:string;
+  topic:string;
+  status:string;
+  source_urls:string[];
+  sources_collected:number;
+  sources_total:number;
+  sources:Array<{url?:string|null;title?:string|null}>;
+  images_generated:number;
+  post_id?:number|null;
+  error?:string|null;
+  updated_at?:string|null;
+};
 type UnansweredQuestion = {
   id:number;
   question:string;
@@ -67,6 +80,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const [research,setResearch]=useState<ResearchState|null>(null);
   const [researchBusy,setResearchBusy]=useState(false);
   const [researchMessage,setResearchMessage]=useState("");
+  const [luciaRun,setLuciaRun]=useState<LuciaRun|null>(null);
   const [unanswered,setUnanswered]=useState<UnansweredQuestion[]>([]);
   const [unansweredLoading,setUnansweredLoading]=useState(false);
   const [unansweredMessage,setUnansweredMessage]=useState("");
@@ -172,6 +186,21 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   },[id]);
 
   useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,sending]);
+
+  useEffect(()=>{
+    if(id!=="lucia")return;
+    let active=true;
+
+    async function loadLuciaRun(){
+      const response=await fetch("/api/admin/agents/lucia/content-run",{cache:"no-store"});
+      const json=await response.json().catch(()=>({}));
+      if(active&&response.ok)setLuciaRun(json.data??null);
+    }
+
+    void loadLuciaRun();
+    const timer=window.setInterval(()=>void loadLuciaRun(),1500);
+    return ()=>{active=false;window.clearInterval(timer);};
+  },[id]);
 
   useEffect(()=>{
     if(id!=="jorge")return;
@@ -401,6 +430,31 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       </div>
 
       <aside className="space-y-5">
+        {id==="lucia"&&<section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div>
+            <div className="flex items-center gap-2"><Search size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Proceso editorial en vivo</h2></div>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Seguimiento real de la corrida, incluso cuando el chat está usando REST fallback.</p>
+          </div>
+
+          {!luciaRun?<div className="rounded-xl border border-dashed border-[var(--border)] p-4 text-sm text-[var(--muted)]">Aún no hay una corrida registrada.</div>:<>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Estado</span><strong className="mt-1 block capitalize">{luciaRun.status.replaceAll("_"," ")}</strong></div>
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Fuentes</span><strong className="mt-1 block">{luciaRun.sources_collected}/{luciaRun.sources_total}</strong></div>
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Imágenes</span><strong className="mt-1 block">{luciaRun.images_generated}/5</strong></div>
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Post</span><strong className="mt-1 block">{luciaRun.post_id??"Pendiente"}</strong></div>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Fuentes recolectadas</span>
+              {luciaRun.sources.length===0?<p className="text-sm text-[var(--muted)]">Esperando que la extensión entregue la primera fuente…</p>:luciaRun.sources.map((source,index)=><div key={source.url??index} className="rounded-xl border border-[var(--border)] p-3">
+                <strong className="block truncate text-sm">{source.title||`Fuente ${index+1}`}</strong>
+                <span className="mt-1 block truncate text-xs text-[var(--muted)]">{source.url}</span>
+              </div>)}
+            </div>
+
+            {luciaRun.error&&<p className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">{luciaRun.error}</p>}
+          </>}
+        </section>}
         {id==="claudio"&&<section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
