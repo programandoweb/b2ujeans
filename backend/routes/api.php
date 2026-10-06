@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('content/public/posts', [PostController::class, 'publicIndex']);
     Route::get('content/public/posts/{slug}', [PostController::class, 'publicShow']);
     Route::get('heroes/public', [HeroSlideController::class, 'publicIndex']);
+    Route::get('communications/public/whatsapp-link', [CommunicationProviderController::class, 'publicWhatsappLink']);
     Route::get('heroes/media/{heroSlide}/{filename}', [HeroSlideController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('catalog/items/{catalogItem}/media/{filename}', [CatalogController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
     Route::get('content/posts/{post}/media/{filename}', [PostController::class, 'media'])->where('filename', '[A-Za-z0-9._-]+');
