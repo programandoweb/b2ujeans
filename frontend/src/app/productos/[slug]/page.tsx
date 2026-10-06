@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, MessageCircle, Tag } from "lucide-react";
+import { ArrowLeft, Check, MessageCircle, ShoppingBag } from "lucide-react";
 import { notFound } from "next/navigation";
 
 type Product = {
@@ -31,10 +30,7 @@ async function getProduct(slug: string): Promise<Product | null> {
       headers: { Accept: "application/json" },
     },
   );
-
-  if (response.status === 404) return null;
   if (!response.ok) return null;
-
   const payload = await response.json();
   return payload.data ?? null;
 }
@@ -46,25 +42,22 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
-
-  if (!product) {
-    return { title: "Producto no encontrado" };
-  }
+  if (!product) return { title: "Producto no encontrado" };
 
   return {
     title: product.seo_title || product.name,
     description:
       product.seo_description ||
       product.short_description ||
-      `Conoce ${product.name} de Gaspronal.`,
-    alternates:{canonical:`/productos/${product.slug}`},
-    robots:{index:true,follow:true},
+      `Conoce ${product.name} de B2U Jeans.`,
+    alternates: { canonical: `/productos/${product.slug}` },
+    robots: { index: true, follow: true },
     openGraph: {
       title: product.seo_title || product.name,
       description:
         product.seo_description ||
         product.short_description ||
-        `Conoce ${product.name} de Gaspronal.`,
+        `Conoce ${product.name} de B2U Jeans.`,
       images: product.og_image ? [product.og_image] : undefined,
       type: "website",
     },
@@ -74,10 +67,7 @@ export async function generateMetadata({
 function normalizeApplications(value: Product["applications"]) {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
   if (typeof value === "string") {
-    return value
-      .split(/\r?\n|•|;/)
-      .map((item) => item.trim())
-      .filter(Boolean);
+    return value.split(/\r?\n|•|;/).map((item) => item.trim()).filter(Boolean);
   }
   return [];
 }
@@ -85,7 +75,7 @@ function normalizeApplications(value: Product["applications"]) {
 function normalizeSpecs(value: Product["specifications"]) {
   if (!value) return [] as Array<[string, string]>;
   if (Array.isArray(value)) {
-    return value.map((item, index) => [`Especificación ${index + 1}`, String(item)] as [string, string]);
+    return value.map((item, index) => [`Detalle ${index + 1}`, String(item)] as [string, string]);
   }
   return Object.entries(value).map(([key, val]) => [
     key,
@@ -109,127 +99,98 @@ export default async function ProductDetailPage({
   const specs = normalizeSpecs(product.specifications);
   const whatsappText =
     product.whatsapp_message ||
-    `Hola Gaspronal, quiero información sobre ${product.name}${product.reference ? ` (${product.reference})` : ""}.`;
-  const whatsappHref = `https://wa.me/573045527575?text=${encodeURIComponent(whatsappText)}`;
+    `Hola B2U Jeans, quiero información sobre ${product.name}${product.reference ? ` (${product.reference})` : ""}.`;
+  const whatsappHref = `https://wa.me/584123694856?text=${encodeURIComponent(whatsappText)}`;
 
   return (
-    <main className="min-h-screen bg-white text-[var(--foreground)]">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-[84px] max-w-[1440px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
-          <Link href="/">
-            <Image
-              src="/programandoweb/brand/logo-gaspronal-horizontal-full-color.png"
-              alt="Gaspronal"
-              width={220}
-              height={78}
-              priority
-              className="h-auto w-[180px] sm:w-[210px]"
-            />
+    <main className="min-h-screen bg-white text-black">
+      <header className="border-b border-black/10 bg-white">
+        <div className="mx-auto flex min-h-[96px] max-w-[1480px] items-center justify-between px-4 sm:px-6 lg:px-10">
+          <Link href="/" aria-label="B2U Jeans - Inicio">
+            <img src="/b2u/logo-b2u.svg" alt="B2U Jeans" className="w-[145px]" />
           </Link>
-          <Link
-            href="/productos"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-          >
-            <ArrowLeft size={17} />
-            Catálogo
+          <Link href="/productos" className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.14em]">
+            <ArrowLeft size={15} /> Nueva colección
           </Link>
         </div>
       </header>
 
-      <section className="border-b border-slate-200 bg-[var(--surface-muted)]">
-        <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-10">
-          <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-            <Link href="/" className="hover:text-[var(--brand)]">Inicio</Link>
-            <span>/</span>
-            <Link href="/productos" className="hover:text-[var(--brand)]">Productos</Link>
-            {product.category ? (
-              <>
-                <span>/</span>
-                <Link
-                  href={`/productos/categoria/${product.category.slug}`}
-                  className="hover:text-[var(--brand)]"
-                >
-                  {product.category.name}
-                </Link>
-              </>
-            ) : null}
-          </nav>
-        </div>
-      </section>
+      <div className="mx-auto max-w-[1480px] px-4 pt-7 sm:px-6 lg:px-10">
+        <nav className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[.12em] text-neutral-500">
+          <Link href="/">Inicio</Link><span>/</span>
+          <Link href="/productos">Productos</Link>
+          {product.category ? (
+            <><span>/</span><Link href={`/productos/categoria/${product.category.slug}`}>{product.category.name}</Link></>
+          ) : null}
+        </nav>
+      </div>
 
-      <section className="mx-auto grid max-w-[1440px] gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
+      <section className="mx-auto grid max-w-[1480px] gap-10 px-4 py-8 sm:px-6 lg:grid-cols-[1.08fr_.92fr] lg:px-10 lg:py-14">
         <div>
-          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[var(--brand-soft)]">
+          <div className="overflow-hidden bg-[#f2f1ed]">
             {gallery[0] ? (
-              <img
-                src={gallery[0]}
-                alt={product.name}
-                className="aspect-[4/3] h-full w-full object-cover"
-              />
+              <img src={gallery[0]} alt={product.name} className="aspect-[3/4] h-full w-full object-cover" />
             ) : (
-              <div className="flex aspect-[4/3] items-center justify-center text-[var(--brand)]/30">
-                <Tag size={72} strokeWidth={1.2} />
+              <div className="flex aspect-[3/4] items-center justify-center text-neutral-400">
+                <ShoppingBag size={60} strokeWidth={1.1} />
               </div>
             )}
           </div>
 
           {gallery.length > 1 ? (
-            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+            <div className="mt-3 grid grid-cols-4 gap-3">
               {gallery.slice(1, 5).map((image) => (
-                <div key={image} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                  <img src={image} alt="" className="aspect-square h-full w-full object-cover" loading="lazy" />
+                <div key={image} className="overflow-hidden bg-[#f2f1ed]">
+                  <img src={image} alt="" className="aspect-[3/4] h-full w-full object-cover" loading="lazy" />
                 </div>
               ))}
             </div>
           ) : null}
         </div>
 
-        <div className="lg:py-4">
+        <div className="lg:sticky lg:top-28 lg:self-start lg:py-5">
           {product.category ? (
             <Link
               href={`/productos/categoria/${product.category.slug}`}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-[var(--brand)]"
+              className="text-[10px] font-semibold uppercase tracking-[.16em] text-neutral-500"
             >
-              <Tag size={14} />
               {product.category.name}
             </Link>
           ) : null}
 
-          {product.reference ? (
-            <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">
-              {product.reference}
-            </p>
-          ) : null}
-
-          <h1 className="mt-3 text-4xl font-black leading-[0.98] tracking-[-0.05em] text-[var(--steel)] sm:text-6xl">
+          <h1 className="b2u-serif mt-3 text-4xl leading-[.98] tracking-[-.045em] sm:text-6xl">
             {product.name}
           </h1>
 
-          {product.short_description ? (
-            <p className="mt-6 text-lg leading-8 text-slate-600">{product.short_description}</p>
+          {product.reference ? (
+            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[.14em] text-neutral-500">
+              Ref. {product.reference}
+            </p>
           ) : null}
 
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-black text-white transition hover:bg-[var(--accent-hover)]"
-          >
-            <MessageCircle size={18} />
-            Cotizar este producto
-            <ArrowRight size={17} />
-          </a>
+          {product.short_description ? (
+            <p className="mt-6 max-w-xl text-base leading-7 text-neutral-600">{product.short_description}</p>
+          ) : null}
+
+          <div className="mt-8 border-y border-black/10 py-6">
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="flex min-h-13 w-full items-center justify-center gap-3 bg-black px-6 text-[11px] font-bold uppercase tracking-[.14em] text-white transition hover:bg-neutral-800"
+            >
+              <MessageCircle size={17} />
+              Consultar por WhatsApp
+            </a>
+          </div>
 
           {applications.length > 0 ? (
-            <div className="mt-10 border-t border-slate-200 pt-8">
-              <h2 className="text-lg font-black text-[var(--steel)]">Aplicaciones</h2>
+            <div className="mt-8">
+              <h2 className="text-[11px] font-bold uppercase tracking-[.16em]">Detalles</h2>
               <div className="mt-4 grid gap-3">
                 {applications.map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-700">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                    {item}
+                  <div key={item} className="flex items-start gap-3 text-sm leading-6 text-neutral-600">
+                    <Check size={15} className="mt-1 shrink-0" /> {item}
                   </div>
                 ))}
               </div>
@@ -239,32 +200,25 @@ export default async function ProductDetailPage({
       </section>
 
       {product.description ? (
-        <section className="border-t border-slate-200 bg-[var(--surface-muted)]">
-          <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
+        <section className="border-t border-black/10 bg-[#f3f2ee]">
+          <div className="mx-auto max-w-[1480px] px-4 py-14 sm:px-6 lg:px-10 lg:py-20">
             <div className="max-w-4xl">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">Descripción</p>
-              <div className="mt-5 whitespace-pre-line text-base leading-8 text-slate-700">
-                {product.description}
-              </div>
+              <p className="text-[11px] font-bold uppercase tracking-[.16em] text-neutral-500">Descripción</p>
+              <div className="mt-5 whitespace-pre-line text-base leading-8 text-neutral-700">{product.description}</div>
             </div>
           </div>
         </section>
       ) : null}
 
       {specs.length > 0 ? (
-        <section className="border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
-            <h2 className="text-3xl font-black tracking-[-0.04em] text-[var(--steel)]">
-              Especificaciones técnicas
-            </h2>
-            <div className="mt-7 overflow-hidden rounded-[2rem] border border-slate-200">
+        <section className="border-t border-black/10 bg-white">
+          <div className="mx-auto max-w-[1480px] px-4 py-14 sm:px-6 lg:px-10 lg:py-20">
+            <h2 className="b2u-serif text-3xl tracking-[-.035em]">Características</h2>
+            <div className="mt-7 max-w-4xl border-t border-black/10">
               {specs.map(([label, value], index) => (
-                <div
-                  key={`${label}-${index}`}
-                  className="grid gap-2 border-b border-slate-200 px-5 py-4 last:border-b-0 sm:grid-cols-[0.4fr_0.6fr] sm:px-7"
-                >
-                  <strong className="text-sm text-[var(--steel)]">{label}</strong>
-                  <span className="text-sm leading-6 text-slate-600">{value}</span>
+                <div key={`${label}-${index}`} className="grid gap-2 border-b border-black/10 py-4 sm:grid-cols-[.35fr_.65fr]">
+                  <strong className="text-[11px] uppercase tracking-[.1em]">{label}</strong>
+                  <span className="text-sm leading-6 text-neutral-600">{value}</span>
                 </div>
               ))}
             </div>
