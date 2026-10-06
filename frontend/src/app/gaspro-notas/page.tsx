@@ -21,6 +21,8 @@ type Post = {
 export const metadata:Metadata={
   title:"Gaspro-notas | Gaspronal",
   description:"Artículos, casos, novedades y contenido técnico de Gaspronal.",
+  alternates:{canonical:"/gaspro-notas"},
+  robots:{index:true,follow:true},
 };
 
 async function getPosts():Promise<Post[]>{
