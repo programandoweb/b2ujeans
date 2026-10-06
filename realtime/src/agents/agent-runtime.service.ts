@@ -170,13 +170,22 @@ export class AgentRuntimeService {
     const credentials = await this.settings.credentials(agent.id);
 
     if (agent.id === "lucia") {
-      const geminiModel = [credentials.primary, credentials.fallback].find(item => item?.provider.driver === "gemini" && item.provider.api_key);
+      const textModels = [credentials.primary, credentials.fallback].filter(
+        (item): item is RuntimeAiModel => Boolean(item),
+      );
+      const geminiModel = textModels.find(item => item.provider.driver === "gemini" && item.provider.api_key);
       const apiKey = geminiModel?.provider.api_key || credentials.api_key;
-      const textModel = geminiModel?.model_identifier || credentials.model || "gemini-3.8-flash";
+      const textModel = geminiModel?.model_identifier || credentials.model || "gemini-2.5-flash";
       if (!apiKey) {
-        return { requestId, agent: { id: agent.id, name: agent.name, role: agent.role }, message: "Lucía necesita un modelo Gemini configurado con API key.", status: "configuration_required" };
+        return { requestId, agent: { id: agent.id, name: agent.name, role: agent.role }, message: "Lucía necesita al menos un proveedor Gemini con API key para generar las imágenes.", status: "configuration_required" };
       }
-      const answer = await this.contentCreator.execute({ topic: message, apiKey, textModel, progress: progressMessage => onProgress?.({ requestId, agentId: agent.id, message: progressMessage }) });
+      const answer = await this.contentCreator.execute({
+        topic: message,
+        apiKey,
+        textModel,
+        textModels,
+        progress: progressMessage => onProgress?.({ requestId, agentId: agent.id, message: progressMessage }),
+      });
       return this.finish(requestId, agent, message, answer, startedAt, input.sessionId);
     }
 
