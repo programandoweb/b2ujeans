@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Bot, CheckCircle2, HelpCircle, KeyRound, LoaderCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, XCircle } from "lucide-react";
+import { ArrowLeft, BookOpen, Bot, CheckCircle2, HelpCircle, KeyRound, LoaderCircle, MessageCircle, Pause, Play, PlugZap, Save, Search, Send, ShieldCheck, Square, XCircle } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
 import ClaudioWhatsAppConversations from "@/components/dashboard/ClaudioWhatsAppConversations";
 import { connectAgentSocket, type AgentSocket } from "@/lib/agent-socket";
@@ -86,6 +86,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const [unansweredLoading,setUnansweredLoading]=useState(false);
   const [unansweredMessage,setUnansweredMessage]=useState("");
   const [answers,setAnswers]=useState<Record<number,string>>({});
+  const [claudioTab,setClaudioTab]=useState<"chats"|"agent">("chats");
   const socketRef=useRef<AgentSocket|null>(null);
   const bottomRef=useRef<HTMLDivElement|null>(null);
 
@@ -389,7 +390,26 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       </Link>
     </header>
 
-    <section className={id==="lucia"?"grid gap-6":"grid gap-6 xl:grid-cols-[1.55fr_.75fr]"}>
+    {id==="claudio"&&<div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-sm">
+      <div className="grid grid-cols-2 gap-1">
+        <button
+          type="button"
+          onClick={()=>setClaudioTab("chats")}
+          className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition ${claudioTab==="chats"?"bg-[var(--brand)] text-white shadow-sm":"text-[var(--muted)] hover:bg-[var(--app-bg)] hover:text-[var(--app-fg)]"}`}
+        >
+          <MessageCircle size={17}/>Chats
+        </button>
+        <button
+          type="button"
+          onClick={()=>setClaudioTab("agent")}
+          className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition ${claudioTab==="agent"?"bg-[var(--brand)] text-white shadow-sm":"text-[var(--muted)] hover:bg-[var(--app-bg)] hover:text-[var(--app-fg)]"}`}
+        >
+          <Bot size={17}/>Agente
+        </button>
+      </div>
+    </div>}
+
+    {(id!=="claudio"||claudioTab==="agent")&&<section className={id==="lucia"?"grid gap-6":"grid gap-6 xl:grid-cols-[1.55fr_.75fr]"}>
       <div className="flex min-h-[640px] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
         <div className="border-b border-[var(--border)] px-5 py-4">
           <h2 className="font-bold">Chat con {name}</h2>
@@ -588,8 +608,8 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           {settingsMessage&&<p className="text-xs leading-5 text-[var(--muted)]">{settingsMessage}</p>}
         </form>}
       </aside>
-    </section>
+    </section>}
 
-    {id==="claudio"&&<ClaudioWhatsAppConversations/>}
+    {id==="claudio"&&claudioTab==="chats"&&<ClaudioWhatsAppConversations/>}
   </div>;
 }
