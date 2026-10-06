@@ -532,3 +532,16 @@ Reglas de arquitectura:
 - una conversación cerrada se reactiva automáticamente si el cliente vuelve a escribir;
 - los mensajes entrantes se deduplican por conversación e identificador externo;
 - el acceso público a WhatsApp debe conservarse visible y mobile-first en las rutas públicas, pero no en dashboard ni autenticación.
+
+
+## 24. Canales WhatsApp de botón / enlace
+
+Los canales de comunicación soportan un driver no transaccional `whatsapp_link` para CTA públicos.
+
+Reglas:
+- `whatsapp_link` pertenece al canal `whatsapp`, pero no utiliza Baileys, QR, sesión ni credenciales.
+- Su configuración mínima es un `name` identificador y `settings.whatsapp` en formato internacional E.164.
+- No participa en `routeAndSend`, fallback, prioridades de mensajería ni reconexión automática.
+- Se utiliza como referencia administrable para botones/enlaces públicos de WhatsApp en Gaspro-notas, productos, servicios, heroes u otras secciones.
+- La interfaz de Canales debe mostrarlo como “WhatsApp · Botón / enlace” y ocultar acciones de conectar/probar.
+- No duplicar números de CTA dentro del frontend cuando exista un canal `whatsapp_link` destinado a ese uso.
