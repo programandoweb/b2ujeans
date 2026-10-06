@@ -118,7 +118,7 @@ class CommunicationProviderController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'channel' => ['required', Rule::in(['whatsapp', 'email'])],
-            'driver' => ['required', Rule::in(['baileys', 'smtp'])],
+            'driver' => ['required', Rule::in(['baileys', 'smtp', 'whatsapp_link'])],
             'is_fallback' => ['sometimes', 'boolean'],
             'priority' => ['sometimes', 'integer', 'min:1', 'max:9999'],
             'auto_connect' => ['sometimes', 'boolean'],
@@ -127,7 +127,10 @@ class CommunicationProviderController extends Controller
             'credentials' => ['nullable', 'array'],
         ]);
 
-        if (($channel === 'whatsapp' && $driver !== 'baileys') || ($channel === 'email' && $driver !== 'smtp')) {
+        if (
+            ($channel === 'whatsapp' && ! in_array($driver, ['baileys', 'whatsapp_link'], true))
+            || ($channel === 'email' && $driver !== 'smtp')
+        ) {
             abort(422, 'La combinación canal/driver no es válida.');
         }
 
@@ -141,10 +144,30 @@ class CommunicationProviderController extends Controller
             ])->validate();
         }
 
+        if ($driver === 'whatsapp_link') {
+            validator($data, [
+                'settings.whatsapp' => ['required', 'string', 'max:20', 'regex:/^\\+?[1-9]\\d{7,14}$/'],
+            ])->validate();
+
+            $data['settings'] = [
+                'whatsapp' => '+'.ltrim((string) $data['settings']['whatsapp'], '+'),
+            ];
+            $data['credentials'] = [];
+            $data['is_fallback'] = false;
+            $data['priority'] = 9999;
+            $data['auto_connect'] = false;
+        }
+
         $data['is_fallback'] = (bool) ($data['is_fallback'] ?? false);
         $data['priority'] = (int) ($data['priority'] ?? 100);
         $data['auto_connect'] = (bool) ($data['auto_connect'] ?? true);
         $data['enabled'] = (bool) ($data['enabled'] ?? true);
+
+        if ($driver === 'whatsapp_link') {
+            $data['is_fallback'] = false;
+            $data['priority'] = 9999;
+            $data['auto_connect'] = false;
+        }
 
         return $data;
     }
