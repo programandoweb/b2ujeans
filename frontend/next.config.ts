@@ -6,6 +6,15 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  async redirects() {
+    return [
+      {
+        source: "/:year(\\d{4})/gaspro-notas/:slug",
+        destination: "/gaspro-notas/:slug",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
