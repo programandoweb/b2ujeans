@@ -564,7 +564,7 @@ La rama `b2ujeans` es una adaptación visual y operativa separada de Gaspronal p
 - rama obligatoria: `b2ujeans`;
 - ruta VPS: `/var/www/demo.pereira.expert/public`;
 - frontend público: `https://demo.pereira.expert`, host port `6500` -> container port `3000`;
-- backend público previsto: `https://backend-demo.pereira.expert`, host port `6501` -> Nginx port `80`;
+- backend público: `https://backend.demo.pereira.expert`, host port `6501` -> Nginx port `80`;
 - backend PHP-FPM: servicio/container `b2u-backend`, puerto interno `9000`;
 - MariaDB aislada: servicio/container `b2u-mariadb`, base `b2u`;
 - archivo Compose canónico: `docker-compose.b2u.yml`;
@@ -600,6 +600,31 @@ El script es la fuente de verdad del despliegue B2U y debe:
 14. publicar/recrear Nginx y frontend;
 15. verificar health local del backend en `127.0.0.1:6501/api/v1/health` y del frontend en `127.0.0.1:6500/`;
 16. terminar con error no-cero si cualquier etapa falla.
+
+### Catálogo B2U desde sitemap oficial
+
+La fuente autorizada para poblar categorías y productos del demo B2U es:
+
+`https://www.b2ujean.com/wp-sitemap.xml`
+
+Reglas obligatorias:
+
+- `B2UJeanCatalogSeeder` recorre el índice de sitemap y todos sus sitemaps hijos hasta agotar la cola, sin asumir un único archivo de productos;
+- descubre URLs `/product-category/` y `/product/` y elimina duplicados antes de importar;
+- procesa primero categorías y luego todos los productos;
+- para cada producto intenta extraer JSON-LD `Product`, SKU, descripción, categorías WooCommerce, galería, atributos, precio/moneda de origen, disponibilidad y metadata SEO;
+- las imágenes se conservan como URLs públicas de origen en `gallery` y `og_image`; no descargar copias durante el seeding salvo decisión posterior;
+- el SKU de WooCommerce se guarda en `reference`;
+- precio, moneda, disponibilidad y categorías originales se conservan en `specifications`/`legacy_meta`, porque el esquema B2U actual no tiene columnas comerciales específicas para precio;
+- el seeder realiza hasta tres pasadas sobre productos fallidos, además de reintentos HTTP por solicitud;
+- si después del loop queda una sola URL de producto sin procesar, el seeder falla y no debe registrar la importación como completada;
+- nunca aceptar una importación con cero productos;
+- el dominio permitido para crawling queda restringido a `b2ujean.com` / `www.b2ujean.com`;
+- `B2U_SOURCE_SITEMAP` puede sobrescribir la URL del sitemap por entorno, pero el valor por defecto es el sitemap oficial anterior;
+- el seeder usa `updateOrCreate`, por lo que puede relanzarse manualmente de forma idempotente con `php artisan db:seed --class=Database\\Seeders\\B2UJeanCatalogSeeder --force`;
+- en el `DatabaseSeeder` general se ejecuta una sola vez mediante `seeder_runs`; para una resincronización posterior debe invocarse la clase directamente;
+- en la rama `b2ujeans` no ejecutar `LegacyProductsSeeder` ni `LegacyServicesSeeder`, porque pertenecen al catálogo Gaspronal y reintroducirían categorías/productos ajenos;
+- el importador no borra productos B2U que hayan desaparecido del sitio fuente; cualquier política destructiva de sincronización debe aprobarse por separado.
 
 ### Seeders y repetibilidad
 
@@ -648,4 +673,4 @@ No agregar al flujo automático seeders destructivos, truncados, borrados masivo
 
 ### Compatibilidad con el despliegue manual previo
 
-Antes de introducir el Compose canónico, el frontend se levantó manualmente como `b2ujeans-frontend`. El script detecta ese contenedor heredado y lo elimina únicamente cuando no pertenece al proyecto Compose `b2ujeans`, evitando el conflicto de nombre durante la primera migración al despliegue automatizado.
+Antes de introducir el Compose canónico, el frontend se levantó manualmente como `b2ujeans-frontend`. El script detecta ese contenedor heredado y lo elimina únicamente cuando no pertenece al proyecto Compose `public`, evitando el conflicto de nombre durante la primera migración al despliegue automatizado.
