@@ -13,6 +13,21 @@ const nextConfig: NextConfig = {
         destination: "/gaspro-notas/:slug",
         permanent: true,
       },
+      {
+        source: "/:year(\\d{4})/productos/categoria/:slug",
+        destination: "/productos/categoria/:slug",
+        permanent: true,
+      },
+      {
+        source: "/:year(\\d{4})/productos/:slug",
+        destination: "/productos/:slug",
+        permanent: true,
+      },
+      {
+        source: "/:year(\\d{4})/productos",
+        destination: "/productos",
+        permanent: true,
+      },
     ];
   },
   async headers() {
