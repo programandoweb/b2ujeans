@@ -116,24 +116,29 @@ async function executeTask(task) {
   if (task?.type !== "SCRAPE_URL" || !taskId || !/^https?:\/\//i.test(url)) return;
 
   running = true;
-  publish({ running: true, collected: 0, error: null, phase: "Recolectando " + url });
+  publish({ running: true, collected: 0, error: null, phase: "Tarea recibida" });
+  send("browser:task-accepted", { taskId, url, at: Date.now() });
 
   let tabId = null;
   let temporaryWindowId = null;
 
   try {
+    publish({ phase: "Localizando ventana del navegador" });
     const { tab, windowId } = await createCollectorTab(url);
     tabId = tab.id;
     temporaryWindowId = windowId;
     if (!tabId) throw new Error("No fue posible crear la pestaña.");
 
+    publish({ phase: "URL abierta · esperando carga" });
     await waitForTab(tabId);
+    publish({ phase: "Página cargada · preparando extracción" });
     await pause(1200);
 
+    publish({ phase: "Extrayendo contenido de la fuente" });
     const response = await chrome.tabs.sendMessage(tabId, { type: "GASPRONAL_SCRAPE_PAGE" });
     if (!response?.result) throw new Error("La página no devolvió contenido.");
 
-    publish({ collected: String(response.result.text || "").length });
+    publish({ collected: String(response.result.text || "").length, phase: "Contenido extraído · enviando resultado" });
     send("browser:result", { taskId, status: "success", result: response.result });
   } catch (error) {
     send("browser:result", {
@@ -141,7 +146,7 @@ async function executeTask(task) {
       status: "error",
       error: error instanceof Error ? error.message : String(error),
     });
-    publish({ error: error instanceof Error ? error.message : String(error) });
+    publish({ error: error instanceof Error ? error.message : String(error), phase: "Error de recolección" });
   } finally {
     if (tabId) await chrome.tabs.remove(tabId).catch(() => undefined);
     if (temporaryWindowId) await chrome.windows.remove(temporaryWindowId).catch(() => undefined);
