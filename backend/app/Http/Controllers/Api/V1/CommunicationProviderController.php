@@ -32,6 +32,24 @@ class CommunicationProviderController extends Controller
         return response()->json(['data' => $this->safeProvider($communicationProvider)]);
     }
 
+    public function publicWhatsappLink(): JsonResponse
+    {
+        $provider = CommunicationProvider::query()
+            ->where('channel', 'whatsapp')
+            ->where('driver', 'whatsapp_link')
+            ->where('enabled', true)
+            ->orderBy('id')
+            ->first();
+
+        return response()->json([
+            'data' => $provider ? [
+                'id' => (string) $provider->id,
+                'name' => $provider->name,
+                'whatsapp' => $provider->settings['whatsapp'] ?? null,
+            ] : null,
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $data = $this->validateProvider($request);
