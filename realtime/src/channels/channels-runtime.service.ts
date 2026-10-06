@@ -118,6 +118,11 @@ export class ChannelsRuntimeService implements OnModuleInit, OnModuleDestroy {
       return this.view(provider);
     }
 
+    if (provider.driver === "whatsapp_link") {
+      this.runtime.set(id, { status: "ready" });
+      return this.view(provider);
+    }
+
     if (provider.driver !== "baileys") {
       throw new BadRequestException("Driver no soportado.");
     }
@@ -259,7 +264,11 @@ export class ChannelsRuntimeService implements OnModuleInit, OnModuleDestroy {
 
   async routeAndSend(channel: Channel, payload: ChannelMessage): Promise<Record<string, unknown>> {
     const providers = (await this.client.providers())
-      .filter((provider) => provider.enabled && provider.channel === channel)
+      .filter((provider) =>
+        provider.enabled
+        && provider.channel === channel
+        && provider.driver !== "whatsapp_link"
+      )
       .sort((a, b) =>
         Number(a.is_fallback) - Number(b.is_fallback) ||
         a.priority - b.priority ||
@@ -536,7 +545,7 @@ export class ChannelsRuntimeService implements OnModuleInit, OnModuleDestroy {
       has_credentials: Object.keys(_credentials ?? {}).length > 0,
       runtime_status:
         current?.status ??
-        (provider.driver === "smtp" && provider.enabled ? "ready" : "disconnected"),
+        ((provider.driver === "smtp" || provider.driver === "whatsapp_link") && provider.enabled ? "ready" : "disconnected"),
       phone_number: current?.phoneNumber,
       display_name: current?.displayName,
       qr_data_url: current?.qrDataUrl,
