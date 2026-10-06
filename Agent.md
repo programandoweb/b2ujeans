@@ -569,7 +569,8 @@ La rama `b2ujeans` es una adaptación visual y operativa separada de Gaspronal p
 - MariaDB aislada: servicio/container `b2u-mariadb`, base `b2u`;
 - archivo Compose canónico: `docker-compose.b2u.yml`;
 - configuración Nginx exclusiva de B2U: `backend/docker/nginx/b2u.conf`;
-- script canónico de despliegue: `deploy-b2ujeans.sh`.
+- script canónico de despliegue: `deploy-b2ujeans.sh`;
+- nombre de proyecto Docker Compose heredado y canónico en este VPS: `public`. Se conserva deliberadamente para adoptar sin pérdida los contenedores y volúmenes creados durante la primera puesta en marcha.
 
 El realtime no forma parte todavía del despliegue B2U. Debe incorporarse únicamente cuando el responsable lo solicite; no reutilizar silenciosamente el realtime de Gaspronal.
 
@@ -636,6 +637,14 @@ No agregar al flujo automático seeders destructivos, truncados, borrados masivo
 - Los seeders terminaron correctamente y sus ejecuciones repetidas deben seguir siendo seguras.
 - El home público respondió HTTP 200 y mostró identidad B2U, sin referencias visibles a Gaspronal en el HTML comprobado.
 - Next.js puede advertir que imágenes de más de 2 MB no entran en Data Cache; esa advertencia no implica pérdida de conectividad con el backend y debe resolverse optimizando assets, no ocultando el error.
+
+### Incidencia de adopción del stack inicial
+
+- Conflicto detectado el 6 de octubre de 2026: el primer intento del script canónico creó el proyecto Compose `b2ujeans`, pero los contenedores existentes `b2u-mariadb`, `b2u-backend` y `b2u-backend-nginx` habían sido creados previamente por Compose bajo el proyecto `public`.
+- Docker rechazó crear otro `/b2u-mariadb` porque el nombre ya estaba ocupado. No era un fallo de MariaDB ni de la imagen; era una incompatibilidad de ownership de Compose.
+- Para preservar la base ya inicializada y sus volúmenes `public_b2u_*`, el despliegue B2U usa explícitamente el proyecto Compose `public` (`-p public` y `name: public`). No eliminar el contenedor ni el volumen de MariaDB para “resolver” este conflicto.
+- El intento fallido pudo dejar una red `b2ujeans` y un volumen vacío `b2ujeans_b2u_mariadb`; no son la fuente de verdad y no deben sustituir `public_b2u_mariadb`.
+- El frontend manual `b2ujeans-frontend` se elimina solo durante la primera adopción si no pertenece al proyecto Compose `public`. En ejecuciones posteriores el script lo conserva y Compose lo administra normalmente.
 
 ### Compatibilidad con el despliegue manual previo
 
