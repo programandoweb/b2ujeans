@@ -64,11 +64,11 @@ export default function ProductUseCasesCarousel({
   if (items.length < 4) return null;
 
   return (
-    <section className="overflow-hidden bg-[#0d2b40] py-20 text-white sm:py-24">
+    <section className="overflow-hidden bg-[var(--steel)] py-20 text-white sm:py-24">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff9a5b]">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">
               Casos de uso
             </p>
             <h2 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.05em] sm:text-6xl">
@@ -108,7 +108,7 @@ export default function ProductUseCasesCarousel({
           return (
             <article
               key={product.id}
-              className="group relative min-h-[520px] w-[88vw] shrink-0 snap-start overflow-hidden rounded-[2rem] border border-white/10 bg-[#15364d] sm:w-[68vw] lg:w-[44vw] xl:w-[36vw]"
+              className="group relative min-h-[520px] w-[88vw] shrink-0 snap-start overflow-hidden rounded-[2rem] border border-white/10 bg-[var(--steel-soft)] sm:w-[68vw] lg:w-[44vw] xl:w-[36vw]"
             >
               <img
                 src={image}
@@ -126,7 +126,7 @@ export default function ProductUseCasesCarousel({
                 ) : null}
 
                 {product.reference ? (
-                  <p className="mt-5 text-xs font-black uppercase tracking-[0.14em] text-[#ff9a5b]">
+                  <p className="mt-5 text-xs font-black uppercase tracking-[0.14em] text-[var(--accent)]">
                     {product.reference}
                   </p>
                 ) : null}
@@ -136,7 +136,7 @@ export default function ProductUseCasesCarousel({
                 </h3>
 
                 <div className="mt-5 flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 shrink-0 text-[#ff9a5b]" size={19} />
+                  <CheckCircle2 className="mt-0.5 shrink-0 text-[var(--accent)]" size={19} />
                   <p className="line-clamp-3 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
                     {useCaseText(product)}
                   </p>

@@ -229,7 +229,7 @@ export default function RedirectsPage(){
                 <td className="px-5 py-4">
                   <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                     item.is_active===false
-                      ?"bg-slate-100 text-slate-600"
+                      ?"bg-[var(--surface-muted)] text-[var(--muted)]"
                       :"bg-emerald-50 text-emerald-700"
                   }`}>
                     {item.is_active===false?"Inactiva":"Activa"}
