@@ -57,6 +57,8 @@ export async function generateMetadata({
       product.seo_description ||
       product.short_description ||
       `Conoce ${product.name} de Gaspronal.`,
+    alternates:{canonical:`/productos/${product.slug}`},
+    robots:{index:true,follow:true},
     openGraph: {
       title: product.seo_title || product.name,
       description:
@@ -144,7 +146,7 @@ export default async function ProductDetailPage({
               <>
                 <span>/</span>
                 <Link
-                  href={`/productos?categoria=${encodeURIComponent(product.category.slug)}`}
+                  href={`/productos/categoria/${product.category.slug}`}
                   className="hover:text-[var(--brand)]"
                 >
                   {product.category.name}
@@ -185,7 +187,7 @@ export default async function ProductDetailPage({
         <div className="lg:py-4">
           {product.category ? (
             <Link
-              href={`/productos?categoria=${encodeURIComponent(product.category.slug)}`}
+              href={`/productos/categoria/${product.category.slug}`}
               className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-[var(--brand)]"
             >
               <Tag size={14} />
