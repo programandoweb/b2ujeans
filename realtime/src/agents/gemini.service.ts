@@ -53,7 +53,10 @@ export class GeminiService {
     if (input.functions?.length) tools.push({ functionDeclarations: input.functions });
     if (tools.length) body.tools = tools;
 
-    const { response, json } = await this.requestWithRetry(
+    const { response, json } = await this.requestWithRetry<{
+      candidates?: Array<{ content?: GeminiContent }>;
+      error?: { message?: string };
+    }>(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       input.apiKey,
       body,
@@ -96,14 +99,14 @@ export class GeminiService {
     return { data: String(image.inlineData.data), mimeType: String(image.inlineData.mimeType || "image/png") };
   }
 
-  private async requestWithRetry(
+  private async requestWithRetry<T = Record<string, unknown>>(
     url: string,
     apiKey: string,
     body: Record<string, unknown>,
     label: string,
-  ): Promise<{ response: Response; json: any }> {
+  ): Promise<{ response: Response; json: T }> {
     let lastResponse: Response | null = null;
-    let lastJson: any = null;
+    let lastJson: T | null = null;
 
     for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
       const response = await fetch(url, {
@@ -112,7 +115,7 @@ export class GeminiService {
         body: JSON.stringify(body),
       });
 
-      const json = await response.json().catch(() => ({}));
+      const json = await response.json().catch(() => ({})) as T;
       lastResponse = response;
       lastJson = json;
 
@@ -124,7 +127,7 @@ export class GeminiService {
     }
 
     throw new Error(
-      lastJson?.error?.message ??
+      (lastJson as { error?: { message?: string } } | null)?.error?.message ??
       `${label} no estuvo disponible después de varios intentos (HTTP ${lastResponse?.status ?? "desconocido"}).`,
     );
   }
