@@ -359,7 +359,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       </Link>
     </header>
 
-    <section className="grid gap-6 xl:grid-cols-[1.55fr_.75fr]">
+    <section className={id==="lucia"?"grid gap-6":"grid gap-6 xl:grid-cols-[1.55fr_.75fr]"}>
       <div className="flex min-h-[640px] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
         <div className="border-b border-[var(--border)] px-5 py-4">
           <h2 className="font-bold">Chat con {name}</h2>
@@ -371,7 +371,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           {!messages.length&&<div className="mx-auto max-w-md py-16 text-center">
             <Bot size={34} className="mx-auto text-[var(--brand)]"/>
             <h3 className="mt-3 font-bold">Inicia una conversación</h3>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{settings?.primary_ai_model_id?"El modelo principal seleccionado está listo para este agente.":settings?.has_api_key?"Gemini está configurado para este agente.":"Configura primero un modelo principal en el panel lateral."}</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{id==="lucia"?"Lucía trabaja con el Browser Collector conectado directamente a su flujo editorial.":settings?.primary_ai_model_id?"El modelo principal seleccionado está listo para este agente.":settings?.has_api_key?"Gemini está configurado para este agente.":"Configura primero un modelo principal en el panel lateral."}</p>
           </div>}
           {messages.map(message=><div key={message.id} className={`flex ${message.role==="user"?"justify-end":"justify-start"}`}>
             <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${message.role==="user"?"bg-[var(--brand)] text-white":message.error?"border border-red-200 bg-red-50 text-red-800":message.progress?"border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]":"bg-[var(--app-bg)] text-[var(--app-fg)]"}`}>
@@ -482,7 +482,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           {researchMessage&&<p className="text-xs font-medium text-[var(--brand)]">{researchMessage}</p>}
         </section>}
 
-        <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+        {id!=="lucia"&&<form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
           <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Modelo de IA</h2></div>
           <p className="text-sm leading-6 text-[var(--muted)]">
             El agente intenta primero el modelo principal. Si falla, utiliza automáticamente el fallback.
@@ -531,7 +531,7 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
           <button disabled={saving} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white disabled:opacity-50"><Save size={17}/>{saving?"Guardando…":"Guardar modelos"}</button>
 
           {settingsMessage&&<p className="text-xs leading-5 text-[var(--muted)]">{settingsMessage}</p>}
-        </form>
+        </form>}
       </aside>
     </section>
   </div>;
