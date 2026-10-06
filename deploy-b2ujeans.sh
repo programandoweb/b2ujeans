@@ -41,12 +41,12 @@ APP_KEY_VALUE="$(grep -m1 '^APP_KEY=' "$ENV_FILE" | cut -d= -f2- || true)"
 BASE64_COUNT="$(printf '%s' "$APP_KEY_VALUE" | grep -o 'base64:' | wc -l | tr -d ' ')"
 [[ "$BASE64_COUNT" -le 1 ]] || fail "APP_KEY contiene más de un prefijo base64:. Corrige backend/.env antes de desplegar."
 
-COMPOSE=(docker compose --env-file "$ENV_FILE" -p b2ujeans -f "$COMPOSE_FILE")
+COMPOSE=(docker compose --env-file "$ENV_FILE" -p public -f "$COMPOSE_FILE")
 
 # Compatibilidad con el primer despliegue manual previo a docker-compose.b2u.yml.
 if docker container inspect b2ujeans-frontend >/dev/null 2>&1; then
   EXISTING_PROJECT="$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.project" }}' b2ujeans-frontend 2>/dev/null || true)"
-  if [[ "$EXISTING_PROJECT" != "b2ujeans" ]]; then
+  if [[ "$EXISTING_PROJECT" != "public" ]]; then
     log "Retirando contenedor frontend manual anterior"
     docker rm -f b2ujeans-frontend
   fi
