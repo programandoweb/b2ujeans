@@ -679,3 +679,11 @@ Antes de introducir el Compose canónico, el frontend se levantó manualmente co
 - `DatabaseSeeder` usa `ADMIN_EMAIL` / `ADMIN_PASSWORD` únicamente para bootstrap con `firstOrCreate`.
 - Un despliegue nunca debe sobrescribir la contraseña de un usuario existente.
 - Los cambios o recuperaciones de contraseña pertenecen al flujo de autenticación y deben persistir entre despliegues.
+
+
+### Historial operativo de Jorge
+- La ficha `/dashboard/agentes/jorge` muestra dos tabs en el panel de investigación: `Actual` y `History`.
+- `Actual` conserva estado, progreso, producto en curso y controles Play/Pausa/Stop.
+- `History` lista hasta 100 productos procesados o en proceso, con ID, referencia, estado, cantidad de imágenes, fecha y error si aplica.
+- La fuente del historial es `GET /api/v1/agents/jorge/research/history` y requiere `agents.view`.
+- El frontend refresca estado e historial cada 5 segundos mientras la ficha de Jorge está abierta.
