@@ -3,315 +3,261 @@
 namespace App\Services;
 
 use App\Models\CatalogItem;
-use Illuminate\Support\Facades\Cache;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 class JorgeProductResearchService
 {
-    private const BASE = 'https://www.gaspronal.com';
-    private const PRODUCTS = self::BASE.'/2019/productos';
+    private const BASE = 'https://www.b2ujean.com';
 
     public function research(CatalogItem $item): array
     {
         $sourceUrl = $this->findSourceUrl($item);
-        $response = Http::timeout(30)->retry(2, 500)->withHeaders([
-            'User-Agent' => 'GaspronalMigrationBot/1.0 (+https://gaspronal.com)',
-            'Accept' => 'text/html,application/xhtml+xml',
-        ])->get($sourceUrl);
+        $response = $this->getPage($sourceUrl);
+        $html = $response->body();
+        $xpath = new DOMXPath($this->document($html));
 
-        if (! $response->successful()) {
-            throw new RuntimeException("La ficha oficial respondió HTTP {$response->status()}.");
+        $title = $this->firstText($xpath, '//h1') ?: $item->name;
+        $description = $this->extractDescription($xpath) ?: $item->description;
+        $meta = $this->extractMeta($xpath, $sourceUrl);
+        $sourceImages = $this->extractImages($xpath, $sourceUrl);
+        $gallery = $this->downloadImages($sourceImages, $item->id);
+
+        if ($gallery === []) {
+            throw new RuntimeException('No se encontró ninguna imagen oficial válida para copiar localmente.');
         }
 
-        $html = $response->body();
-        $document = $this->document($html);
-        $xpath = new \DOMXPath($document);
-
-        $title = $this->firstText($xpath, '//h1|//h2') ?: $item->name;
-        $description = $this->extractDescription($xpath);
-        $specifications = $this->extractSpecifications($description);
-        $meta = $this->extractMeta($xpath, $sourceUrl);
-        $images = $this->extractImages($xpath, $sourceUrl, $item);
-        $gallery = $this->downloadImages($images, $item->id);
-        $meta['source_images'] = $images;
-
-        $seoTitle = $meta['title'] ?? $title;
-        $seoDescription = $meta['description'] ?? null;
-        $ogImage = $gallery[0] ?? null;
+        $legacyMeta = is_array($item->legacy_meta) ? $item->legacy_meta : [];
+        $legacyMeta['source_url'] = $sourceUrl;
+        $legacyMeta['source_images'] = $sourceImages;
+        $legacyMeta['local_gallery'] = $gallery;
+        $legacyMeta['image_researched_at'] = now()->toIso8601String();
 
         $item->update([
-            'description' => $description ?: $item->description,
+            'description' => $description,
             'short_description' => ($meta['description'] ?? null) ?: $item->short_description,
-            'specifications' => $specifications ?: $item->specifications,
-            'seo_title' => $seoTitle ?: $item->seo_title,
-            'seo_description' => $seoDescription ?: $item->seo_description,
-            'og_image' => $ogImage ?: $item->og_image,
-            'gallery' => $gallery ?: $item->gallery,
+            'seo_title' => ($meta['title'] ?? null) ?: $title ?: $item->seo_title,
+            'seo_description' => ($meta['description'] ?? null) ?: $item->seo_description,
+            'og_image' => $gallery[0],
+            'gallery' => $gallery,
             'legacy_source_url' => $sourceUrl,
-            'legacy_meta' => $meta,
+            'legacy_meta' => $legacyMeta,
             'legacy_raw_html' => $html,
             'legacy_research_status' => 'completed',
             'legacy_research_error' => null,
             'legacy_researched_at' => now(),
         ]);
 
-        return [
-            'source_url' => $sourceUrl,
-            'title' => $title,
-            'images' => $gallery,
-            'meta' => $meta,
-        ];
+        return ['source_url' => $sourceUrl, 'title' => $title, 'images' => $gallery, 'meta' => $legacyMeta];
     }
 
     public function findSourceUrl(CatalogItem $item): string
     {
-        $direct = self::PRODUCTS.'/'.trim($item->slug, '/');
-        foreach ([$direct, $direct.'-'] as $candidate) {
-            $response = Http::timeout(12)->withHeaders(['User-Agent' => 'GaspronalMigrationBot/1.0'])->get($candidate);
-            if ($response->successful() && str_contains(Str::lower($response->body()), Str::lower((string) ($item->reference ?: $item->name)))) {
-                return $candidate;
-            }
+        $stored = trim((string) $item->legacy_source_url);
+        $candidates = array_values(array_unique(array_filter([
+            $stored,
+            self::BASE.'/product/'.trim($item->slug, '/').'/',
+        ])));
+
+        foreach ($candidates as $candidate) {
+            if (! $this->isOfficialHost($candidate)) continue;
+            $response = Http::timeout(20)->retry(2, 500)->withHeaders($this->headers())->get($candidate);
+            if ($response->successful()) return $candidate;
         }
 
-        $links = Cache::remember('jorge:gaspronal-product-links', now()->addHours(6), fn () => $this->discoverProductLinks());
-        $needle = $this->normalize(($item->reference ? $item->reference.' ' : '').$item->name);
-
-        $best = null;
-        $bestScore = 0.0;
-
-        foreach ($links as $url => $label) {
-            $score = $this->similarity($needle, $this->normalize($label.' '.$url));
-            if ($score > $bestScore) {
-                $best = $url;
-                $bestScore = $score;
-            }
-        }
-
-        if (! $best || $bestScore < 0.38) {
-            throw new RuntimeException('No fue posible identificar con seguridad la ficha oficial del producto.');
-        }
-
-        return $best;
+        throw new RuntimeException('No fue posible abrir la ficha oficial B2U del producto.');
     }
 
-    private function discoverProductLinks(): array
+    private function getPage(string $url): Response
     {
-        $root = Http::timeout(30)->retry(2, 500)->get(self::PRODUCTS);
-        if (! $root->successful()) {
-            throw new RuntimeException('No fue posible consultar el índice de productos de Gaspronal.');
-        }
+        if (! $this->isOfficialHost($url)) throw new RuntimeException('La URL fuente no pertenece a B2U Jeans.');
+        $response = Http::timeout(30)->retry(2, 500)->withHeaders($this->headers())->get($url);
+        if (! $response->successful()) throw new RuntimeException("La ficha oficial respondió HTTP {$response->status()}.");
+        return $response;
+    }
 
-        $categoryLinks = $this->linksMatching($root->body(), '/2019/productos/categoria/');
-        $products = [];
+    private function headers(): array
+    {
+        return [
+            'User-Agent' => 'Mozilla/5.0 B2UImageResearch/1.0',
+            'Accept' => 'text/html,application/xhtml+xml,image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+        ];
+    }
 
-        foreach (array_keys($categoryLinks) as $categoryUrl) {
-            $response = Http::timeout(30)->retry(2, 500)->get($categoryUrl);
-            if (! $response->successful()) {
-                continue;
+    private function extractImages(DOMXPath $xpath, string $sourceUrl): array
+    {
+        $images = [];
+
+        foreach ($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " woocommerce-product-gallery ")]//img') ?: [] as $node) {
+            if (! $node instanceof DOMElement) continue;
+
+            foreach (['data-large_image', 'data-src', 'data-lazy-src', 'src'] as $attribute) {
+                $value = trim((string) $node->getAttribute($attribute));
+                if ($value !== '') $this->addImageCandidate($images, $this->absoluteUrl($value, $sourceUrl));
             }
 
-            foreach ($this->linksMatching($response->body(), '/2019/productos/') as $url => $label) {
-                if (! str_contains($url, '/categoria/')) {
-                    $products[$url] = $label;
+            foreach (['srcset', 'data-srcset'] as $attribute) {
+                foreach ($this->srcsetUrls((string) $node->getAttribute($attribute)) as $value) {
+                    $this->addImageCandidate($images, $this->absoluteUrl($value, $sourceUrl));
                 }
             }
         }
 
-        return $products;
-    }
-
-    private function linksMatching(string $html, string $path): array
-    {
-        $xpath = new \DOMXPath($this->document($html));
-        $links = [];
-
-        foreach ($xpath->query('//a[@href]') ?: [] as $node) {
-            $href = trim((string) $node->getAttribute('href'));
-            if ($href === '') continue;
-
-            $absolute = $this->absoluteUrl($href, self::BASE);
-            if (! $this->isOfficialHost($absolute) || ! str_contains($absolute, $path)) continue;
-
-            $links[$absolute] = trim(preg_replace('/\s+/', ' ', $node->textContent) ?? '');
-        }
-
-        return $links;
-    }
-
-    private function extractMeta(\DOMXPath $xpath, string $sourceUrl): array
-    {
-        $meta = ['source_url' => $sourceUrl];
-
-        $titleNode = $xpath->query('//title')?->item(0);
-        if ($titleNode) $meta['title'] = trim($titleNode->textContent);
-
-        foreach ($xpath->query('//meta[@content]') ?: [] as $node) {
-            $key = strtolower(trim((string) ($node->getAttribute('name') ?: $node->getAttribute('property'))));
-            $value = trim((string) $node->getAttribute('content'));
-            if ($key !== '' && $value !== '') $meta[$key] = $value;
-        }
-
-        $canonical = $xpath->query('//link[translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="canonical"]')?->item(0);
-        if ($canonical) $meta['canonical'] = $this->absoluteUrl((string) $canonical->getAttribute('href'), $sourceUrl);
-
-        return $meta;
-    }
-
-    private function extractDescription(\DOMXPath $xpath): ?string
-    {
-        foreach ($xpath->query('//h2|//h3|//h4') ?: [] as $heading) {
-            if (! str_contains(Str::upper($heading->textContent), 'DESCRIP')) continue;
-
-            $parts = [];
-            $node = $heading->nextSibling;
-            while ($node) {
-                if ($node instanceof \DOMElement && in_array(strtolower($node->tagName), ['h1','h2','h3','h4'], true)) break;
-                $text = trim(preg_replace('/\s+/', ' ', $node->textContent ?? '') ?? '');
-                if ($text !== '' && ! str_contains(Str::lower($text), 'pide aquí')) $parts[] = $text;
-                $node = $node->nextSibling;
-            }
-
-            if ($parts) return implode("\n\n", array_values(array_unique($parts)));
-        }
-
-        $parts = [];
-        foreach ($xpath->query('//main//p|//article//p') ?: [] as $node) {
-            $text = trim(preg_replace('/\s+/', ' ', $node->textContent) ?? '');
-            if (mb_strlen($text) > 30) $parts[] = $text;
-        }
-
-        return $parts ? implode("\n\n", array_slice(array_values(array_unique($parts)), 0, 12)) : null;
-    }
-
-    private function extractSpecifications(?string $description): array
-    {
-        if (! $description) return [];
-
-        $specifications = [];
-        foreach (preg_split('/\R+/', $description) ?: [] as $line) {
-            $line = trim($line);
-            if ($line === '' || ! str_contains($line, ':')) continue;
-
-            [$key, $value] = array_pad(explode(':', $line, 2), 2, null);
-            $key = trim((string) $key);
-            $value = trim((string) $value);
-
-            if ($key !== '' && $value !== '' && mb_strlen($key) <= 100) {
-                $specifications[$key] = $value;
+        foreach ($xpath->query('//meta[@property="og:image" or @property="og:image:secure_url"]') ?: [] as $node) {
+            if ($node instanceof DOMElement) {
+                $this->addImageCandidate($images, $this->absoluteUrl((string) $node->getAttribute('content'), $sourceUrl));
             }
         }
 
-        return $specifications;
+        return array_keys($images);
     }
 
-    private function extractImages(\DOMXPath $xpath, string $sourceUrl, CatalogItem $item): array
+    private function addImageCandidate(array &$images, string $url): void
     {
-        $images = [];
-        $needle = $this->normalize($item->name.' '.$item->reference);
+        $url = $this->cleanImageUrl($url);
+        if ($url === '' || ! $this->isOfficialHost($url)) return;
 
-        foreach ($xpath->query('//img[@src]') ?: [] as $node) {
-            $src = trim((string) $node->getAttribute('src'));
-            if ($src === '') continue;
+        // Primero el original de WordPress; después la variante encontrada como fallback.
+        foreach ($this->imageCandidates($url) as $candidate) $images[$candidate] = true;
+    }
 
-            $url = $this->absoluteUrl($src, $sourceUrl);
-            if (! $this->isOfficialHost($url)) continue;
+    private function imageCandidates(string $url): array
+    {
+        $url = $this->cleanImageUrl($url);
+        $parts = parse_url($url);
+        if (! is_array($parts) || empty($parts['path'])) return [$url];
 
-            $alt = $this->normalize((string) $node->getAttribute('alt'));
-            $haystack = $this->normalize($url.' '.$alt);
+        $path = (string) $parts['path'];
+        $originalPath = preg_replace('/-scaled(?=\.[a-z0-9]+$)/i', '', $path) ?? $path;
+        $originalPath = preg_replace('/-\d+x\d+(?=\.[a-z0-9]+$)/i', '', $originalPath) ?? $originalPath;
 
-            if (preg_match('/logo|favicon|facebook|instagram|whatsapp|icon|banner|maps?/i', $haystack)) {
-                continue;
-            }
+        $base = ($parts['scheme'] ?? 'https').'://'.($parts['host'] ?? 'www.b2ujean.com');
+        $original = $base.$originalPath;
+        if (! empty($parts['query'])) $original .= '?'.$parts['query'];
 
-            if (
-                str_contains($url, '/productos/')
-                || $this->similarity($needle, $haystack) >= 0.20
-                || ($alt !== '' && $this->similarity($this->normalize($item->name), $alt) >= 0.35)
-            ) {
-                $images[$url] = $url;
-            }
-        }
-
-        return array_values($images);
+        return array_values(array_unique([$original, $url]));
     }
 
     private function downloadImages(array $urls, int $productId): array
     {
-        if (! $urls) return [];
-
         $directory = public_path("images/uploads/agente/{$productId}");
         if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
             throw new RuntimeException("No fue posible crear {$directory}.");
         }
 
         $saved = [];
-        foreach (array_slice($urls, 0, 20) as $index => $url) {
-            $response = Http::timeout(30)->retry(2, 500)->get($url);
+        $seenBodies = [];
+        foreach ($urls as $url) {
+            if (count($saved) >= 20) break;
+
+            $response = Http::timeout(30)->retry(2, 500)->withHeaders($this->headers())->get($url);
             if (! $response->successful()) continue;
 
             $contentType = strtolower((string) $response->header('Content-Type'));
             if (! str_starts_with($contentType, 'image/')) continue;
 
-            $image = @imagecreatefromstring($response->body());
+            $body = $response->body();
+            $hash = sha1($body);
+            if (isset($seenBodies[$hash])) continue;
+
+            $image = @imagecreatefromstring($body);
             if ($image === false) continue;
 
-            $filename = $index === 0 ? 'image.jpg' : 'image-'.($index + 1).'.jpg';
+            $number = count($saved);
+            $filename = $number === 0 ? 'image.jpg' : 'image-'.($number + 1).'.jpg';
             $target = $directory.'/'.$filename;
-
             imageinterlace($image, true);
             imagejpeg($image, $target, 88);
             imagedestroy($image);
 
+            $seenBodies[$hash] = true;
             $saved[] = "/images/uploads/agente/{$productId}/{$filename}";
         }
 
         return $saved;
     }
 
-    private function document(string $html): \DOMDocument
+    private function cleanImageUrl(string $url): string
     {
-        $document = new \DOMDocument('1.0', 'UTF-8');
+        $url = html_entity_decode(trim($url), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Una imagen nunca se normaliza como página: elimina slash después de la extensión.
+        return preg_replace('#(\.(?:jpe?g|png|webp|gif|avif))/+(?=\?|$)#i', '$1', $url) ?? $url;
+    }
+
+    private function srcsetUrls(string $srcset): array
+    {
+        $result = [];
+        foreach (explode(',', $srcset) as $candidate) {
+            $url = trim((string) preg_split('/\s+/', trim($candidate))[0]);
+            if ($url !== '') $result[] = $url;
+        }
+        return $result;
+    }
+
+    private function extractMeta(DOMXPath $xpath, string $sourceUrl): array
+    {
+        $meta = ['source_url' => $sourceUrl];
+        $title = $xpath->query('//title')?->item(0);
+        if ($title) $meta['title'] = trim($title->textContent);
+        foreach ($xpath->query('//meta[@content]') ?: [] as $node) {
+            if (! $node instanceof DOMElement) continue;
+            $key = strtolower(trim((string) ($node->getAttribute('name') ?: $node->getAttribute('property'))));
+            $value = trim((string) $node->getAttribute('content'));
+            if ($key !== '' && $value !== '') $meta[$key] = $value;
+        }
+        return $meta;
+    }
+
+    private function extractDescription(DOMXPath $xpath): ?string
+    {
+        foreach ([
+            '//*[@id="tab-description"]',
+            '//*[contains(concat(" ", normalize-space(@class), " "), " woocommerce-product-details__short-description ")]',
+        ] as $query) {
+            $node = $xpath->query($query)?->item(0);
+            if ($node) {
+                $text = trim(preg_replace('/\s+/u', ' ', $node->textContent) ?? '');
+                if ($text !== '') return $text;
+            }
+        }
+        return null;
+    }
+
+    private function document(string $html): DOMDocument
+    {
+        $document = new DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
         $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NOWARNING | LIBXML_NOERROR);
         libxml_clear_errors();
-
         return $document;
     }
 
-    private function firstText(\DOMXPath $xpath, string $query): ?string
+    private function firstText(DOMXPath $xpath, string $query): ?string
     {
         $node = $xpath->query($query)?->item(0);
-        return $node ? trim(preg_replace('/\s+/', ' ', $node->textContent) ?? '') : null;
+        return $node ? trim(preg_replace('/\s+/u', ' ', $node->textContent) ?? '') : null;
     }
 
     private function absoluteUrl(string $url, string $base): string
     {
+        $url = trim($url);
         if (preg_match('#^https?://#i', $url)) return $url;
         if (str_starts_with($url, '//')) return 'https:'.$url;
         if (str_starts_with($url, '/')) return self::BASE.$url;
 
         $parts = parse_url($base);
-        $path = isset($parts['path']) ? rtrim(dirname($parts['path']), '/') : '';
-
-        return ($parts['scheme'] ?? 'https').'://'.($parts['host'] ?? 'www.gaspronal.com').$path.'/'.$url;
+        $path = isset($parts['path']) ? rtrim(dirname((string) $parts['path']), '/') : '';
+        return ($parts['scheme'] ?? 'https').'://'.($parts['host'] ?? 'www.b2ujean.com').$path.'/'.$url;
     }
 
     private function isOfficialHost(string $url): bool
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
-        return in_array($host, ['gaspronal.com', 'www.gaspronal.com'], true);
-    }
-
-    private function normalize(string $value): string
-    {
-        return trim(preg_replace('/\s+/', ' ', Str::lower(Str::ascii($value))) ?? '');
-    }
-
-    private function similarity(string $left, string $right): float
-    {
-        similar_text($left, $right, $percent);
-        return $percent / 100;
+        return in_array($host, ['b2ujean.com', 'www.b2ujean.com'], true);
     }
 }
