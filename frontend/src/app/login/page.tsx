@@ -183,8 +183,8 @@ export default function LoginPage() {
         <img src="/api/media/login-programandoweb" alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
         <div className="relative z-10 max-w-2xl p-14 xl:p-20">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Gestión digital Gaspronal</p>
-          <h2 className="mt-4 text-4xl font-bold leading-tight drop-shadow-sm xl:text-5xl">Una plataforma moderna para administrar un activo construido durante años.</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Gestión digital B2U Jeans</p>
+          <h2 className="mt-4 text-4xl font-bold leading-tight drop-shadow-sm xl:text-5xl">Una plataforma moderna para administrar B2U Jeans.</h2>
           <p className="mt-5 max-w-xl text-base leading-7 text-white/75">Catálogo, contenido, oportunidades y operación digital desde un entorno centralizado.</p>
         </div>
       </aside>
