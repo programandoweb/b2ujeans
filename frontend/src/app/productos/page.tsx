@@ -85,16 +85,15 @@ function productImage(product: Product) {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string; buscar?: string; pagina?: string; option?: string }>;
+  searchParams: Promise<{ categoria?: string; buscar?: string; pagina?: string }>;
 }) {
   const params = await searchParams;
   const category = params.categoria?.trim() || undefined;
   const search = params.buscar?.trim() || undefined;
   const page = Math.max(Number(params.pagina || "1") || 1, 1);
-  const requestedOption = Number(params.option || "") || undefined;
   const [{ products, categories }, heroSlides] = await Promise.all([
     getCatalog(category, search, page),
-    getManagedHero("productos.hero", requestedOption),
+    getManagedHero("productos.hero"),
   ]);
 
   return (
