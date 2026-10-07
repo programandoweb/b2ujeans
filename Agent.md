@@ -696,5 +696,5 @@ Antes de introducir el Compose canónico, el frontend se levantó manualmente co
 - `gaspro-notas.hero` controla el hero de `/gaspro-notas`.
 - Las páginas consultan `/api/v1/heroes/public?section=...` sin caché para que los cambios del dashboard se reflejen de inmediato.
 - Si una ubicación no tiene slides activos, la página conserva su hero B2U estático como fallback.
-- Si existen varias propuestas/opciones, la página usa la opción solicitada con `?option=N`; sin parámetro usa la primera opción activa disponible.
+- B2U ya no expone sistema de propuestas para heroes. Las páginas usan una única configuración activa; por compatibilidad con los datos históricos se conserva internamente la opción 2 como fuente operativa.
 - Las imágenes internas de heroes se resuelven contra `PUBLIC_BACKEND_URL`.
