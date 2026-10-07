@@ -115,7 +115,7 @@ export default function LoginPage() {
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-md">
           <div className="mb-10 flex justify-center">
-            <img src="/programandoweb/brand/logo-gaspronal-vertical-full-color.png" alt="Gaspronal" className="h-auto max-h-28 w-auto max-w-[360px] object-contain" />
+            <img src="/b2u/logo-b2u.svg" alt="B2U Jeans" className="h-auto max-h-24 w-auto max-w-[280px] object-contain" />
           </div>
 
           <div>
