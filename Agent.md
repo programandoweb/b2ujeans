@@ -687,3 +687,14 @@ Antes de introducir el Compose canónico, el frontend se levantó manualmente co
 - `History` lista hasta 100 productos procesados o en proceso, con ID, referencia, estado, cantidad de imágenes, fecha y error si aplica.
 - La fuente del historial es `GET /api/v1/agents/jorge/research/history` y requiere `agents.view`.
 - El frontend refresca estado e historial cada 5 segundos mientras la ficha de Jorge está abierta.
+
+
+### Heroes públicos B2U
+- El constructor `/dashboard/heroes` está conectado a las páginas públicas reales de B2U.
+- `home.hero` controla el hero de `/`.
+- `productos.hero` controla el hero de `/productos`.
+- `gaspro-notas.hero` controla el hero de `/gaspro-notas`.
+- Las páginas consultan `/api/v1/heroes/public?section=...` sin caché para que los cambios del dashboard se reflejen de inmediato.
+- Si una ubicación no tiene slides activos, la página conserva su hero B2U estático como fallback.
+- Si existen varias propuestas/opciones, la página usa la opción solicitada con `?option=N`; sin parámetro usa la primera opción activa disponible.
+- Las imágenes internas de heroes se resuelven contra `PUBLIC_BACKEND_URL`.
