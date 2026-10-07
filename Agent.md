@@ -674,3 +674,8 @@ No agregar al flujo automático seeders destructivos, truncados, borrados masivo
 ### Compatibilidad con el despliegue manual previo
 
 Antes de introducir el Compose canónico, el frontend se levantó manualmente como `b2ujeans-frontend`. El script detecta ese contenedor heredado y lo elimina únicamente cuando no pertenece al proyecto Compose `public`, evitando el conflicto de nombre durante la primera migración al despliegue automatizado.
+
+### Contraseñas en despliegues B2U
+- `DatabaseSeeder` usa `ADMIN_EMAIL` / `ADMIN_PASSWORD` únicamente para bootstrap con `firstOrCreate`.
+- Un despliegue nunca debe sobrescribir la contraseña de un usuario existente.
+- Los cambios o recuperaciones de contraseña pertenecen al flujo de autenticación y deben persistir entre despliegues.
