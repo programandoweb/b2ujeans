@@ -77,6 +77,11 @@ type UnansweredQuestion = {
   created_at:string;
 };
 
+function dateTime(value?:string|null){
+  if(!value)return "Sin fecha";
+  return new Intl.DateTimeFormat("es-CO",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value));
+}
+
 export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }) {
   const { id } = use(params);
   const [agent,setAgent]=useState<Agent|null>(null);
