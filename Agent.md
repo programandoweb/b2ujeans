@@ -705,3 +705,13 @@ Antes de introducir el Compose canónico, el frontend se levantó manualmente co
 - El home usa información oficial de b2ujean.com: nueva colección, origen venezolano desde 2015, categorías principales y WhatsApp oficial.
 - `B2UHeroContentSeeder` actualiza una sola vez los tres slides operativos de `home.hero` (opción interna 2) para sustituir contenido heredado de Gaspronal.
 - El seeder se ejecuta mediante `runOnce`, por lo que después de aplicarse no vuelve a pisar ediciones hechas manualmente desde `/dashboard/heroes`.
+
+
+### Despliegue rápido selectivo B2U
+- `deploy-b2ujeans-fast.sh` compara el commit local contra `origin/b2ujeans` y despliega únicamente los servicios afectados.
+- Cambios en `frontend/`: construye y recrea solo `b2u-frontend`.
+- Cambios en `realtime/`: construye y recrea solo `b2u-realtime`.
+- Cambios PHP normales en `backend/`: aprovecha el bind mount, limpia/genera cachés y evita reconstruir la imagen completa.
+- Migraciones y seeders se ejecutan solo cuando cambiaron sus carpetas respectivas.
+- Si detecta cambios de infraestructura/Docker, el script se detiene y exige usar `deploy-b2ujeans.sh`.
+- El despliegue completo sigue siendo la ruta canónica para cambios estructurales; el rápido es para iteraciones ordinarias.
