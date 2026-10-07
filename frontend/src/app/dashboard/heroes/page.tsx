@@ -252,7 +252,8 @@ export default function HeroesPage() {
           <div className="px-4 py-4">
             <span className="mb-3 block text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Slides</span>
             <div className="flex gap-1 overflow-x-auto">
-                    <button
+              {visibleSlides.map((slide, index) => (
+                <button
                   key={slide.id}
                   type="button"
                   onClick={() => setActiveSlideId(slide.id)}
