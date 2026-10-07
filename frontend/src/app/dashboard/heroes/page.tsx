@@ -24,7 +24,6 @@ type HeroSlide = {
   cards: CardItem[] | null;
 };
 
-const options = [1, 2, 3, 4, 5] as const;
 const sectionPresets = [
   { key: "home.hero", label: "Home / Hero principal" },
   { key: "productos.hero", label: "Productos / Hero" },
@@ -38,7 +37,6 @@ const emptyCards: CardItem[] = [
 
 export default function HeroesPage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
-  const [activeOption, setActiveOption] = useState<number>(2);
   const [activeSection, setActiveSection] = useState("home.hero");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -66,9 +64,9 @@ export default function HeroesPage() {
 
   const visibleSlides = useMemo(
     () => slides
-      .filter((slide) => slide.section_key === activeSection && slide.option === activeOption)
+      .filter((slide) => slide.section_key === activeSection && slide.option === 2)
       .sort((a, b) => a.sort_order - b.sort_order),
-    [slides, activeOption, activeSection]
+    [slides, activeSection]
   );
 
   useEffect(() => {
@@ -120,13 +118,13 @@ export default function HeroesPage() {
 
   async function createSlide() {
     setMessage("");
-    const current = slides.filter((slide) => slide.section_key === activeSection && slide.option === activeOption);
+    const current = slides.filter((slide) => slide.section_key === activeSection && slide.option === 2);
     const response = await fetch("/api/admin/heroes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         section_key: activeSection,
-        option: activeOption,
+        option: 2,
         sort_order: current.length,
         is_active: true,
         interval_ms: 3000,
@@ -186,7 +184,7 @@ export default function HeroesPage() {
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Contenido / Constructor visual</span>
           <h1 className="mt-2 text-3xl font-bold">Constructor de heroes</h1>
           <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
-            Administra los heroes reales de B2U. <strong>home.hero</strong>, <strong>productos.hero</strong> y <strong>gaspro-notas.hero</strong> están conectados directamente a sus páginas públicas.
+            Administra los heroes reales de B2U por página. Cada ubicación usa una única configuración activa, sin sistema de propuestas.
           </p>
         </div>
         {canManage && (
@@ -220,30 +218,6 @@ export default function HeroesPage() {
                 }
               >
                 {section.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="px-4 pt-4">
-          <span className="mb-3 block text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Propuesta</span>
-          <div className="flex gap-1 overflow-x-auto border-b border-[var(--border)]">
-            {options.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => {
-                  setActiveOption(option);
-                  setActiveSlideId(null);
-                }}
-                className={
-                  "whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm font-semibold transition " +
-                  (activeOption === option
-                    ? "border-[var(--brand)] text-[var(--brand)]"
-                    : "border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]")
-                }
-              >
-                Propuesta {option}
               </button>
             ))}
           </div>
