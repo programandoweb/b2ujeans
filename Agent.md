@@ -698,3 +698,10 @@ Antes de introducir el Compose canónico, el frontend se levantó manualmente co
 - Si una ubicación no tiene slides activos, la página conserva su hero B2U estático como fallback.
 - B2U ya no expone sistema de propuestas para heroes. Las páginas usan una única configuración activa; por compatibilidad con los datos históricos se conserva internamente la opción 2 como fuente operativa.
 - Las imágenes internas de heroes se resuelven contra `PUBLIC_BACKEND_URL`.
+
+
+### Contenido del hero Home B2U
+- El diseño visual actual del hero B2U se mantiene; el cambio realizado es de contenido, no de estructura.
+- El home usa información oficial de b2ujean.com: nueva colección, origen venezolano desde 2015, categorías principales y WhatsApp oficial.
+- `B2UHeroContentSeeder` actualiza una sola vez los tres slides operativos de `home.hero` (opción interna 2) para sustituir contenido heredado de Gaspronal.
+- El seeder se ejecuta mediante `runOnce`, por lo que después de aplicarse no vuelve a pisar ediciones hechas manualmente desde `/dashboard/heroes`.
