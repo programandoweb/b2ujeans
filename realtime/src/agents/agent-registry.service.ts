@@ -31,12 +31,12 @@ export class AgentRegistryService implements OnModuleInit {
       const tools = [baseTools, skills].filter(Boolean).join("\n\n");
 
       const name = prompt.match(/^#\s+([^\n]+)/m)?.[1]?.trim() ?? entry.name;
-      const role = prompt.match(/^##\s+Rol\s*\n+([^\n]+)/mi)?.[1]?.trim() ?? "Agente Gaspronal";
+      const role = prompt.match(/^##\s+Rol\s*\n+([^\n]+)/mi)?.[1]?.trim() ?? "Agente B2U Jeans";
 
       this.agents.set(id, { id, name, role, prompt, memory, tools });
     }
 
-    this.logger.log("Agentes Gaspronal cargados: " + [...this.agents.keys()].join(", "));
+    this.logger.log("Agentes B2U Jeans cargados: " + [...this.agents.keys()].join(", "));
   }
 
   private async readSkills(skillsDir: string): Promise<string> {
