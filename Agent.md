@@ -715,3 +715,11 @@ Antes de introducir el Compose canónico, el frontend se levantó manualmente co
 - Migraciones y seeders se ejecutan solo cuando cambiaron sus carpetas respectivas.
 - Si detecta cambios de infraestructura/Docker, el script se detiene y exige usar `deploy-b2ujeans.sh`.
 - El despliegue completo sigue siendo la ruta canónica para cambios estructurales; el rápido es para iteraciones ordinarias.
+
+
+### Lucía editorial B2U
+- Lucía está orientada exclusivamente a investigación editorial de moda femenina y denim para B2U Jeans.
+- Sus temas deben relacionarse con tendencias, siluetas, fit, styling, color, combinaciones y categorías compatibles con el catálogo real de B2U.
+- Las fuentes iniciales incluyen b2ujean.com, su Nueva Colección y medios de moda externos para detectar tendencias verificables.
+- El motor editorial ya no usa prompts industriales de Gaspronal: estrategia, redacción SEO e imágenes están adaptadas al sector moda.
+- La plantilla visible en `/dashboard/agentes/lucia` carga una instrucción de investigación de moda B2U y deja siempre el resultado como borrador.
