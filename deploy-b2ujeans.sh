@@ -81,6 +81,21 @@ log "Generando cachés de producción"
 "${COMPOSE[@]}" exec -T b2u-backend php artisan config:cache
 "${COMPOSE[@]}" exec -T b2u-backend php artisan view:cache
 
+# Composer/Artisan pueden volver a crear archivos como root durante el despliegue.
+# La normalización final debe ocurrir DESPUÉS de todos esos pasos para que
+# PHP-FPM (www-data) pueda escribir caché, sesiones, vistas y logs.
+log "Normalizando permisos Laravel después de Composer, seeders y caches"
+"${COMPOSE[@]}" exec -T -u root b2u-backend sh -lc '
+  mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+  chown -R www-data:www-data storage bootstrap/cache
+  find storage bootstrap/cache -type d -exec chmod 775 {} \;
+  find storage bootstrap/cache -type f -exec chmod 664 {} \;
+'
+"${COMPOSE[@]}" exec -T -u www-data b2u-backend php artisan optimize:clear
+"${COMPOSE[@]}" exec -T -u www-data b2u-backend php artisan permission:cache-reset
+"${COMPOSE[@]}" exec -T -u www-data b2u-backend php artisan config:cache
+"${COMPOSE[@]}" exec -T -u www-data b2u-backend php artisan view:cache
+
 log "Publicando Nginx backend, agentes realtime y frontend"
 "${COMPOSE[@]}" up -d --force-recreate b2u-backend-nginx b2u-realtime b2u-frontend
 
