@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import PublicHeader from "@/components/public/PublicHeader";
+import ManagedHero from "@/components/public/ManagedHero";
+import { getManagedHero } from "@/lib/public-hero";
 import { ArrowRight, CalendarDays } from "lucide-react";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
@@ -39,12 +41,22 @@ async function getPosts():Promise<Post[]>{
   }
 }
 
-export default async function GasproNotasPage(){
-  const posts=await getPosts();
+export default async function GasproNotasPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ option?: string }>;
+}){
+  const params=searchParams?await searchParams:{};
+  const requestedOption=Number(params.option||"")||undefined;
+  const [posts,heroSlides]=await Promise.all([
+    getPosts(),
+    getManagedHero("gaspro-notas.hero",requestedOption),
+  ]);
 
   return <main className="min-h-screen bg-white text-[var(--foreground)]">
     <PublicHeader whatsappHref={whatsappHref}/>
 
+    {heroSlides.length?<ManagedHero slides={heroSlides}/>:(
     <section className="border-b border-slate-200 bg-[var(--surface-muted)]">
       <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 lg:px-10">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspro-notas</p>
@@ -56,6 +68,7 @@ export default async function GasproNotasPage(){
         </p>
       </div>
     </section>
+    )}
 
     <section className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
       {posts.length===0?(
