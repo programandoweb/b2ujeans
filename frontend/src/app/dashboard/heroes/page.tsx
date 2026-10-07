@@ -28,9 +28,7 @@ const options = [1, 2, 3, 4, 5] as const;
 const sectionPresets = [
   { key: "home.hero", label: "Home / Hero principal" },
   { key: "productos.hero", label: "Productos / Hero" },
-  { key: "servicios.hero", label: "Servicios / Hero" },
   { key: "gaspro-notas.hero", label: "Gaspro-notas / Hero" },
-  { key: "contacto.hero", label: "Contacto / Hero" },
 ] as const;
 const emptyCards: CardItem[] = [
   { title: "Bloque 1", text: "Descripción" },
@@ -118,16 +116,16 @@ export default function HeroesPage() {
         sort_order: current.length,
         is_active: true,
         interval_ms: 3000,
-        image_url: "/programandoweb/opengraph/home-opengraph.jpg",
+        image_url: "https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg",
         background_position: "center",
-        eyebrow: "Gaspronal",
-        title: "Nuevo mensaje",
-        accent: "destacado.",
+        eyebrow: "B2U Jeans",
+        title: "Nueva colección",
+        accent: "B2U.",
         description: "Edita el contenido de este nuevo slide.",
-        primary_label: "Hablar con un asesor",
-        primary_href: "https://wa.me/573045527575",
-        secondary_label: "Ver productos",
-        secondary_href: "#productos",
+        primary_label: "Ver productos",
+        primary_href: "/productos",
+        secondary_label: "Inicio",
+        secondary_href: "/",
         cards: emptyCards,
       }),
     });
@@ -172,7 +170,7 @@ export default function HeroesPage() {
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Contenido / Constructor visual</span>
           <h1 className="mt-2 text-3xl font-bold">Constructor de heroes</h1>
           <p className="mt-2 max-w-3xl text-sm text-[var(--muted)]">
-            Administra heroes y carruseles por ubicación. <strong>home.hero</strong> está conectado al home actual; las demás ubicaciones quedan disponibles para reutilizar el mismo constructor en otras páginas.
+            Administra los heroes reales de B2U. <strong>home.hero</strong>, <strong>productos.hero</strong> y <strong>gaspro-notas.hero</strong> están conectados directamente a sus páginas públicas.
           </p>
         </div>
         {canManage && (
