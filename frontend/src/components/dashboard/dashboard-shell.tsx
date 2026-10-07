@@ -113,15 +113,13 @@ export function DashboardShell({ children, user, impersonating = false }: { chil
               collapsed ? "lg:justify-center" : "",
             ].join(" ")}
             onClick={() => setOpen(false)}
-            aria-label="Ir al dashboard de Gaspronal"
+            aria-label="Ir al dashboard de B2U Jeans"
           >
             <img
-              src={collapsed
-                ? "/programandoweb/brand/isotipo-gaspronal-white.png"
-                : "/programandoweb/brand/logo-gaspronal-horizontal-white.png"}
-              alt="Gaspronal - Tecnología e Ingeniería Estratégica"
+              src="/b2u/logo-b2u.svg"
+              alt="B2U Jeans"
               className={[
-                "object-contain transition-all duration-200",
+                "object-contain brightness-0 invert transition-all duration-200",
                 collapsed
                   ? "h-11 w-11 object-center"
                   : "h-auto max-h-14 w-full object-left",
@@ -248,7 +246,7 @@ export function DashboardShell({ children, user, impersonating = false }: { chil
           </button>
 
           <div className="ml-3 min-w-0">
-            <p className="truncate text-sm font-semibold">Gaspronal · Tecnología e Ingeniería Estratégica</p>
+            <p className="truncate text-sm font-semibold">B2U Jeans · Gestión comercial</p>
           </div>
 
           <a
