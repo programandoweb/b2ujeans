@@ -165,15 +165,22 @@ class JorgeProductResearchService
             $hash = sha1($body);
             if (isset($seenBodies[$hash])) continue;
 
-            $image = @imagecreatefromstring($body);
-            if ($image === false) continue;
-
             $number = count($saved);
             $filename = $number === 0 ? 'image.jpg' : 'image-'.($number + 1).'.jpg';
             $target = $directory.'/'.$filename;
-            imageinterlace($image, true);
-            imagejpeg($image, $target, 88);
-            imagedestroy($image);
+
+            // Las fotos oficiales de B2U son JPEG de alta resolución. Copiarlas
+            // directamente evita que GD descomprima toda la imagen en RAM
+            // (algunas superan el memory_limit de 128 MB al decodificarse).
+            if (str_contains($contentType, 'jpeg') || str_contains($contentType, 'jpg')) {
+                if (file_put_contents($target, $body) === false) continue;
+            } else {
+                $image = @imagecreatefromstring($body);
+                if ($image === false) continue;
+                imageinterlace($image, true);
+                imagejpeg($image, $target, 88);
+                imagedestroy($image);
+            }
 
             $seenBodies[$hash] = true;
             $saved[] = "/images/uploads/agente/{$productId}/{$filename}";
