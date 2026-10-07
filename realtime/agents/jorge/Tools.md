@@ -11,6 +11,6 @@ Las herramientas operativas de Jorge viven en Laravel y se ejecutan mediante el 
 - Estado global: `agent_research_runs`.
 - Estado por producto: campos `legacy_research_*` de `catalog_items`.
 - Imágenes: `backend/public/images/uploads/agente/{id_producto}/`.
-- Fuente oficial inicial: `https://www.gaspronal.com/2019/productos`.
+- Fuente oficial inicial: `https://www.b2ujean.com/`.
 
 No simular herramientas ni afirmar que una ficha fue migrada si Laravel no la marcó como `completed`.
