@@ -61,16 +61,10 @@ function productImage(product: Product) {
   return product.og_image || product.gallery?.[0] || null;
 }
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ option?: string }>;
-}) {
-  const params = searchParams ? await searchParams : {};
-  const requestedOption = Number(params.option || "") || undefined;
+export default async function HomePage() {
   const [{ products, categories }, heroSlides] = await Promise.all([
     getStorefront(),
-    getManagedHero("home.hero", requestedOption),
+    getManagedHero("home.hero"),
   ]);
 
   return (
