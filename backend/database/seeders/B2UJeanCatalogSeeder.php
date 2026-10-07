@@ -459,7 +459,7 @@ class B2UJeanCatalogSeeder extends Seeder
                 }
 
                 if (is_string($image) && $this->isHttpUrl($image)) {
-                    $images[$this->normalizeUrl($image)] = true;
+                    $images[$this->normalizeImageUrl($image)] = true;
                 }
             }
         }
@@ -472,7 +472,7 @@ class B2UJeanCatalogSeeder extends Seeder
             foreach (['data-large_image', 'data-lazy-src', 'data-src', 'src'] as $attribute) {
                 $image = trim($node->getAttribute($attribute));
                 if ($this->isHttpUrl($image)) {
-                    $images[$this->normalizeUrl($image)] = true;
+                    $images[$this->normalizeImageUrl($image)] = true;
                     break;
                 }
             }
@@ -648,6 +648,13 @@ class B2UJeanCatalogSeeder extends Seeder
     {
         $url = html_entity_decode(trim($url), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         return rtrim($url, '/').'/';
+    }
+
+    private function normalizeImageUrl(string $url): string
+    {
+        $url = html_entity_decode(trim($url), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return preg_replace('#(\\.(?:jpe?g|png|webp|gif|avif))/+(?=\\?|$)#i', '$1', $url) ?? $url;
     }
 
     private function isAllowedSourceUrl(string $url): bool
