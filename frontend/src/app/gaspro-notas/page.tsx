@@ -41,16 +41,10 @@ async function getPosts():Promise<Post[]>{
   }
 }
 
-export default async function GasproNotasPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ option?: string }>;
-}){
-  const params=searchParams?await searchParams:{};
-  const requestedOption=Number(params.option||"")||undefined;
+export default async function GasproNotasPage(){
   const [posts,heroSlides]=await Promise.all([
     getPosts(),
-    getManagedHero("gaspro-notas.hero",requestedOption),
+    getManagedHero("gaspro-notas.hero"),
   ]);
 
   return <main className="min-h-screen bg-white text-[var(--foreground)]">
