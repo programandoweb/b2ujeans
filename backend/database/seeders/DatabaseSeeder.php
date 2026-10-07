@@ -26,10 +26,13 @@ class DatabaseSeeder extends Seeder
         $password = (string) env('ADMIN_PASSWORD', '');
 
         if ($email !== '' && $password !== '') {
-            User::query()->updateOrCreate(
+            // Bootstrap únicamente: un deploy nunca debe cambiar la contraseña
+            // de una cuenta existente. La recuperación/cambio de contraseña es
+            // responsabilidad exclusiva del flujo de autenticación.
+            User::query()->firstOrCreate(
                 ['email' => $email],
                 [
-                    'name' => env('ADMIN_NAME', 'Administrador Gaspronal'),
+                    'name' => env('ADMIN_NAME', 'Administrador B2U Jeans'),
                     'password' => Hash::make($password),
                 ],
             );
