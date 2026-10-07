@@ -177,7 +177,7 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
       "@type":"Organization",
       name:"Gaspronal Industrias y Servicios S.A.S.",
       url:siteUrl,
-      logo:{"@type":"ImageObject",url:`${siteUrl}/programandoweb/brand/logo-gaspronal-horizontal-full-color.png`},
+      logo:{"@type":"ImageObject",url:`${siteUrl}/b2u/logo-b2u.svg`},
     },
   };
   const breadcrumbs={
