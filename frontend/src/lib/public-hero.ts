@@ -25,7 +25,7 @@ function publicAsset(url: string): string {
   return publicBackendUrl + (url.startsWith("/") ? url : "/" + url);
 }
 
-export async function getManagedHero(section: string, requestedOption?: number): Promise<ManagedHeroSlide[]> {
+export async function getManagedHero(section: string): Promise<ManagedHeroSlide[]> {
   try {
     const response = await fetch(
       `${backendUrl}/api/v1/heroes/public?section=${encodeURIComponent(section)}`,
@@ -35,14 +35,10 @@ export async function getManagedHero(section: string, requestedOption?: number):
 
     const payload = await response.json() as { data?: Record<string, ManagedHeroSlide[]> };
     const groups = payload.data ?? {};
-    const availableOptions = Object.keys(groups)
+    const selected = groups["2"]?.length ? 2 : Object.keys(groups)
       .map(Number)
-      .filter(Number.isFinite)
-      .sort((a, b) => a - b);
-
-    const selected = requestedOption && groups[String(requestedOption)]?.length
-      ? requestedOption
-      : availableOptions[0];
+      .filter((option) => Number.isFinite(option) && groups[String(option)]?.length)
+      .sort((a, b) => a - b)[0];
 
     if (!selected) return [];
 
