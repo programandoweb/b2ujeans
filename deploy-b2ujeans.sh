@@ -52,8 +52,8 @@ if docker container inspect b2ujeans-frontend >/dev/null 2>&1; then
   fi
 fi
 
-log "Construyendo backend y frontend"
-"${COMPOSE[@]}" build b2u-backend b2u-frontend
+log "Construyendo backend, realtime y frontend"
+"${COMPOSE[@]}" build b2u-backend b2u-realtime b2u-frontend
 
 log "Levantando MariaDB"
 "${COMPOSE[@]}" up -d b2u-mariadb
@@ -81,8 +81,8 @@ log "Generando cachés de producción"
 "${COMPOSE[@]}" exec -T b2u-backend php artisan config:cache
 "${COMPOSE[@]}" exec -T b2u-backend php artisan view:cache
 
-log "Publicando Nginx backend y frontend"
-"${COMPOSE[@]}" up -d --force-recreate b2u-backend-nginx b2u-frontend
+log "Publicando Nginx backend, agentes realtime y frontend"
+"${COMPOSE[@]}" up -d --force-recreate b2u-backend-nginx b2u-realtime b2u-frontend
 
 log "Esperando health del backend"
 BACKEND_OK=0
