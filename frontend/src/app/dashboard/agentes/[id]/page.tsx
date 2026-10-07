@@ -37,10 +37,23 @@ type ResearchState = {
     successful_items:number;
     failed_items:number;
     last_error?:string|null;
+    last_heartbeat_at?:string|null;
     current_item?:{id:number;name:string;reference?:string|null}|null;
   };
   pending_items:number;
   completed_items:number;
+};
+type ResearchHistoryItem = {
+  id:number;
+  name:string;
+  reference?:string|null;
+  status:"processing"|"completed"|"failed";
+  error?:string|null;
+  researched_at?:string|null;
+  updated_at?:string|null;
+  source_url?:string|null;
+  gallery_count:number;
+  image?:string|null;
 };
 type LuciaRun = {
   uuid:string;
@@ -81,6 +94,8 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
   const [research,setResearch]=useState<ResearchState|null>(null);
   const [researchBusy,setResearchBusy]=useState(false);
   const [researchMessage,setResearchMessage]=useState("");
+  const [jorgeTab,setJorgeTab]=useState<"actual"|"history">("actual");
+  const [researchHistory,setResearchHistory]=useState<ResearchHistoryItem[]>([]);
   const [luciaRun,setLuciaRun]=useState<LuciaRun|null>(null);
   const [unanswered,setUnanswered]=useState<UnansweredQuestion[]>([]);
   const [unansweredLoading,setUnansweredLoading]=useState(false);
@@ -209,9 +224,15 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
     let active=true;
 
     async function loadResearch(){
-      const response=await fetch("/api/admin/agents/jorge/research",{cache:"no-store"});
+      const [response,historyResponse]=await Promise.all([
+        fetch("/api/admin/agents/jorge/research",{cache:"no-store"}),
+        fetch("/api/admin/agents/jorge/research/history",{cache:"no-store"}),
+      ]);
       const json=await response.json().catch(()=>({}));
-      if(active&&response.ok)setResearch(json.data);
+      const historyJson=await historyResponse.json().catch(()=>({}));
+      if(!active)return;
+      if(response.ok)setResearch(json.data);
+      if(historyResponse.ok)setResearchHistory(historyJson.data??[]);
     }
 
     void loadResearch();
@@ -561,30 +582,53 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
 
         {id==="jorge"&&<section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
           <div className="flex items-center gap-2"><Search size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Investigación del catálogo</h2></div>
-          <p className="text-sm leading-6 text-[var(--muted)]">Jorge recorre uno a uno los productos de la web oficial de Gaspronal, recupera contenido, SEO, metatags e imágenes y los guarda localmente.</p>
+          <p className="text-sm leading-6 text-[var(--muted)]">Jorge recorre uno a uno los productos oficiales de B2U Jeans, recupera sus imágenes originales y las guarda localmente.</p>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Estado</span><strong className="mt-1 block capitalize">{research?.run.status??"cargando"}</strong></div>
-            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Progreso</span><strong className="mt-1 block">{research?.run.processed_items??0} / {research?.run.total_items??0}</strong></div>
-            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Completados</span><strong className="mt-1 block">{research?.run.successful_items??0}</strong></div>
-            <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Fallidos</span><strong className="mt-1 block">{research?.run.failed_items??0}</strong></div>
+          <div className="grid grid-cols-2 rounded-xl bg-[var(--app-bg)] p-1">
+            <button type="button" onClick={()=>setJorgeTab("actual")} className={`min-h-10 rounded-lg px-3 text-sm font-semibold transition ${jorgeTab==="actual"?"bg-[var(--surface)] text-[var(--app-fg)] shadow-sm":"text-[var(--muted)]"}`}>Actual</button>
+            <button type="button" onClick={()=>setJorgeTab("history")} className={`min-h-10 rounded-lg px-3 text-sm font-semibold transition ${jorgeTab==="history"?"bg-[var(--surface)] text-[var(--app-fg)] shadow-sm":"text-[var(--muted)]"}`}>History ({researchHistory.length})</button>
           </div>
 
-          {research&&research.run.total_items>0&&<div className="h-2 overflow-hidden rounded-full bg-[var(--app-bg)]"><div className="h-full bg-[var(--brand)] transition-all" style={{width:`${Math.min(100,Math.round((research.run.processed_items/research.run.total_items)*100))}%`}}/></div>}
+          {jorgeTab==="actual"?<>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Estado</span><strong className="mt-1 block capitalize">{research?.run.status??"cargando"}</strong></div>
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Progreso</span><strong className="mt-1 block">{research?.run.processed_items??0} / {research?.run.total_items??0}</strong></div>
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Completados</span><strong className="mt-1 block">{research?.run.successful_items??0}</strong></div>
+              <div className="rounded-xl bg-[var(--app-bg)] p-3"><span className="block text-xs text-[var(--muted)]">Fallidos</span><strong className="mt-1 block">{research?.run.failed_items??0}</strong></div>
+            </div>
 
-          {research?.run.current_item&&<div className="rounded-xl border border-[var(--border)] p-3 text-sm">
-            <span className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Producto actual</span>
-            <strong className="mt-1 block">{research.run.current_item.name}</strong>
+            {research&&research.run.total_items>0&&<div className="h-2 overflow-hidden rounded-full bg-[var(--app-bg)]"><div className="h-full bg-[var(--brand)] transition-all" style={{width:`${Math.min(100,Math.round((research.run.processed_items/research.run.total_items)*100))}%`}}/></div>}
+
+            {research?.run.current_item&&<div className="rounded-xl border border-[var(--border)] p-3 text-sm">
+              <span className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Producto actual</span>
+              <strong className="mt-1 block">{research.run.current_item.name}</strong>
+            </div>}
+
+            <div className="grid grid-cols-3 gap-2">
+              <button type="button" disabled={researchBusy||research?.run.status==="running"} onClick={()=>void researchAction("play")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-3 text-sm font-semibold text-white disabled:opacity-45"><Play size={16}/>Play</button>
+              <button type="button" disabled={researchBusy||research?.run.status!=="running"} onClick={()=>void researchAction("pause")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-45"><Pause size={16}/>Pausa</button>
+              <button type="button" disabled={researchBusy||!["running","paused"].includes(research?.run.status??"")} onClick={()=>void researchAction("stop")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 px-3 text-sm font-semibold text-red-700 disabled:opacity-45"><Square size={16}/>Stop</button>
+            </div>
+
+            {research?.run.last_error&&<p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">{research.run.last_error}</p>}
+            {researchMessage&&<p className="text-xs font-medium text-[var(--brand)]">{researchMessage}</p>}
+          </>:<div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
+            {researchHistory.length===0&&<div className="rounded-xl border border-dashed border-[var(--border)] p-5 text-center text-sm text-[var(--muted)]">Aún no hay productos procesados.</div>}
+            {researchHistory.map(item=><article key={item.id} className="rounded-xl border border-[var(--border)] p-3">
+              <div className="flex items-start gap-3">
+                {item.image&&<img src={item.image} alt="" className="size-14 shrink-0 rounded-lg border border-[var(--border)] object-cover"/>}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <strong className="block truncate text-sm">{item.name}</strong>
+                    <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold uppercase ${item.status==="completed"?"bg-emerald-50 text-emerald-700":item.status==="failed"?"bg-red-50 text-red-700":"bg-amber-50 text-amber-700"}`}>{item.status}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--muted)]">ID {item.id}{item.reference?` · ${item.reference}`:""} · {item.gallery_count} imagen(es)</p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">{item.researched_at?dateTime(item.researched_at):dateTime(item.updated_at)}</p>
+                  {item.error&&<p className="mt-2 text-xs leading-5 text-red-700">{item.error}</p>}
+                </div>
+              </div>
+            </article>)}
           </div>}
-
-          <div className="grid grid-cols-3 gap-2">
-            <button type="button" disabled={researchBusy||research?.run.status==="running"} onClick={()=>void researchAction("play")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-3 text-sm font-semibold text-white disabled:opacity-45"><Play size={16}/>Play</button>
-            <button type="button" disabled={researchBusy||research?.run.status!=="running"} onClick={()=>void researchAction("pause")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold disabled:opacity-45"><Pause size={16}/>Pausa</button>
-            <button type="button" disabled={researchBusy||!["running","paused"].includes(research?.run.status??"")} onClick={()=>void researchAction("stop")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 px-3 text-sm font-semibold text-red-700 disabled:opacity-45"><Square size={16}/>Stop</button>
-          </div>
-
-          {research?.run.last_error&&<p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">{research.run.last_error}</p>}
-          {researchMessage&&<p className="text-xs font-medium text-[var(--brand)]">{researchMessage}</p>}
         </section>}
 
         {id!=="lucia"&&<form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
