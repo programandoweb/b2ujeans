@@ -28,6 +28,47 @@ class JorgeResearchController extends Controller
         ]);
     }
 
+    public function history(): JsonResponse
+    {
+        $items = CatalogItem::query()
+            ->where('type', 'product')
+            ->whereIn('legacy_research_status', ['processing', 'completed', 'failed'])
+            ->orderByRaw("CASE legacy_research_status WHEN 'processing' THEN 0 ELSE 1 END")
+            ->orderByDesc('legacy_researched_at')
+            ->orderByDesc('updated_at')
+            ->limit(100)
+            ->get([
+                'id',
+                'name',
+                'reference',
+                'legacy_source_url',
+                'legacy_research_status',
+                'legacy_research_error',
+                'legacy_researched_at',
+                'gallery',
+                'updated_at',
+            ])
+            ->map(function (CatalogItem $item): array {
+                $gallery = is_array($item->gallery) ? $item->gallery : [];
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'reference' => $item->reference,
+                    'status' => $item->legacy_research_status,
+                    'error' => $item->legacy_research_error,
+                    'researched_at' => optional($item->legacy_researched_at)->toIso8601String(),
+                    'updated_at' => optional($item->updated_at)->toIso8601String(),
+                    'source_url' => $item->legacy_source_url,
+                    'gallery_count' => count($gallery),
+                    'image' => $gallery[0] ?? null,
+                ];
+            })
+            ->values();
+
+        return response()->json(['data' => $items]);
+    }
+
     public function play(): JsonResponse
     {
         CatalogItem::query()
