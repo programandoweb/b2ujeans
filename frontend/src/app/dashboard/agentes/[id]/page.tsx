@@ -433,6 +433,36 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
         </div>
 
         <form onSubmit={send} className="border-t border-[var(--border)] p-4">
+          {id==="jorge"&&<div className="mb-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={()=>setDraft(`Jorge, inicia una investigación completa de imágenes del catálogo B2U Jeans.
+
+Trabaja en loop producto por producto hasta procesar todo el catálogo. Para cada producto revisa su ficha oficial en b2ujean.com y localiza todas las imágenes originales de producto.
+
+No conserves hotlinks externos como imágenes definitivas.
+
+Cuando WordPress entregue variantes como -scaled, -1536x2048, -1024x1365, -768x1024 u otros tamaños, intenta recuperar primero el archivo original eliminando esos sufijos antes de la extensión. Ejemplo: si encuentras DSC09686-scaled.jpg, debes intentar primero DSC09686.jpg.
+
+Nunca agregues / después de una extensión de imagen. Una URL como DSC09686-scaled.jpg/ es inválida.
+
+Antes de aceptar una imagen comprueba que responda HTTP 200 y que Content-Type sea image/*. Si falla, prueba el siguiente candidato. No guardes una URL que produzca 404.
+
+Cuando encuentres la imagen válida, descárgala físicamente al proyecto B2U en backend/public/images/uploads/agente/{id_producto}/image.jpg. Para imágenes adicionales usa image-2.jpg, image-3.jpg, etc.
+
+Después actualiza la galería del producto para que utilice exclusivamente las URLs públicas locales de demo.pereira.expert, no las URLs de b2ujean.com. Conserva la URL original únicamente como trazabilidad/source metadata.
+
+Continúa automáticamente con el siguiente producto. Si una imagen falla, registra el fallo, prueba candidatos alternativos y continúa. No detengas todo el proceso por un producto.
+
+Repite el proceso hasta que no queden productos pendientes. Al finalizar realiza una segunda pasada de validación sobre todo el catálogo comprobando que cada URL de gallery responda correctamente y que no exista ninguna URL que contenga -scaled, termine en .jpg/, .jpeg/, .png/ o siga apuntando a b2ujean.com.
+
+El proceso solamente se considera terminado cuando todas las imágenes recuperables estén almacenadas localmente y las galerías apunten a esas copias.`)}
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--brand)] bg-[var(--brand-soft)] px-3 text-sm font-semibold text-[var(--brand)] transition hover:opacity-85"
+            >
+              <Search size={16}/>Migrar imágenes B2U en loop
+            </button>
+            <span className="text-xs text-[var(--muted)]">Carga la plantilla en el input; revisa y presiona enviar.</span>
+          </div>}
           {id==="lucia"&&<div className="mb-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
