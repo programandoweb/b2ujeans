@@ -616,7 +616,6 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
             {researchHistory.length===0&&<div className="rounded-xl border border-dashed border-[var(--border)] p-5 text-center text-sm text-[var(--muted)]">Aún no hay productos procesados.</div>}
             {researchHistory.map(item=><article key={item.id} className="rounded-xl border border-[var(--border)] p-3">
               <div className="flex items-start gap-3">
-                {item.image&&<img src={item.image} alt="" className="size-14 shrink-0 rounded-lg border border-[var(--border)] object-cover"/>}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <strong className="block truncate text-sm">{item.name}</strong>
