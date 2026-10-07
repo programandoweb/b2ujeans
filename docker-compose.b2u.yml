@@ -39,6 +39,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD debe existir en backend/.env}
       DEPLOYMENT_ENABLED: "false"
       AUTODEPLOY_ENABLED: "false"
+      AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+      REALTIME_INTERNAL_URL: http://b2u-realtime:4100
     depends_on:
       b2u-mariadb:
         condition: service_healthy
@@ -69,6 +71,35 @@ services:
     networks:
       - b2ujeans
 
+  b2u-realtime:
+    build:
+      context: ./realtime
+      dockerfile: Dockerfile
+    image: b2ujeans-realtime:latest
+    container_name: b2u-realtime
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "4100"
+      AGENTS_PATH: /app/agents
+      CORS_ORIGIN: ${FRONTEND_URL:-https://demo.pereira.expert}
+      AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+      BROWSER_SOCKET_PATH: ${BROWSER_SOCKET_PATH:-/browser}
+      BROWSER_TASK_TIMEOUT_MS: ${BROWSER_TASK_TIMEOUT_MS:-90000}
+      GEMINI_IMAGE_MODEL: ${GEMINI_IMAGE_MODEL:-gemini-3.1-flash-image}
+      LARAVEL_API_URL: http://b2u-backend-nginx/api/v1
+      BAILEYS_SESSIONS_PATH: /app/data/baileys
+    volumes:
+      - b2u_baileys_sessions:/app/data/baileys
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:4100/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - b2ujeans
+
   b2u-frontend:
     build:
       context: ./frontend
@@ -87,8 +118,12 @@ services:
       PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-https://backend-demo.pereira.expert}
       NEXT_PUBLIC_SITE_URL: ${FRONTEND_URL:-https://demo.pereira.expert}
       NEXT_PUBLIC_REALTIME_URL: ""
+      REALTIME_INTERNAL_URL: http://b2u-realtime:4100
+      AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
     depends_on:
       b2u-backend-nginx:
+        condition: service_healthy
+      b2u-realtime:
         condition: service_healthy
     ports:
       - "6500:3000"
@@ -105,6 +140,7 @@ volumes:
   b2u_mariadb:
   b2u_backend_vendor:
   b2u_backend_storage:
+  b2u_baileys_sessions:
 
 networks:
   b2ujeans:
