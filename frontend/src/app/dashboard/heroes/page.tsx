@@ -40,11 +40,11 @@ export default function HeroesPage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [activeOption, setActiveOption] = useState<number>(2);
   const [activeSection, setActiveSection] = useState("home.hero");
-  const [sectionInput, setSectionInput] = useState("home.hero");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [canManage, setCanManage] = useState(false);
+  const [activeSlideId, setActiveSlideId] = useState<number | null>(null);
 
   async function load() {
     setLoading(true);
@@ -69,6 +69,19 @@ export default function HeroesPage() {
       .sort((a, b) => a.sort_order - b.sort_order),
     [slides, activeOption, activeSection]
   );
+
+  useEffect(() => {
+    if (visibleSlides.length === 0) {
+      setActiveSlideId(null);
+      return;
+    }
+
+    if (!visibleSlides.some((slide) => slide.id === activeSlideId)) {
+      setActiveSlideId(visibleSlides[0].id);
+    }
+  }, [visibleSlides, activeSlideId]);
+
+  const activeSlide = visibleSlides.find((slide) => slide.id === activeSlideId) ?? visibleSlides[0] ?? null;
 
   function patch(id: number, field: keyof HeroSlide, value: HeroSlide[keyof HeroSlide]) {
     setSlides((current) => current.map((slide) => (slide.id === id ? { ...slide, [field]: value } : slide)));
@@ -135,6 +148,7 @@ export default function HeroesPage() {
       return;
     }
     setSlides((currentSlides) => [...currentSlides, json.data]);
+    setActiveSlideId(json.data.id);
   }
 
   async function remove(slide: HeroSlide) {
@@ -146,6 +160,7 @@ export default function HeroesPage() {
       return;
     }
     setSlides((current) => current.filter((item) => item.id !== slide.id));
+    if (activeSlideId === slide.id) setActiveSlideId(null);
   }
 
   async function uploadImage(slide: HeroSlide, file: File) {
@@ -184,74 +199,77 @@ export default function HeroesPage() {
         )}
       </header>
 
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
-          <label className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Ubicación / section key</span>
-            <input
-              list="hero-section-presets"
-              value={sectionInput}
-              onChange={(e) => setSectionInput(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
-              className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm"
-              placeholder="home.hero"
-            />
-            <datalist id="hero-section-presets">
-              {sectionPresets.map((section) => <option key={section.key} value={section.key}>{section.label}</option>)}
-            </datalist>
-          </label>
-          <button
-            type="button"
-            onClick={() => {
-              if (!sectionInput.trim()) return;
-              setActiveSection(sectionInput.trim());
-            }}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--border)] px-4 text-sm font-semibold"
-          >
-            Administrar ubicación
-          </button>
+      <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+        <div className="border-b border-[var(--border)] px-4 pt-4">
+          <span className="mb-3 block text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Página</span>
+          <div className="flex gap-1 overflow-x-auto">
+            {sectionPresets.map((section) => (
+              <button
+                key={section.key}
+                type="button"
+                onClick={() => {
+                  setActiveSection(section.key);
+                  setActiveSlideId(null);
+                }}
+                className={
+                  "whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm font-semibold transition " +
+                  (activeSection === section.key
+                    ? "border-[var(--brand)] text-[var(--brand)]"
+                    : "border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]")
+                }
+              >
+                {section.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {sectionPresets.map((section) => (
-            <button
-              key={section.key}
-              type="button"
-              onClick={() => {
-                setSectionInput(section.key);
-                setActiveSection(section.key);
-              }}
-              className={
-                "rounded-lg border px-3 py-2 text-xs font-semibold " +
-                (activeSection === section.key
-                  ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
-                  : "border-[var(--border)]")
-              }
-            >
-              {section.label}
-            </button>
-          ))}
-        </div>
-        <p className="mt-3 text-xs text-[var(--muted)]">
-          Ubicación activa: <strong>{activeSection}</strong>
-        </p>
-      </section>
 
-      <div className="flex flex-wrap gap-2">
-        {options.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setActiveOption(option)}
-            className={
-              "rounded-xl border px-4 py-2 text-sm font-semibold transition " +
-              (activeOption === option
-                ? "border-[var(--brand)] bg-[var(--brand)] text-white"
-                : "border-[var(--border)] bg-[var(--surface)]")
-            }
-          >
-            Propuesta {option}
-          </button>
-        ))}
-      </div>
+        <div className="px-4 pt-4">
+          <span className="mb-3 block text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Propuesta</span>
+          <div className="flex gap-1 overflow-x-auto border-b border-[var(--border)]">
+            {options.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => {
+                  setActiveOption(option);
+                  setActiveSlideId(null);
+                }}
+                className={
+                  "whitespace-nowrap border-b-2 px-4 pb-3 pt-1 text-sm font-semibold transition " +
+                  (activeOption === option
+                    ? "border-[var(--brand)] text-[var(--brand)]"
+                    : "border-transparent text-[var(--muted)] hover:text-[var(--app-fg)]")
+                }
+              >
+                Propuesta {option}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {visibleSlides.length > 0 && (
+          <div className="px-4 py-4">
+            <span className="mb-3 block text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted)]">Slides</span>
+            <div className="flex gap-1 overflow-x-auto">
+                    <button
+                  key={slide.id}
+                  type="button"
+                  onClick={() => setActiveSlideId(slide.id)}
+                  className={
+                    "whitespace-nowrap rounded-t-lg border border-b-0 px-4 py-2.5 text-sm font-semibold transition " +
+                    (activeSlide?.id === slide.id
+                      ? "border-[var(--border)] bg-[var(--surface)] text-[var(--brand)]"
+                      : "border-transparent bg-[var(--app-bg)] text-[var(--muted)] hover:text-[var(--app-fg)]")
+                  }
+                >
+                  Slide {index + 1}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {message && <p className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">{message}</p>}
 
@@ -259,8 +277,10 @@ export default function HeroesPage() {
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 text-sm text-[var(--muted)]">Cargando heroes…</div>
       ) : (
         <div className="space-y-5">
-          {visibleSlides.map((slide, index) => (
-            <section key={slide.id} className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+          {activeSlide && (() => {
+            const slide = activeSlide;
+            const index = visibleSlides.findIndex((item) => item.id === slide.id);
+            return <section key={slide.id} className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
               <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--app-bg)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <strong>Slide {index + 1}</strong>
@@ -382,8 +402,8 @@ export default function HeroesPage() {
                   </div>
                 </div>
               </div>
-            </section>
-          ))}
+            </section>;
+          })()}
 
           {visibleSlides.length === 0 && (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center text-sm text-[var(--muted)]">
