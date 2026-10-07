@@ -4,7 +4,7 @@
 
 ### Marca y catálogo
 https://www.b2ujean.com/
-https://www.b2ujean.com/product-category/nueva-coleccion/
+https://www.b2ujean.com/nueva-coleccion/
 
 ### Moda y tendencias
 https://www.vogue.mx/moda
