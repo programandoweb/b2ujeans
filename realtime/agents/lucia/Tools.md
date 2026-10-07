@@ -17,7 +17,7 @@ https://www.elle.com/fashion/trend-reports/
 - El post debe conectar la investigación con el universo real de B2U sin inventar inventario.
 
 ## Browser Collector
-- WebSocket nativo: wss://demo.pereira.expert/browser
+- WebSocket nativo: wss://gaspronal.programandoweb.net/browser
 - Tarea: SCRAPE_URL.
 - Resultado: title, description, text, headings, links e images.
 
