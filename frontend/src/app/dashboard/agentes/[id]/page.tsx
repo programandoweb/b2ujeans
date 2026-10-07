@@ -635,10 +635,12 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
           </div>}
         </section>}
 
-        {id!=="lucia"&&<form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+        <form onSubmit={saveSettings} className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
           <div className="flex items-center gap-2"><KeyRound size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Modelo de IA</h2></div>
           <p className="text-sm leading-6 text-[var(--muted)]">
-            El agente intenta primero el modelo principal. Si falla, utiliza automáticamente el fallback.
+            {id==="lucia"
+              ?"Lucía requiere un modelo Gemini activo con API key porque su flujo editorial genera texto e imágenes. Selecciona aquí el modelo Gemini que utilizará."
+              :"El agente intenta primero el modelo principal. Si falla, utiliza automáticamente el fallback."}
           </p>
 
           <label className="block space-y-2">
@@ -652,7 +654,7 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
               className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"
             >
               <option value="">Selecciona un modelo</option>
-              {aiModels.map(item=><option key={item.id} value={item.id}>
+              {aiModels.filter(item=>id!=="lucia"||item.provider?.driver==="gemini").map(item=><option key={item.id} value={item.id}>
                 {item.name} · {item.provider?.name??"Sin proveedor"} · {item.model_identifier}
               </option>)}
             </select>
@@ -666,7 +668,7 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
               className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-transparent px-3"
             >
               <option value="">Sin fallback</option>
-              {aiModels.filter(item=>String(item.id)!==primaryAiModelId).map(item=><option key={item.id} value={item.id}>
+              {aiModels.filter(item=>String(item.id)!==primaryAiModelId&&(id!=="lucia"||item.provider?.driver==="gemini")).map(item=><option key={item.id} value={item.id}>
                 {item.name} · {item.provider?.name??"Sin proveedor"} · {item.model_identifier}
               </option>)}
             </select>
@@ -684,7 +686,7 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
           <button disabled={saving} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white disabled:opacity-50"><Save size={17}/>{saving?"Guardando…":"Guardar modelos"}</button>
 
           {settingsMessage&&<p className="text-xs leading-5 text-[var(--muted)]">{settingsMessage}</p>}
-        </form>}
+        </form>
       </aside>
     </section>}
 
