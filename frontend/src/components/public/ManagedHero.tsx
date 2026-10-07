@@ -35,7 +35,7 @@ export default function ManagedHero({slides}:{slides:ManagedHeroSlide[]}) {
   if(!slides.length)return null;
   const slide=slides[Math.min(active,slides.length-1)]??slides[0];
 
-  return <section className="relative min-h-[68vh] overflow-hidden bg-neutral-950 text-white lg:min-h-[76vh]">
+  return <section className="relative h-[720px] overflow-hidden bg-neutral-950 text-white sm:h-[760px] lg:h-[780px]">
     <AnimatePresence mode="sync" initial={false}>
       <motion.img
         key={slide.id}
@@ -50,7 +50,7 @@ export default function ManagedHero({slides}:{slides:ManagedHeroSlide[]}) {
       />
     </AnimatePresence>
     <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10"/>
-    <div className="relative mx-auto flex min-h-[68vh] max-w-[1480px] items-end px-5 pb-14 pt-28 sm:px-8 lg:min-h-[76vh] lg:px-12 lg:pb-20">
+    <div className="relative mx-auto flex h-full max-w-[1480px] items-end px-5 pb-14 pt-28 sm:px-8 lg:px-12 lg:pb-20">
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={"content-"+slide.id}
