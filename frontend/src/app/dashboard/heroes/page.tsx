@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FiEye, FiEyeOff, FiImage, FiPlus, FiSave, FiTrash2 } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiImage, FiMaximize2, FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
 
 type CardItem = { title: string; text: string };
 type HeroSlide = {
@@ -45,6 +45,7 @@ export default function HeroesPage() {
   const [message, setMessage] = useState("");
   const [canManage, setCanManage] = useState(false);
   const [activeSlideId, setActiveSlideId] = useState<number | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -323,84 +324,110 @@ export default function HeroesPage() {
                 </div>
               </div>
 
-              <div className="grid gap-5 p-5 lg:grid-cols-4">
-                <label className="space-y-2 lg:col-span-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Imagen de fondo / URL</span>
-                  <input disabled={!canManage} value={slide.image_url} onChange={(e) => patch(slide.id, "image_url", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Posición</span>
-                  <input disabled={!canManage} value={slide.background_position} onChange={(e) => patch(slide.id, "background_position", e.target.value)} placeholder="center 38%" className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Intervalo ms</span>
-                  <input disabled={!canManage} type="number" min={1000} max={15000} step={250} value={slide.interval_ms} onChange={(e) => patch(slide.id, "interval_ms", Number(e.target.value))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
+              <div className="grid gap-4 p-4 xl:grid-cols-[190px_1fr]">
+                <aside className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewImage(slide.image_url)}
+                    className="group relative block aspect-square w-full overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--app-bg)]"
+                    title="Ver imagen en grande"
+                  >
+                    {slide.image_url ? (
+                      <img src={slide.image_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="grid h-full place-items-center text-xs text-[var(--muted)]">Sin imagen</span>
+                    )}
+                    <span className="absolute inset-0 grid place-items-center bg-black/0 transition group-hover:bg-black/35">
+                      <FiMaximize2 className="text-xl text-white opacity-0 transition group-hover:opacity-100" />
+                    </span>
+                  </button>
 
-                <label className="space-y-2 lg:col-span-3">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Subir nueva imagen</span>
-                  <span className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[var(--border)] px-4 text-sm font-semibold">
-                    <FiImage />
-                    Seleccionar JPG, PNG o WebP
-                    <input disabled={!canManage} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void uploadImage(slide, file);
-                      e.currentTarget.value = "";
-                    }} />
-                  </span>
-                </label>
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Orden</span>
-                  <input disabled={!canManage} type="number" min={0} value={slide.sort_order} onChange={(e) => patch(slide.id, "sort_order", Number(e.target.value))} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
+                  <label className="block">
+                    <span className="flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-3 text-xs font-semibold">
+                      <FiImage /> Cambiar imagen
+                      <input disabled={!canManage} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadImage(slide, file);
+                        e.currentTarget.value = "";
+                      }} />
+                    </span>
+                  </label>
 
-                <label className="space-y-2 lg:col-span-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Badge</span>
-                  <input disabled={!canManage} value={slide.eyebrow ?? ""} onChange={(e) => patch(slide.id, "eyebrow", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Título</span>
-                  <input disabled={!canManage} value={slide.title} onChange={(e) => patch(slide.id, "title", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Texto naranja</span>
-                  <input disabled={!canManage} value={slide.accent ?? ""} onChange={(e) => patch(slide.id, "accent", e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
-                </label>
-
-                <label className="space-y-2 lg:col-span-4">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Descripción</span>
-                  <textarea disabled={!canManage} value={slide.description ?? ""} onChange={(e) => patch(slide.id, "description", e.target.value)} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm" />
-                </label>
-
-                {[
-                  ["primary_label", "Botón principal", "primary_href", "URL principal"],
-                  ["secondary_label", "Botón secundario", "secondary_href", "URL secundaria"],
-                ].map(([labelKey, labelTitle, hrefKey, hrefTitle]) => (
-                  <div key={labelKey} className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
-                    <label className="space-y-2">
-                      <span className="text-xs font-bold uppercase text-[var(--muted)]">{labelTitle}</span>
-                      <input disabled={!canManage} value={String(slide[labelKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, labelKey as keyof HeroSlide, e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">Posición</span>
+                      <input disabled={!canManage} value={slide.background_position} onChange={(e) => patch(slide.id, "background_position", e.target.value)} placeholder="center" className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs" />
                     </label>
-                    <label className="space-y-2">
-                      <span className="text-xs font-bold uppercase text-[var(--muted)]">{hrefTitle}</span>
-                      <input disabled={!canManage} value={String(slide[hrefKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, hrefKey as keyof HeroSlide, e.target.value)} className="min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm" />
+                    <label className="space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">Orden</span>
+                      <input disabled={!canManage} type="number" min={0} value={slide.sort_order} onChange={(e) => patch(slide.id, "sort_order", Number(e.target.value))} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs" />
                     </label>
                   </div>
-                ))}
 
-                <div className="lg:col-span-4">
-                  <span className="text-xs font-bold uppercase text-[var(--muted)]">Bloques derechos</span>
-                  <div className="mt-3 grid gap-3 lg:grid-cols-3">
-                    {[0, 1, 2].map((cardIndex) => {
-                      const card = (slide.cards ?? emptyCards)[cardIndex] ?? { title: "", text: "" };
-                      return (
-                        <div key={cardIndex} className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--app-bg)] p-4">
-                          <input disabled={!canManage} value={card.title} onChange={(e) => patchCard(slide.id, cardIndex, "title", e.target.value)} placeholder="Título" className="min-h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold" />
-                          <textarea disabled={!canManage} value={card.text} onChange={(e) => patchCard(slide.id, cardIndex, "text", e.target.value)} placeholder="Descripción" rows={2} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm" />
+                  <label className="space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">Intervalo</span>
+                    <input disabled={!canManage} type="number" min={1000} max={15000} step={250} value={slide.interval_ms} onChange={(e) => patch(slide.id, "interval_ms", Number(e.target.value))} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs" />
+                  </label>
+                </aside>
+
+                <div className="space-y-4">
+                  <section className="rounded-xl border border-[var(--border)] p-3">
+                    <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Contenido principal</div>
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                      <label className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase text-[var(--muted)]">Badge</span>
+                        <input disabled={!canManage} value={slide.eyebrow ?? ""} onChange={(e) => patch(slide.id, "eyebrow", e.target.value)} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs" />
+                      </label>
+                      <label className="space-y-1 xl:col-span-2">
+                        <span className="text-[10px] font-bold uppercase text-[var(--muted)]">Título</span>
+                        <input disabled={!canManage} value={slide.title} onChange={(e) => patch(slide.id, "title", e.target.value)} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs" />
+                      </label>
+                      <label className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase text-[var(--muted)]">Destacado</span>
+                        <input disabled={!canManage} value={slide.accent ?? ""} onChange={(e) => patch(slide.id, "accent", e.target.value)} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs" />
+                      </label>
+                      <label className="space-y-1 md:col-span-2 xl:col-span-4">
+                        <span className="text-[10px] font-bold uppercase text-[var(--muted)]">Descripción</span>
+                        <textarea disabled={!canManage} value={slide.description ?? ""} onChange={(e) => patch(slide.id, "description", e.target.value)} rows={2} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-2 text-xs" />
+                      </label>
+                    </div>
+                  </section>
+
+                  <section className="rounded-xl border border-[var(--border)] p-3">
+                    <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Botones</div>
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                      {[
+                        ["primary_label", "Principal", "primary_href", "URL principal"],
+                        ["secondary_label", "Secundario", "secondary_href", "URL secundaria"],
+                      ].map(([labelKey, labelTitle, hrefKey, hrefTitle]) => (
+                        <div key={labelKey} className="contents">
+                          <label className="space-y-1">
+                            <span className="text-[10px] font-bold uppercase text-[var(--muted)]">{labelTitle}</span>
+                            <input disabled={!canManage} value={String(slide[labelKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, labelKey as keyof HeroSlide, e.target.value)} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs" />
+                          </label>
+                          <label className="space-y-1">
+                            <span className="text-[10px] font-bold uppercase text-[var(--muted)]">{hrefTitle}</span>
+                            <input disabled={!canManage} value={String(slide[hrefKey as keyof HeroSlide] ?? "")} onChange={(e) => patch(slide.id, hrefKey as keyof HeroSlide, e.target.value)} className="h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs" />
+                          </label>
                         </div>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="rounded-xl border border-[var(--border)] p-3">
+                    <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Bloques derechos</div>
+                    <div className="grid gap-2 lg:grid-cols-3">
+                      {[0, 1, 2].map((cardIndex) => {
+                        const card = (slide.cards ?? emptyCards)[cardIndex] ?? { title: "", text: "" };
+                        return (
+                          <div key={cardIndex} className="grid gap-2 rounded-lg bg-[var(--app-bg)] p-2">
+                            <input disabled={!canManage} value={card.title} onChange={(e) => patchCard(slide.id, cardIndex, "title", e.target.value)} placeholder="Título" className="h-8 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 text-xs font-semibold" />
+                            <textarea disabled={!canManage} value={card.text} onChange={(e) => patchCard(slide.id, cardIndex, "text", e.target.value)} placeholder="Descripción" rows={2} className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
                 </div>
               </div>
             </section>;
@@ -411,6 +438,27 @@ export default function HeroesPage() {
               Esta ubicación/propuesta todavía no tiene slides. Puedes crear el primero con “Nuevo slide”.
             </div>
           )}
+        </div>
+      )}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[100] grid place-items-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vista ampliada del hero"
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewImage(null)}
+            className="absolute right-5 top-5 grid size-10 place-items-center rounded-full bg-white text-black shadow-xl"
+            aria-label="Cerrar"
+          >
+            <FiX size={20} />
+          </button>
+          <div className="max-h-[90vh] max-w-[92vw] overflow-hidden rounded-2xl bg-black shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <img src={previewImage} alt="" className="max-h-[90vh] max-w-[92vw] object-contain" />
+          </div>
         </div>
       )}
     </div>
