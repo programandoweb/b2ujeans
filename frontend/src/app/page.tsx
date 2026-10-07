@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Instagram, MapPin, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import PublicHeader from "@/components/public/PublicHeader";
+import ManagedHero from "@/components/public/ManagedHero";
 import { GASPRONAL_WHATSAPP_HREF } from "@/lib/public-contact";
+import { getManagedHero } from "@/lib/public-hero";
 
 type Product = {
   id: number;
@@ -59,8 +61,17 @@ function productImage(product: Product) {
   return product.og_image || product.gallery?.[0] || null;
 }
 
-export default async function HomePage() {
-  const { products, categories } = await getStorefront();
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ option?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const requestedOption = Number(params.option || "") || undefined;
+  const [{ products, categories }, heroSlides] = await Promise.all([
+    getStorefront(),
+    getManagedHero("home.hero", requestedOption),
+  ]);
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -70,6 +81,7 @@ export default async function HomePage() {
 
       <PublicHeader whatsappHref={GASPRONAL_WHATSAPP_HREF} />
 
+      {heroSlides.length ? <ManagedHero slides={heroSlides} /> : (
       <section className="relative min-h-[68vh] overflow-hidden bg-neutral-900 lg:min-h-[76vh]">
         <img
           src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg"
@@ -95,6 +107,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       <section className="border-b border-black/10 bg-white">
         <div className="mx-auto grid max-w-[1480px] grid-cols-2 lg:grid-cols-4">
