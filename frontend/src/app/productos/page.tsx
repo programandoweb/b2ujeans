@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Search, ShoppingBag } from "lucide-react";
+import ManagedHero from "@/components/public/ManagedHero";
+import { getManagedHero } from "@/lib/public-hero";
 
 export const metadata: Metadata = {
   title: "Nueva Colección",
@@ -83,13 +85,17 @@ function productImage(product: Product) {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string; buscar?: string; pagina?: string }>;
+  searchParams: Promise<{ categoria?: string; buscar?: string; pagina?: string; option?: string }>;
 }) {
   const params = await searchParams;
   const category = params.categoria?.trim() || undefined;
   const search = params.buscar?.trim() || undefined;
   const page = Math.max(Number(params.pagina || "1") || 1, 1);
-  const { products, categories } = await getCatalog(category, search, page);
+  const requestedOption = Number(params.option || "") || undefined;
+  const [{ products, categories }, heroSlides] = await Promise.all([
+    getCatalog(category, search, page),
+    getManagedHero("productos.hero", requestedOption),
+  ]);
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -102,6 +108,7 @@ export default async function ProductsPage({
         </div>
       </header>
 
+      {heroSlides.length ? <ManagedHero slides={heroSlides} /> : (
       <section className="border-b border-black/10 bg-[#f3f2ee]">
         <div className="mx-auto max-w-[1480px] px-4 py-14 sm:px-6 sm:py-20 lg:px-10">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">
@@ -146,6 +153,7 @@ export default async function ProductsPage({
           </form>
         </div>
       </section>
+      )}
 
       <section className="mx-auto max-w-[1480px] px-4 py-8 sm:px-6 lg:px-10">
         <div className="flex gap-2 overflow-x-auto pb-2">
