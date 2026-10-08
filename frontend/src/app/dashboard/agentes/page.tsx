@@ -167,7 +167,7 @@ export default function AgentsPage(){
           Centro de agentes
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">
-          Uso real, conocimiento, preguntas, configuración y salud operativa de los agentes de Gaspronal.
+          Uso real, conocimiento, preguntas, configuración y salud operativa de los agentes de B2uJeans.
         </p>
       </div>
 
