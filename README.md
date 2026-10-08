@@ -1,6 +1,6 @@
-# Gaspronal
+# B2uJeans
 
-Modernización tecnológica del activo digital de **Gaspronal Industrias y Servicios S.A.S.**
+Modernización tecnológica del activo digital de **B2uJeans Industrias y Servicios S.A.S.**
 
 ## Objetivo
 
@@ -16,7 +16,7 @@ Se preservarán como punto de partida:
 - contenido institucional;
 - sedes y canales de contacto;
 - URLs con valor SEO mediante redirecciones controladas;
-- colores base e identidad visual de Gaspronal.
+- colores base e identidad visual de B2uJeans.
 
 ## Arquitectura objetivo
 
