@@ -69,8 +69,8 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <div className="bg-black px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[.18em] text-white">
-        Envíos a nivel nacional
+      <div className="bg-[#d8c2ad] px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[.18em] text-[#29221e]">
+        B2U JEANS  ·  DESCUBRE TU PRÓXIMO LOOK  ·  ENVÍOS NACIONALES
       </div>
 
       <PublicHeader whatsappHref={GASPRONAL_WHATSAPP_HREF} />
@@ -103,7 +103,28 @@ export default async function HomePage() {
       </section>
       )}
 
-      <section className="border-b border-black/10 bg-white">
+
+      <section className="bg-[#faf6f2] px-4 py-16 text-center sm:py-24">
+        <p className="text-[11px] font-semibold uppercase tracking-[.3em] text-[#8e6f61]">B2U Jeans · Style edit</p>
+        <h2 className="b2u-serif mx-auto mt-4 max-w-3xl text-4xl leading-tight tracking-tight text-[#332a29] sm:text-6xl">Tu outfit perfecto comienza aquí.</h2>
+        <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#75655d]">Descubre siluetas, tendencias y prendas que expresan tu personalidad. Una selección de denim para cada momento.</p>
+        <Link href="/productos" className="mt-8 inline-flex items-center gap-3 rounded-full bg-[#332a29] px-8 py-4 text-xs font-bold uppercase tracking-[.15em] text-white transition hover:bg-[#805d50]">Comprar la colección <ArrowRight size={16}/></Link>
+      </section>
+
+      <section className="mx-auto grid max-w-[1480px] gap-4 px-4 py-12 sm:grid-cols-3 sm:px-6 lg:px-10">
+        {[
+          { title: "Mom Jeans", subtitle: "El clásico que vuelve", href: "/productos", image: "https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg" },
+          { title: "Nueva colección", subtitle: "Looks para inspirarte", href: "/productos", image: "https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg" },
+          { title: "Denim B2U", subtitle: "Encuentra tu fit", href: "/productos", image: "https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg" },
+        ].map((item) => (
+          <Link key={item.title} href={item.href} className="group relative block min-h-[420px] overflow-hidden bg-[#eee2da] sm:min-h-[490px]">
+            <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"/>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"/>
+            <div className="absolute bottom-0 left-0 p-7 text-white"><p className="text-[10px] uppercase tracking-[.2em]">{item.subtitle}</p><h3 className="b2u-serif mt-2 text-4xl">{item.title}</h3><span className="mt-5 inline-flex items-center gap-2 border-b border-white pb-1 text-xs uppercase tracking-widest">Explorar <ArrowRight size={14}/></span></div>
+          </Link>
+        ))}
+      </section>
+      <section className="border-b border-[#e6d9ce] bg-[#faf6f2]">
         <div className="mx-auto grid max-w-[1480px] grid-cols-2 lg:grid-cols-4">
           {[
             ["Mom Jeans", "Clásicos de B2U"],
@@ -128,8 +149,8 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1480px] px-4 py-16 sm:px-6 lg:px-10 lg:py-24">
         <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[.22em] text-neutral-500">Nueva colección</p>
-            <h2 className="b2u-serif mt-3 text-4xl tracking-[-.04em] sm:text-5xl">Productos destacados</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[.22em] text-neutral-500">Elige tu estilo</p>
+            <h2 className="b2u-serif mt-3 text-4xl tracking-[-.04em] sm:text-5xl">Lo más nuevo</h2>
           </div>
           <Link href="/productos" className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[.14em]">
             Ver todo <ArrowRight size={15} />
@@ -143,12 +164,12 @@ export default async function HomePage() {
               return (
                 <article key={product.id} className="group">
                   <Link href={`/productos/${product.slug}`} className="block">
-                    <div className="relative overflow-hidden bg-[#f2f1ed]">
+                    <div className="relative overflow-hidden rounded-t-[90px] bg-[#f2eae4]">
                       {image ? (
                         <img
                           src={image}
                           alt={product.name}
-                          className="b2u-product-image h-full w-full transition duration-500 group-hover:scale-[1.025]"
+                          className="b2u-product-image h-full w-full object-cover transition duration-500 group-hover:scale-[1.045]"
                           loading="lazy"
                         />
                       ) : (
@@ -156,7 +177,7 @@ export default async function HomePage() {
                           <ShoppingBag size={44} strokeWidth={1.2} />
                         </div>
                       )}
-                      <span className="absolute left-3 top-3 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.14em]">
+                      <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.14em]">
                         Nuevo
                       </span>
                     </div>
@@ -185,7 +206,7 @@ export default async function HomePage() {
         )}
       </section>
 
-      <section id="b2u" className="grid bg-[#efeee9] lg:grid-cols-2">
+      <section id="b2u" className="grid bg-[#f2e5dd] lg:grid-cols-2">
         <div className="min-h-[440px] lg:min-h-[640px]">
           <img
             src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg"
@@ -226,7 +247,7 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="border-y border-black/10 bg-white">
+      <section className="border-y border-[#e6d9ce] bg-[#faf6f2]">
         <div className="mx-auto grid max-w-[1480px] divide-y divide-black/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {[
             [Truck, "Envío seguro", "Tus compras en buenas manos."],
@@ -245,7 +266,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer id="contacto" className="bg-black text-white">
+      <footer id="contacto" className="bg-[#332a29] text-white">
         <div className="mx-auto grid max-w-[1480px] gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_.8fr_.8fr] lg:px-10">
           <div>
             <img src="/b2u/logo-b2u.svg" alt="B2U Jeans" className="w-[150px] invert" />
