@@ -9,10 +9,10 @@ class HeroSlideSeeder extends Seeder
 {
     public function run(): void
     {
-        $legacyOne = 'https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web.jpg?1791214773376';
-        $legacyTwo = 'https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web-2.jpg?1791214773955';
+        $legacyOne = 'https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg';
+        $legacyTwo = 'https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg';
         $industrial = '/programandoweb/opengraph/home-opengraph.jpg';
-        $whatsapp = 'https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.';
+        $whatsapp = 'https://wa.me/584123694856?text=Hola%20B2uJeans,%20quiero%20informacion%20de%20la%20coleccion.';
 
         $slides = [
             [
@@ -69,7 +69,7 @@ class HeroSlideSeeder extends Seeder
                 'sort_order' => 0,
                 'image_url' => $industrial,
                 'background_position' => 'center',
-                'eyebrow' => 'Catálogo industrial Gaspronal',
+                'eyebrow' => 'Colección de denim B2uJeans',
                 'title' => 'El equipo correcto para',
                 'accent' => 'cada operación.',
                 'description' => 'Encuentra soluciones para cocción, preparación, producción y extracción, con fabricación especial cuando el proceso lo requiere.',
@@ -117,7 +117,7 @@ class HeroSlideSeeder extends Seeder
                 'sort_order' => 0,
                 'image_url' => $legacyTwo,
                 'background_position' => 'center',
-                'eyebrow' => 'Gaspronal Industrias y Servicios',
+                'eyebrow' => 'B2uJeans Industrias y Servicios',
                 'title' => 'Una empresa para resolver',
                 'accent' => 'toda tu operación.',
                 'description' => 'Fabricación de equipos, redes de gas, extracción, instalación y soporte técnico con un mismo equipo especializado.',
@@ -139,7 +139,7 @@ class HeroSlideSeeder extends Seeder
                 'description' => 'Integramos diseño, fabricación e instalación para que cada solución llegue lista para aportar productividad a tu negocio.',
                 'primary_label' => 'Contar mi proyecto',
                 'primary_href' => $whatsapp,
-                'secondary_label' => 'Conocer Gaspronal',
+                'secondary_label' => 'Conocer B2uJeans',
                 'secondary_href' => '#nosotros',
                 'cards' => [['title' => 'Planeamos', 'text' => 'Necesidad, espacio y requerimientos'], ['title' => 'Ejecutamos', 'text' => 'Fabricación e instalación coordinadas'], ['title' => 'Soportamos', 'text' => 'Acompañamiento después de la entrega']],
             ],
