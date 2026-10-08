@@ -96,7 +96,7 @@ export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):Re
         <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:"28px"}}>
           <img
             src={logoUrl}
-            alt="Gaspronal - Tecnología e Ingeniería Estratégica"
+            alt="B2uJeans - Tecnología e Ingeniería Estratégica"
             width="360"
             height="93"
             style={{width:"360px",height:"93px",objectFit:"contain",objectPosition:"left center"}}
