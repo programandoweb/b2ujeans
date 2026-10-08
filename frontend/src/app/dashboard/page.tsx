@@ -176,7 +176,7 @@ export default function DashboardPage(){
   return <div className="w-full max-w-none space-y-7">
     <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-start lg:justify-between">
       <div>
-        <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Gaspronal · visión ejecutiva</span>
+        <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">B2UJeans · visión ejecutiva</span>
         <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Dashboard</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">
           Estado real de catálogo, operación comercial, contenido y comunicaciones.
