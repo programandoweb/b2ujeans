@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Modernizar Gaspronal sin perder el valor de URLs, contenido y señales acumuladas por el sitio actual.
+Modernizar B2uJeans sin perder el valor de URLs, contenido y señales acumuladas por el sitio actual.
 
 ## Regla de oro
 
