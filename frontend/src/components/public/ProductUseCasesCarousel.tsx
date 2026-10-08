@@ -72,7 +72,7 @@ export default function ProductUseCasesCarousel({
               Casos de uso
             </p>
             <h2 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.05em] sm:text-6xl">
-              Equipos Gaspronal en escenarios reales de operación.
+              Equipos B2uJeans en escenarios reales de operación.
             </h2>
           </div>
 
