@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 const whatsappHref =
-  "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
+  "https://wa.me/573045527575?text=Hola%20B2uJeans,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
 
 const heroBackgroundOne =
   "https://www.gaspronal.com/2019/fotos/Image/cabezotesjq/Cabezote-Gaspronal-Web.jpg?1791214773376";
@@ -290,7 +290,7 @@ export default function HomeHeroVariants({
     {
       src: industrialImage,
       position: "center",
-      eyebrow: "Catálogo industrial Gaspronal",
+      eyebrow: "Colección de moda B2uJeans",
       title: "El equipo correcto para",
       accent: "cada operación.",
       description:
@@ -347,7 +347,7 @@ export default function HomeHeroVariants({
     {
       src: heroBackgroundTwo,
       position: "center",
-      eyebrow: "Gaspronal Industrias y Servicios",
+      eyebrow: "B2uJeans · Denim femenino",
       title: "Una empresa para resolver",
       accent: "toda tu operación.",
       description:
