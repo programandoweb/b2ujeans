@@ -11,8 +11,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->runOnce(GasproNotasSeeder::class);
-        $this->runOnce(GoogleIndexedGasproNotasSeeder::class);
+        // Legacy Gaspronal editorial content intentionally excluded from B2U seeds.
+        // Preserve historical seeder files only for old installation compatibility.
         // Catálogo B2U: importación remota completa desde el sitemap oficial.
         // Se ejecuta una sola vez en el flujo general; puede relanzarse manualmente
         // llamando directamente B2UJeanCatalogSeeder si se necesita resincronizar.
