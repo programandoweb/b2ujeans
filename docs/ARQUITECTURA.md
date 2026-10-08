@@ -1,4 +1,4 @@
-# Arquitectura objetivo — Gaspronal
+# Arquitectura objetivo — B2uJeans
 
 ## 1. Visión
 
@@ -92,7 +92,7 @@ Rutas objetivo conceptuales:
 
 ```text
 /
-/somos-gaspronal
+/somos-b2ujeans
 /servicios
 /servicios/{slug}
 /productos
@@ -132,7 +132,7 @@ Los valores corporativos se extraerán del sitio/activos vigentes y se centraliz
 
 La implementación no debe dispersar valores HEX en componentes.
 
-Se debe mantener la paleta base Gaspronal y modernizar:
+Se debe mantener la paleta base B2uJeans y modernizar:
 
 - contraste;
 - tipografía;
