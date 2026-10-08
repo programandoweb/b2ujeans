@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Tratamiento de datos personales | Gaspronal",
-  description: "Información sobre el tratamiento de datos personales utilizados para atención y seguimiento comercial de Gaspronal.",
+  title: "Tratamiento de datos personales | B2uJeans",
+  description: "Información sobre el tratamiento de datos personales utilizados para atención y seguimiento comercial de B2uJeans.",
 };
 
 export default function DataProcessingPage() {
@@ -10,7 +10,7 @@ export default function DataProcessingPage() {
     <main className="min-h-screen bg-[var(--app-bg)] px-5 py-10 sm:px-8 lg:px-12">
       <article className="mx-auto max-w-4xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-10">
         <div className="border-b border-[var(--border)] pb-6">
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Gaspronal</span>
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">B2uJeans</span>
           <h1 className="mt-2 text-3xl font-bold">Tratamiento de datos personales</h1>
           <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Versión vigente: 5 de octubre de 2026.</p>
         </div>
@@ -45,7 +45,7 @@ export default function DataProcessingPage() {
           <section>
             <h2 className="text-lg font-bold">Conservación y seguridad</h2>
             <p className="mt-2">
-              Gaspronal conserva la información necesaria para la relación de atención y seguimiento comercial y aplica
+              B2uJeans conserva la información necesaria para la relación de atención y seguimiento comercial y aplica
               controles técnicos y administrativos para limitar el acceso a la información.
             </p>
           </section>
@@ -55,7 +55,7 @@ export default function DataProcessingPage() {
             <p className="mt-2">
               El titular puede solicitar información sobre sus datos, pedir su actualización o corrección y presentar
               solicitudes relacionadas con la autorización o el tratamiento de su información a través de los canales
-              oficiales de Gaspronal.
+              oficiales de B2uJeans.
             </p>
           </section>
 
