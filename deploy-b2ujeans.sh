@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-BRANCH="b2ujeans"
+BRANCH="main"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="${ROOT_DIR}/docker-compose.b2u.yml"
 ENV_FILE="${ROOT_DIR}/backend/.env"
@@ -32,9 +32,9 @@ fi
 cd "$ROOT_DIR"
 
 log "Sincronizando rama $BRANCH"
-git fetch origin "$BRANCH"
-git checkout "$BRANCH"
-git reset --hard "origin/$BRANCH"
+git fetch https://github.com/programandoweb/b2ujeans.git "$BRANCH"
+git checkout -B "$BRANCH" FETCH_HEAD
+git reset --hard FETCH_HEAD
 
 APP_KEY_VALUE="$(grep -m1 '^APP_KEY=' "$ENV_FILE" | cut -d= -f2- || true)"
 [[ -n "$APP_KEY_VALUE" ]] || fail "APP_KEY está vacía. Configúrala antes de desplegar."
