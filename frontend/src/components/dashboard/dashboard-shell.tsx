@@ -54,14 +54,14 @@ export function DashboardShell({ children, user, impersonating = false }: { chil
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("gaspronal-sidebar-collapsed");
+    const stored = window.localStorage.getItem("b2ujeans-sidebar-collapsed");
     if (stored === "true") setCollapsed(true);
   }, []);
 
   function toggleCollapsed() {
     setCollapsed((current) => {
       const next = !current;
-      window.localStorage.setItem("gaspronal-sidebar-collapsed", String(next));
+      window.localStorage.setItem("b2ujeans-sidebar-collapsed", String(next));
       return next;
     });
   }
