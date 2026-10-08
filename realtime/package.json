@@ -1,8 +1,8 @@
 {
-  "name": "gaspronal-realtime",
+  "name": "b2ujeans-realtime",
   "version": "0.1.0",
   "private": true,
-  "description": "NestJS realtime and agent runtime for Gaspronal",
+  "description": "NestJS realtime and agent runtime for B2uJeans",
   "scripts": {
     "build": "nest build",
     "start": "node dist/main.js",
