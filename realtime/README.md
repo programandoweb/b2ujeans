@@ -1,6 +1,6 @@
-# Gaspronal Realtime & Agent Runtime
+# B2uJeans Realtime & Agent Runtime
 
-Servicio NestJS del monorepo Gaspronal para comunicación en tiempo real con agentes.
+Servicio NestJS del monorepo B2uJeans para comunicación en tiempo real con agentes.
 
 ## Agentes iniciales
 
