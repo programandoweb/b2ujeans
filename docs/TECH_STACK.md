@@ -36,4 +36,4 @@ La autorización definitiva siempre pertenece a Laravel/Spatie.
 
 ## Nota de origen
 
-La foundation toma como referencia técnica el repositorio `programandoweb/ivoolveERP`: Laravel 12, PHP 8.2, Sanctum, Scramble, PHPUnit/Pint y Next.js 16/React 19/Motion/Playwright. JWT y Spatie se incorporan explícitamente por decisión del proyecto Gaspronal.
+La foundation toma como referencia técnica el repositorio `programandoweb/ivoolveERP`: Laravel 12, PHP 8.2, Sanctum, Scramble, PHPUnit/Pint y Next.js 16/React 19/Motion/Playwright. JWT y Spatie se incorporan explícitamente por decisión del proyecto B2uJeans.
