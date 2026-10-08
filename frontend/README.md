@@ -1,4 +1,4 @@
-# Gaspronal Frontend
+# B2UJeans Frontend
 
 Next.js 16 + React 19 + TypeScript + Tailwind CSS 4.
 
@@ -21,4 +21,4 @@ npm run build
 
 El JWT del backend se conserva en una cookie HttpOnly a través del BFF de Next.js. El dashboard valida la sesión contra Laravel antes de renderizar contenido privado.
 
-Los colores corporativos definitivos todavía no deben inventarse: se incorporarán después de extraer la paleta real de los activos/web vigente de Gaspronal.
+Los colores corporativos definitivos todavía no deben inventarse: se incorporarán después de extraer la paleta real de los activos/web vigente de B2UJeans.
