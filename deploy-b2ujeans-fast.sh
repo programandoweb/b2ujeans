@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-BRANCH="b2ujeans"
+BRANCH="main"
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.b2u.yml"
 ENV_FILE="$ROOT_DIR/backend/.env"
@@ -28,8 +28,8 @@ cd "$ROOT_DIR"
 
 OLD_SHA="$(git rev-parse HEAD)"
 log "Consultando cambios remotos de $BRANCH"
-git fetch origin "$BRANCH"
-NEW_SHA="$(git rev-parse "origin/$BRANCH")"
+git fetch https://github.com/programandoweb/b2ujeans.git "$BRANCH"
+NEW_SHA="$(git rev-parse FETCH_HEAD)"
 
 if [[ "$OLD_SHA" == "$NEW_SHA" ]]; then
   log "No hay cambios nuevos. Nada que desplegar."
@@ -43,7 +43,7 @@ if printf '%s\n' "$CHANGED" | grep -Eq '^(docker-compose\.b2u\.yml|deploy-b2ujea
 fi
 
 log "Actualizando código"
-git checkout "$BRANCH"
+git checkout -B "$BRANCH" "$NEW_SHA"
 git reset --hard "$NEW_SHA"
 
 FRONTEND_CHANGED=0
