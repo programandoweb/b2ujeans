@@ -1,4 +1,4 @@
-# Gaspronal Backend
+# B2uJeans Backend
 
 Laravel 12 compatible con PHP 8.2.
 
