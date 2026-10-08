@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
-import { GASPRONAL_WHATSAPP_HREF } from "@/lib/public-contact";
+import { B2UJEANS_WHATSAPP_HREF } from "@/lib/public-contact";
 
 const privatePrefixes = ["/dashboard", "/login", "/forgot-password", "/reset-password"];
 
@@ -15,7 +15,7 @@ export default function PublicWhatsAppButton() {
 
   return (
     <a
-      href={GASPRONAL_WHATSAPP_HREF}
+      href={B2UJEANS_WHATSAPP_HREF}
       target="_blank"
       rel="noreferrer"
       aria-label="Hablar con B2U Jeans por WhatsApp"
