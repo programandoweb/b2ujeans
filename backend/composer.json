@@ -1,8 +1,8 @@
 {
   "$schema": "https://getcomposer.org/schema.json",
-  "name": "programandoweb/gaspronal-backend",
+  "name": "programandoweb/b2ujeans-backend",
   "type": "project",
-  "description": "API, CMS y CRM de Gaspronal.",
+  "description": "API, CMS y CRM de B2uJeans.",
   "license": "proprietary",
   "require": {
     "php": "^8.2",
