@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Instagram, MapPin, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import PublicHeader from "@/components/public/PublicHeader";
 import ManagedHero from "@/components/public/ManagedHero";
-import { GASPRONAL_WHATSAPP_HREF } from "@/lib/public-contact";
+import { B2UJEANS_WHATSAPP_HREF } from "@/lib/public-contact";
 import { getManagedHero } from "@/lib/public-hero";
 
 type Product = {
@@ -73,7 +73,7 @@ export default async function HomePage() {
         B2U JEANS  ·  DESCUBRE TU PRÓXIMO LOOK  ·  ENVÍOS NACIONALES
       </div>
 
-      <PublicHeader whatsappHref={GASPRONAL_WHATSAPP_HREF} />
+      <PublicHeader whatsappHref={B2UJEANS_WHATSAPP_HREF} />
 
       {heroSlides.length ? <ManagedHero slides={heroSlides} /> : (
       <section className="relative min-h-[68vh] overflow-hidden bg-neutral-900 lg:min-h-[76vh]">
@@ -278,7 +278,7 @@ export default async function HomePage() {
             <h3 className="text-[11px] font-bold uppercase tracking-[.18em]">Contacto</h3>
             <div className="mt-5 space-y-3 text-sm text-white/65">
               <p className="flex gap-2"><MapPin size={17} className="mt-0.5 shrink-0" /> Caracas, Venezuela</p>
-              <a href={GASPRONAL_WHATSAPP_HREF} target="_blank" rel="noreferrer" className="block hover:text-white">
+              <a href={B2UJEANS_WHATSAPP_HREF} target="_blank" rel="noreferrer" className="block hover:text-white">
                 Atención por WhatsApp
               </a>
             </div>
