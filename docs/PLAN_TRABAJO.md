@@ -1,10 +1,10 @@
-# Plan de trabajo — Modernización Gaspronal
+# Plan de trabajo — Modernización B2uJeans
 
 ## Objetivo general
 
-Migrar el activo digital actual de Gaspronal a una arquitectura moderna basada en Next.js, Tailwind CSS, Laravel y MariaDB, conservando estructura, contenidos, identidad visual y patrimonio SEO.
+Migrar el activo digital actual de B2uJeans a una arquitectura moderna basada en Next.js, Tailwind CSS, Laravel y MariaDB, conservando estructura, contenidos, identidad visual y patrimonio SEO.
 
-El proyecto debe producir una evolución reconocible de Gaspronal, no una sustitución de identidad.
+El proyecto debe producir una evolución reconocible de B2uJeans, no una sustitución de identidad.
 
 ## Fase 0 — Línea base y preservación
 
@@ -40,7 +40,7 @@ No iniciar una sustitución masiva de contenido hasta poder demostrar qué se co
 
 - inicializar Next.js + TypeScript;
 - instalar/configurar Tailwind;
-- definir tokens con la paleta real de Gaspronal;
+- definir tokens con la paleta real de B2uJeans;
 - crear primitives compartidos;
 - establecer layouts públicos;
 - diseñar navegación mobile-first;
@@ -68,7 +68,7 @@ No iniciar una sustitución masiva de contenido hasta poder demostrar qué se co
 
 ### Criterio de aceptación
 
-La UI base debe conservar los colores de Gaspronal, verse contemporánea y estar especialmente optimizada para teléfono.
+La UI base debe conservar los colores de B2uJeans, verse contemporánea y estar especialmente optimizada para teléfono.
 
 ---
 
@@ -325,4 +325,4 @@ Producción
 
 ## Regla final
 
-La modernización se considera exitosa si Gaspronal conserva su reconocimiento y contenido, mejora drásticamente la experiencia móvil, gana capacidad comercial y administrativa, y no pierde patrimonio SEO durante la transición.
+La modernización se considera exitosa si B2uJeans conserva su reconocimiento y contenido, mejora drásticamente la experiencia móvil, gana capacidad comercial y administrativa, y no pierde patrimonio SEO durante la transición.
