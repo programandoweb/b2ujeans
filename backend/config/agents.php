@@ -3,7 +3,7 @@
 $sharedSecret = trim((string) env('AGENT_SHARED_SECRET', ''));
 
 if ($sharedSecret === '') {
-    $dockerEnv = '/var/www/gaspronal.programandoweb.net/.env.docker';
+    $dockerEnv = '/var/www/b2ujeans/.env.docker';
 
     if (is_file($dockerEnv)) {
         foreach (file($dockerEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
