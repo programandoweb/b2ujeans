@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
-const siteUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://gaspronal.programandoweb.net").replace(/\/$/, "");
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://demo.pereira.expert").replace(/\/$/, "");
 
 type Post = {
   slug:string;
