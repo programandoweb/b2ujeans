@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { ArrowLeft, CheckCircle2, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/components/public/CartProvider";
 
@@ -20,7 +20,7 @@ export default function CartCheckoutPage() {
     catch { return value.toFixed(2) + " " + currency; }
   };
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!items.length || currencies.length > 1) return;
     setSubmitting(true);
@@ -55,7 +55,7 @@ export default function CartCheckoutPage() {
         <h1 className="mt-5 text-3xl font-bold">¡Solicitud recibida!</h1>
         <p className="mt-3">Tu número de referencia es <strong>{confirmation}</strong>.</p>
         <p className="mt-3 text-sm text-neutral-600">Nuestro equipo confirmará disponibilidad, precios pendientes, entrega y medios de pago. No se ha realizado ningún cargo.</p>
-        <Link href="/productos" className="mt-7 inline-flex bg-black px-6 py-3 text-white">Seguir explorando</Link>
+        <div className="mt-7 flex flex-wrap justify-center gap-4"><Link href="/pedido" className="inline-flex bg-black px-6 py-3 text-white">Consultar estado</Link><Link href="/productos" className="inline-flex border px-6 py-3">Seguir explorando</Link></div>
       </section> : <>
         <span className="text-xs font-bold uppercase tracking-[.2em] text-[#997765]">B2U · Tienda en línea</span>
         <h1 className="mt-3 text-4xl font-semibold">Tu carrito ({count})</h1>
