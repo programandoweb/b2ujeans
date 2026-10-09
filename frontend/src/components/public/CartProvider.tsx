@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingBag, Trash2, X, Plus, Minus } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
@@ -94,7 +95,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             <p className="mt-4 font-semibold">Tu carrito está vacío.</p>
             <Link href="/productos" onClick={() => setOpen(false)} className="mt-5 inline-block border-b border-black pb-1 text-sm">Descubrir colección</Link>
           </div> : <div className="space-y-5">{items.map(item => <article key={item.id} className="flex gap-4 border-b pb-5">
-            {item.image ? <img src={item.image} alt="" className="h-28 w-20 shrink-0 bg-neutral-100 object-cover" /> : <div className="h-28 w-20 shrink-0 bg-neutral-100"/>}
+            {item.image ? <Image src={item.image} alt="" width={80} height={112} sizes="80px" quality={60} className="h-28 w-20 shrink-0 bg-neutral-100 object-cover" /> : <div className="h-28 w-20 shrink-0 bg-neutral-100"/>}
             <div className="min-w-0 flex-1">
               <Link href={`/productos/${item.slug}`} onClick={() => setOpen(false)} className="font-semibold">{item.name}</Link>
               <p className="mt-1 text-sm text-neutral-600">{item.price === null || item.price === undefined ? "Precio por confirmar" : money(Number(item.price), item.currency || "COP")}</p>
