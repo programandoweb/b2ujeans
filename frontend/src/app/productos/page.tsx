@@ -17,8 +17,6 @@ export const metadata: Metadata = {
 
 type Category = {
   id: number;
-  commercial_price?: string | number | null;
-  price_currency?: string | null;
   name: string;
   slug: string;
   description?: string | null;
@@ -27,6 +25,8 @@ type Category = {
 
 type Product = {
   id: number;
+  commercial_price?: string | number | null;
+  price_currency?: string | null;
   name: string;
   slug: string;
   reference?: string | null;
