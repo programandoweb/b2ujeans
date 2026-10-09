@@ -22,6 +22,8 @@ class PublicCartCheckoutController extends Controller
             'whatsapp' => ['required', 'string', 'min:7', 'max:40'],
             'address' => ['required', 'string', 'max:500'],
             'city' => ['required', 'string', 'max:120'],
+            'alternate_phone' => ['nullable', 'string', 'max:40'],
+            'address_reference' => ['required', 'string', 'min:5', 'max:500'],
             'notes' => ['nullable', 'string', 'max:1500'],
             'items' => ['required', 'array', 'min:1', 'max:40'],
             'items.*.id' => ['required', 'integer', 'distinct'],
@@ -57,7 +59,7 @@ class PublicCartCheckoutController extends Controller
                 'whatsapp' => $data['whatsapp'],
                 'source' => 'web_cart',
                 'status' => 'new',
-                'notes' => "Entrega: {$data['address']}, {$data['city']}".(empty($data['notes']) ? '' : "\nObservaciones: {$data['notes']}"),
+                'notes' => "Entrega: {$data['address']}, {$data['city']}\nReferencia de dirección: {$data['address_reference']}".(empty($data['alternate_phone']) ? '' : "\nTeléfono alternativo: {$data['alternate_phone']}").(empty($data['notes']) ? '' : "\nObservaciones: {$data['notes']}"),
             ]);
 
             $missingPrices = false;
@@ -85,12 +87,46 @@ class PublicCartCheckoutController extends Controller
                 'currency' => $currency,
                 'subtotal' => $total,
                 'total' => $total,
-                'notes' => "Pedido desde carrito web.\nDirección: {$data['address']}\nCiudad: {$data['city']}\n".($data['notes'] ?? '').($missingPrices ? "\nHay artículos sin precio: confirmar antes de cobrar." : "\nTotal sin envío: pendiente de confirmación."),
+                'notes' => "Pedido desde carrito web.\nDirección: {$data['address']}\nCiudad: {$data['city']}\nReferencia: {$data['address_reference']}".(empty($data['alternate_phone']) ? '' : "\nTeléfono alternativo: {$data['alternate_phone']}")."\n".($data['notes'] ?? '').($missingPrices ? "\nHay artículos sin precio: confirmar antes de cobrar." : "\nTotal sin envío: pendiente de confirmación."),
                 'created_by_agent' => 'web_cart',
             ]);
             $quote->items()->createMany($lines);
 
-            return ['id' => $quote->id, 'number' => $quote->number, 'status' => 'pending_approval', 'needs_price_confirmation' => $missingPrices];
+            $messageLines = [
+                'Hola B2U Jeans, deseo confirmar mi pedido *'.$quote->number.'*.',
+                '',
+                '*Productos:*',
+            ];
+            foreach ($lines as $line) {
+                $priceLabel = $products->get($line['catalog_item_id'])->commercial_price === null
+                    ? 'Precio por confirmar'
+                    : number_format($line['line_total'], 2, ',', '.').' '.$currency;
+                $messageLines[] = '- '.$line['description'].' x '.$line['quantity'].' — '.$priceLabel;
+            }
+
+            $messageLines = array_merge($messageLines, [
+                '',
+                '*Subtotal estimado:* '.number_format($total, 2, ',', '.').' '.$currency,
+                $missingPrices ? 'Hay artículos con precio por confirmar.' : 'Envío y disponibilidad por confirmar.',
+                '',
+                '*Datos de entrega:*',
+                'Nombre: '.$data['name'],
+                'Correo: '.$data['email'],
+                'Teléfono: '.$data['whatsapp'],
+                'Teléfono alternativo: '.($data['alternate_phone'] ?? 'No indicado'),
+                'Ciudad: '.$data['city'],
+                'Dirección: '.$data['address'],
+                'Referencia de ubicación: '.$data['address_reference'],
+                'Observaciones: '.($data['notes'] ?? 'Ninguna'),
+            ]);
+
+            return [
+                'id' => $quote->id,
+                'number' => $quote->number,
+                'status' => 'pending_approval',
+                'needs_price_confirmation' => $missingPrices,
+                'whatsapp_message' => implode("\\n", $messageLines),
+            ];
         });
 
         return response()->json([
