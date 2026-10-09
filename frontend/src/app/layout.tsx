@@ -42,7 +42,10 @@ export const metadata: Metadata = {
     siteName: "B2U Jeans",
     locale: "es_VE",
     type: "website",
+    url: "/",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "B2U Jeans · Nueva colección" }],
   },
+  twitter: { card: "summary_large_image", images: ["/opengraph-image"] },
 };
 
 export default function RootLayout({
