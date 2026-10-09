@@ -111,6 +111,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'show'])->middleware('permission:commercial.quotes.view');
         Route::put('commercial/quotes/{commercialQuote}', [CommercialQuoteController::class, 'update'])->middleware('permission:commercial.quotes.manage');
         Route::post('commercial/quotes/{commercialQuote}/approve', [CommercialQuoteController::class, 'approve'])->middleware('permission:commercial.quotes.manage');
+        Route::patch('commercial/quotes/{commercialQuote}/status', [CommercialQuoteController::class, 'changeStatus'])->middleware('permission:commercial.quotes.manage');
         Route::get('commercial/appointments', [CommercialAppointmentController::class, 'index'])->middleware('permission:commercial.appointments.view');
 
         Route::get('agents/lucia/content-run', [InternalContentCreatorController::class, 'latestRun'])->middleware('permission:agents.view');
