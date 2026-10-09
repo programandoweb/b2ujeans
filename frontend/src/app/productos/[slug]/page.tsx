@@ -44,6 +44,10 @@ export async function generateMetadata({
   const product = await getProduct(slug);
   if (!product) return { title: "Producto no encontrado" };
 
+  const socialImage = product.og_image || product.gallery?.find(Boolean) || "/opengraph-image";
+  const imageUrl = /^https?:\/\//i.test(socialImage) ? socialImage : `${(process.env.NEXT_PUBLIC_SITE_URL || "https://demo.pereira.expert").replace(/\/$/, "")}${socialImage.startsWith("/") ? "" : "/"}${socialImage}`;
+  const description = product.seo_description || product.short_description || `Conoce ${product.name} de B2U Jeans.`;
+
   return {
     title: product.seo_title || product.name,
     description:
@@ -58,9 +62,13 @@ export async function generateMetadata({
         product.seo_description ||
         product.short_description ||
         `Conoce ${product.name} de B2U Jeans.`,
-      images: product.og_image ? [product.og_image] : undefined,
+      images: [{ url: imageUrl, alt: product.name, ...(socialImage === "/opengraph-image" ? { width: 1200, height: 630 } : {}) }],
+      url: `/productos/${product.slug}`,
+      siteName: "B2U Jeans",
+      locale: "es_VE",
       type: "website",
     },
+    twitter: { card: "summary_large_image", title: product.seo_title || product.name, description, images: [imageUrl] },
   };
 }
 
