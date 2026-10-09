@@ -168,7 +168,7 @@ export default async function HomePage() {
               return (
                 <article key={product.id} className="group">
                   <Link href={`/productos/${product.slug}`} className="block">
-                    <div className="relative overflow-hidden rounded-t-[90px] bg-[#f2eae4]">
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-t-[90px] bg-[#f2eae4]">
                       {image ? (
                         <Image src={image} alt={product.name} fill sizes="(max-width: 1023px) 50vw, 25vw" quality={70} className="b2u-product-image object-cover transition duration-500 group-hover:scale-[1.045]"/>
                       ) : (
