@@ -35,6 +35,9 @@ class PublicCartCheckoutController extends Controller
                 ->where('type', 'product')
                 ->where('status', 'published')
                 ->whereNotNull('published_at')
+                ->where(function ($query): void {
+                    $query->whereNull('category_id')->orWhereHas('category', fn ($category) => $category->where('is_active', true));
+                })
                 ->get()
                 ->keyBy('id');
 
