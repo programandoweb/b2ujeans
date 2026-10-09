@@ -90,7 +90,7 @@ export default function ProposalDetailPage({params}:{params:Promise<{id:string}>
   {quote.created_by_agent==="web_cart"&&<section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
     <h2 className="font-bold">Datos del pedido web</h2>
     <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">{quote.notes||"Sin observaciones de entrega"}</p>
-    <a href={`https://wa.me/${quote.lead.whatsapp.replace(/\\D/g,"")}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex border-b border-[var(--brand)] pb-1 text-sm font-semibold">Contactar al cliente por WhatsApp</a>
+    <a href={`https://wa.me/${quote.lead.whatsapp.replace(/\D/g,"")}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex border-b border-[var(--brand)] pb-1 text-sm font-semibold">Contactar al cliente por WhatsApp</a>
    </section>}
 
   <section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
