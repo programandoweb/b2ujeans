@@ -5,8 +5,8 @@ import { notFound, permanentRedirect } from "next/navigation";
 import PublicHeader from "@/components/public/PublicHeader";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
-const fallbackWhatsappNumber = "573045527575";
-const whatsappMessage = "Hola Gaspronal, quiero recibir asesoría para mi proyecto.";
+const fallbackWhatsappNumber = "584123694856";
+const whatsappMessage = "Hola B2U Jeans, quiero recibir asesoría para mi proyecto.";
 
 type Post = {
   title:string;
@@ -45,7 +45,7 @@ function buildWhatsappHref(number:string):string{
 
 async function requestSiteUrl():Promise<string>{
   const requestHeaders=await headers();
-  const host=(requestHeaders.get("x-forwarded-host")||requestHeaders.get("host")||"gaspronal.programandoweb.net")
+  const host=(requestHeaders.get("x-forwarded-host")||requestHeaders.get("host")||"demo.pereira.expert")
     .split(",")[0]
     .trim();
   const proto=(requestHeaders.get("x-forwarded-proto")||"https")
@@ -83,7 +83,7 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
   const siteUrl=await requestSiteUrl();
 
   const title=post.seo_title||post.title;
-  const description=post.seo_description||post.excerpt||"Contenido técnico y soluciones industriales de Gaspronal.";
+  const description=post.seo_description||post.excerpt||"Moda, denim y tendencias de B2U Jeans.";
   const canonical=`${siteUrl}/gaspro-notas/${post.slug}`;
   const imageVersion=encodeURIComponent(post.updated_at||post.published_at||"1");
   const socialImage=`${siteUrl}/api/og/gaspro-notas/${encodeURIComponent(post.slug)}?v=${imageVersion}`;
@@ -92,19 +92,19 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
     title,
     description,
     alternates:{canonical},
-    authors:[{name:"Gaspronal Industrias y Servicios S.A.S."}],
-    creator:"Gaspronal Industrias y Servicios S.A.S.",
-    publisher:"Gaspronal Industrias y Servicios S.A.S.",
-    category:"Industria, gastronomía y soluciones a gas",
+    authors:[{name:"B2U Jeans"}],
+    creator:"B2U Jeans",
+    publisher:"B2U Jeans",
+    category:"Moda femenina y denim",
     keywords:[
-      "Gaspronal",
-      "equipos industriales",
-      "gas natural",
-      "gas propano",
-      "acero inoxidable",
-      "cocinas industriales",
-      "servicio técnico",
-      "extracción industrial",
+      "B2U Jeans",
+      "moda femenina",
+      "denim",
+      "jeans",
+      "estilo",
+      "colección B2U",
+      "tendencias",
+      "moda venezolana",
     ],
     robots:{
       index:true,
@@ -121,19 +121,19 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
       title,
       description,
       url:canonical,
-      siteName:"Gaspronal",
-      locale:"es_CO",
+      siteName:"B2U Jeans",
+      locale:"es_VE",
       type:"article",
       publishedTime:post.published_at||undefined,
       modifiedTime:post.updated_at||post.published_at||undefined,
-      authors:["Gaspronal Industrias y Servicios S.A.S."],
-      section:"Gaspro-notas",
-      tags:["equipos industriales","gas","acero inoxidable","gastronomía","Gaspronal"],
+      authors:["B2U Jeans"],
+      section:"Notas B2U",
+      tags:["equipos industriales","gas","acero inoxidable","gastronomía","B2U Jeans"],
       images:[{
         url:socialImage,
         width:1200,
         height:630,
-        alt:`${post.title} · Gaspro-notas Gaspronal`,
+        alt:`${post.title} · Notas B2U B2U Jeans`,
         type:"image/png",
       }],
     },
@@ -172,10 +172,10 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
     datePublished:post.published_at||undefined,
     dateModified:post.updated_at||post.published_at||undefined,
     mainEntityOfPage:{"@type":"WebPage","@id":canonical},
-    author:{"@type":"Organization",name:"Gaspronal Industrias y Servicios S.A.S.",url:siteUrl},
+    author:{"@type":"Organization",name:"B2U Jeans",url:siteUrl},
     publisher:{
       "@type":"Organization",
-      name:"Gaspronal Industrias y Servicios S.A.S.",
+      name:"B2U Jeans",
       url:siteUrl,
       logo:{"@type":"ImageObject",url:`${siteUrl}/b2u/logo-b2u.svg`},
     },
@@ -185,7 +185,7 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
     "@type":"BreadcrumbList",
     itemListElement:[
       {"@type":"ListItem",position:1,name:"Inicio",item:siteUrl},
-      {"@type":"ListItem",position:2,name:"Gaspro-notas",item:`${siteUrl}/gaspro-notas`},
+      {"@type":"ListItem",position:2,name:"Notas B2U",item:`${siteUrl}/gaspro-notas`},
       {"@type":"ListItem",position:3,name:post.title,item:canonical},
     ],
   };
@@ -199,7 +199,7 @@ export default async function GasproNotaDetailPage({params}:{params:Promise<{slu
     <PublicHeader whatsappHref={whatsappHref}/>
 
     <article className="mx-auto max-w-[1100px] px-4 py-12 sm:px-6 sm:py-16 lg:px-10">
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspro-notas</p>
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Notas B2U</p>
       <h1 className="mt-4 text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-6xl">{post.title}</h1>
       {post.excerpt&&<p className="mt-6 text-lg leading-8 text-slate-600">{post.excerpt}</p>}
       {post.published_at&&<p className="mt-4 text-sm font-semibold text-slate-400">{new Date(post.published_at).toLocaleDateString("es-CO")}</p>}
