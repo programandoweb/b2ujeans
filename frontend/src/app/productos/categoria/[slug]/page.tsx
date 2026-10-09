@@ -41,7 +41,11 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
       description,
       url:`/productos/categoria/${category.slug}`,
       type:"website",
+      siteName:"B2U Jeans",
+      locale:"es_VE",
+      images:[{url:"/opengraph-image",width:1200,height:630,alt:`${category.name} · B2U Jeans`}],
     },
+    twitter:{card:"summary_large_image",title,description,images:["/opengraph-image"]},
   };
 }
 
