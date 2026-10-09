@@ -4,17 +4,16 @@ type Props={
   title:string;
   excerpt:string;
   image:string|null;
-  logoUrl:string;
 };
 
-export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):ReactElement{
+export default function GasproNotaOgCard({title,excerpt,image}:Props):ReactElement{
   return (
     <div
       style={{
         width:"1200px",
         height:"630px",
         display:"flex",
-        background:"#1F252B",
+        background:"#322725",
         color:"#ffffff",
         fontFamily:"Source Sans 3, Arial, Helvetica, sans-serif",
         position:"relative",
@@ -29,7 +28,7 @@ export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):Re
           width:"18px",
           height:"630px",
           display:"flex",
-          background:"#F37021",
+          background:"#c9a38c",
         }}
       />
       <div
@@ -51,15 +50,15 @@ export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):Re
                 display:"flex",
                 padding:"10px 16px",
                 borderRadius:"999px",
-                background:"rgba(243,112,33,0.16)",
-                border:"1px solid rgba(243,112,33,0.62)",
-                color:"#F37021",
+                background:"rgba(201,163,140,0.18)",
+                border:"1px solid rgba(201,163,140,0.64)",
+                color:"#ead3c4",
                 fontSize:"21px",
                 fontWeight:800,
                 letterSpacing:"2px",
               }}
             >
-              GASPRO-NOTAS
+              B2U · NOTAS
             </div>
           </div>
 
@@ -94,15 +93,9 @@ export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):Re
         </div>
 
         <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:"28px"}}>
-          <img
-            src={logoUrl}
-            alt="B2uJeans - Tecnología e Ingeniería Estratégica"
-            width="360"
-            height="93"
-            style={{width:"360px",height:"93px",objectFit:"contain",objectPosition:"left center"}}
-          />
-          <div style={{display:"flex",fontSize:"17px",fontWeight:800,color:"#F37021",whiteSpace:"nowrap"}}>
-            GAS · ACERO · INGENIERÍA
+          <div style={{display:"flex",fontSize:"33px",fontWeight:900,letterSpacing:"3px",color:"#ffffff"}}>B2U JEANS</div>
+          <div style={{display:"flex",fontSize:"17px",fontWeight:800,color:"#ead3c4",whiteSpace:"nowrap"}}>
+            DENIM · MODA · ESTILO
           </div>
         </div>
       </div>
@@ -116,7 +109,7 @@ export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):Re
             position:"relative",
             overflow:"hidden",
             zIndex:2,
-            background:"#005C99",
+            background:"#d4b7a5",
           }}
         >
           <img
@@ -131,7 +124,7 @@ export default function GasproNotaOgCard({title,excerpt,image,logoUrl}:Props):Re
               position:"absolute",
               inset:0,
               display:"flex",
-              background:"rgba(31,37,43,0.18)",
+              background:"rgba(50,39,37,0.12)",
             }}
           />
         </div>
