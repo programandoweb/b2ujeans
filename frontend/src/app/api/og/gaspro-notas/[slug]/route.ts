@@ -53,10 +53,9 @@ export async function GET(
     .trim()
     .slice(0,220);
   const image=sourceImageUrl(post?.og_image||post?.featured_image,origin);
-  const logoUrl=`${origin}/b2u/logo-b2u.svg`;
 
   return new ImageResponse(
-    GasproNotaOgCard({title,excerpt,image,logoUrl}),
+    GasproNotaOgCard({title,excerpt,image}),
     {
       width:1200,
       height:630,
