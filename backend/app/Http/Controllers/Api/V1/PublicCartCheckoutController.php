@@ -125,7 +125,7 @@ class PublicCartCheckoutController extends Controller
                 'number' => $quote->number,
                 'status' => 'pending_approval',
                 'needs_price_confirmation' => $missingPrices,
-                'whatsapp_message' => implode("\\n", $messageLines),
+                'whatsapp_message' => implode("\n", $messageLines),
             ];
         });
 
