@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { getImageProps } from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ManagedHeroSlide } from "@/lib/public-hero";
@@ -34,12 +35,15 @@ export default function ManagedHero({slides}:{slides:ManagedHeroSlide[]}) {
 
   if(!slides.length)return null;
   const slide=slides[Math.min(active,slides.length-1)]??slides[0];
+  const { props: optimizedSlide } = getImageProps({ src: slide.image_url, alt: "", fill: true, sizes: "100vw", quality: 75 });
 
   return <section className="relative h-[720px] overflow-hidden bg-neutral-950 text-white sm:h-[760px] lg:h-[780px]">
     <AnimatePresence mode="sync" initial={false}>
       <motion.img
         key={slide.id}
-        src={slide.image_url}
+        src={optimizedSlide.src}
+        srcSet={optimizedSlide.srcSet}
+        sizes={optimizedSlide.sizes}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
         style={{objectPosition:slide.background_position||"center"}}
