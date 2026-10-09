@@ -3,11 +3,14 @@ import Link from "next/link";
 import { ArrowRight, Instagram, MapPin, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import PublicHeader from "@/components/public/PublicHeader";
 import ManagedHero from "@/components/public/ManagedHero";
+import AddToCartButton from "@/components/public/AddToCartButton";
 import { B2UJEANS_WHATSAPP_HREF } from "@/lib/public-contact";
 import { getManagedHero } from "@/lib/public-hero";
 
 type Product = {
   id: number;
+  commercial_price?: string | number | null;
+  price_currency?: string | null;
   name: string;
   slug: string;
   reference?: string | null;
@@ -191,6 +194,7 @@ export default async function HomePage() {
                       </span>
                     </div>
                   </Link>
+                  <div className="mt-3"><AddToCartButton product={{ id: product.id, name: product.name, slug: product.slug, image, price: product.commercial_price, currency: product.price_currency || "COP" }} /></div>
                 </article>
               );
             })}
