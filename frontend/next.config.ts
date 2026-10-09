@@ -4,7 +4,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: "standalone",
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ["image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    qualities: [60, 70, 75, 80],
+    remotePatterns: [
+      { protocol: "https", hostname: "www.b2ujean.com", pathname: "/**" },
+      { protocol: "https", hostname: "b2ujean.com", pathname: "/**" },
+      { protocol: "https", hostname: "demo.pereira.expert", pathname: "/**" },
+      { protocol: "https", hostname: "backend-demo.pereira.expert", pathname: "/**" },
+    ],
   },
   async redirects() {
     return [
