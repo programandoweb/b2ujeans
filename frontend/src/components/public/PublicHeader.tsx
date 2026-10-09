@@ -15,6 +15,7 @@ const navigation = [
   { label: "Nueva Colección", href: "/productos?coleccion=nueva" },
   { label: "B2U", href: "/#b2u" },
   { label: "Contacto", href: "/#contacto" },
+  { label: "Mis pedidos", href: "/pedido" },
 ];
 
 export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
