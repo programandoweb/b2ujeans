@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Instagram, MapPin, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import PublicHeader from "@/components/public/PublicHeader";
 import ManagedHero from "@/components/public/ManagedHero";
@@ -121,7 +122,7 @@ export default async function HomePage() {
           { title: "Denim B2U", subtitle: "Encuentra tu fit", href: "/productos", image: "https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg" },
         ].map((item) => (
           <Link key={item.title} href={item.href} className="group relative block min-h-[420px] overflow-hidden bg-[#eee2da] sm:min-h-[490px]">
-            <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"/>
+            <Image src={item.image} alt={item.title} fill sizes="(max-width: 639px) 100vw, 33vw" quality={70} className="object-cover transition duration-700 group-hover:scale-105"/>
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"/>
             <div className="absolute bottom-0 left-0 p-7 text-white"><p className="text-[10px] uppercase tracking-[.2em]">{item.subtitle}</p><h3 className="b2u-serif mt-2 text-4xl">{item.title}</h3><span className="mt-5 inline-flex items-center gap-2 border-b border-white pb-1 text-xs uppercase tracking-widest">Explorar <ArrowRight size={14}/></span></div>
           </Link>
@@ -169,12 +170,7 @@ export default async function HomePage() {
                   <Link href={`/productos/${product.slug}`} className="block">
                     <div className="relative overflow-hidden rounded-t-[90px] bg-[#f2eae4]">
                       {image ? (
-                        <img
-                          src={image}
-                          alt={product.name}
-                          className="b2u-product-image h-full w-full object-cover transition duration-500 group-hover:scale-[1.045]"
-                          loading="lazy"
-                        />
+                        <Image src={image} alt={product.name} fill sizes="(max-width: 1023px) 50vw, 25vw" quality={70} className="b2u-product-image object-cover transition duration-500 group-hover:scale-[1.045]"/>
                       ) : (
                         <div className="flex aspect-[3/4] items-center justify-center text-neutral-400">
                           <ShoppingBag size={44} strokeWidth={1.2} />
@@ -211,12 +207,8 @@ export default async function HomePage() {
       </section>
 
       <section id="b2u" className="grid bg-[#f2e5dd] lg:grid-cols-2">
-        <div className="min-h-[440px] lg:min-h-[640px]">
-          <img
-            src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg"
-            alt="B2U Jeans"
-            className="h-full w-full object-cover"
-          />
+        <div className="relative min-h-[440px] lg:min-h-[640px]">
+          <Image src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_yuh0d4yuh0d4yuh0-1.jpg" alt="B2U Jeans" fill sizes="(max-width: 1023px) 100vw, 50vw" quality={75} className="object-cover"/>
         </div>
         <div className="flex items-center px-6 py-14 sm:px-10 lg:px-16">
           <div className="max-w-xl">
