@@ -8,7 +8,7 @@ import { ArrowRight, CalendarDays } from "lucide-react";
 
 const backendUrl = process.env.LARAVEL_API_URL ?? "http://127.0.0.1:8000";
 const whatsappHref =
-  "https://wa.me/573045527575?text=Hola%20Gaspronal,%20quiero%20recibir%20asesor%C3%ADa%20para%20mi%20proyecto.";
+  "https://wa.me/584123694856?text=Hola%20B2U%20Jeans,%20quiero%20conocer%20la%20coleccion.";
 
 type Post = {
   id:number;
@@ -21,10 +21,12 @@ type Post = {
 };
 
 export const metadata:Metadata={
-  title:"Gaspro-notas | Gaspronal",
-  description:"Artículos, casos, novedades y contenido técnico de Gaspronal.",
+  title:"Notas B2U | B2U Jeans",
+  description:"Inspiración de moda, tendencias y consejos para vestir denim B2U Jeans.",
   alternates:{canonical:"/gaspro-notas"},
   robots:{index:true,follow:true},
+  openGraph:{title:"Notas B2U Jeans | Moda y tendencias",description:"Consejos de estilo y tendencias denim B2U Jeans.",url:"/gaspro-notas",images:[{url:"/opengraph-image",width:1200,height:630,alt:"B2U Jeans · Moda y tendencias"}],siteName:"B2U Jeans",type:"website"},
+  twitter:{card:"summary_large_image",images:["/opengraph-image"]},
 };
 
 async function getPosts():Promise<Post[]>{
@@ -53,12 +55,12 @@ export default async function GasproNotasPage(){
     {heroSlides.length?<ManagedHero slides={heroSlides}/>:(
     <section className="border-b border-slate-200 bg-[var(--surface-muted)]">
       <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 lg:px-10">
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Gaspro-notas</p>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">Notas B2U</p>
         <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-[-0.045em] text-[var(--steel)] sm:text-6xl">
-          Ideas, casos y conocimiento aplicado a la operación.
+          Inspiración, tendencias y el denim que te representa.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600">
-          Contenido técnico y comercial de Gaspronal sobre equipos, gas, extracción, mantenimiento y proyectos especiales.
+          Consejos de estilo, nuevas colecciones y las últimas tendencias de moda femenina.
         </p>
       </div>
     </section>
@@ -67,7 +69,7 @@ export default async function GasproNotasPage(){
     <section className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 lg:px-10">
       {posts.length===0?(
         <div className="rounded-[2rem] border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-          <h2 className="text-xl font-black text-[var(--steel)]">Aún no hay Gaspro-notas publicadas.</h2>
+          <h2 className="text-xl font-black text-[var(--steel)]">Aún no hay Notas B2U publicadas.</h2>
           <p className="mt-2 text-sm text-slate-500">Los borradores creados por Lucía aparecerán aquí cuando sean publicados.</p>
         </div>
       ):(
@@ -77,7 +79,7 @@ export default async function GasproNotasPage(){
             return <article key={post.id} className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
               <Link href={`/gaspro-notas/${post.slug}`} className="block">
                 <div className="aspect-[16/10] overflow-hidden bg-slate-100">
-                  {image?<Image src={image} alt={post.title} width={1000} height={625} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"/>:<div className="grid h-full place-items-center text-sm text-slate-400">Gaspro-notas</div>}
+                  {image?<Image src={image} alt={post.title} width={1000} height={625} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"/>:<div className="grid h-full place-items-center text-sm text-slate-400">Notas B2U</div>}
                 </div>
                 <div className="p-6">
                   {post.published_at&&<div className="flex items-center gap-2 text-xs font-semibold text-slate-400"><CalendarDays size={14}/>{new Date(post.published_at).toLocaleDateString("es-CO")}</div>}
