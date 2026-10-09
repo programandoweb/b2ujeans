@@ -6,7 +6,7 @@ import { use, useEffect, useState } from "react";
 
 type Item={id:number;description:string;quantity:string;unit_price:string;line_total:string};
 type Quote={
- id:number;number:string;status:string;currency:string;notes?:string|null;total:string;
+ id:number;number:string;status:string;currency:string;notes?:string|null;total:string;created_by_agent?:string;
  lead:{name:string;email:string;whatsapp:string;status:string};
  items:Item[];
 };
@@ -50,17 +50,35 @@ export default function ProposalDetailPage({params}:{params:Promise<{id:string}>
   setQuote(json.data);setMessage("Propuesta aprobada y lista para seguimiento humano.");
  }
 
+ async function setStatus(status:"processing"|"shipped"|"completed"|"cancelled"){
+  if(!quote)return;
+  if(status==="cancelled"&&!confirm("¿Cancelar esta solicitud?"))return;
+  setSaving(true);setMessage("");
+  try{
+   const response=await fetch(`/api/admin/commercial/quotes/${id}/status`,{
+    method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})
+   });
+   const json=await response.json().catch(()=>({}));
+   if(!response.ok){setMessage(json.message??"No se pudo cambiar el estado.");return;}
+   setQuote(json.data);setMessage("Estado actualizado.");
+  }finally{setSaving(false);}
+ }
+
+ const statusLabels:Record<string,string>={
+  pending_approval:"Pendiente de revisión",approved:"Aprobado",processing:"En preparación",
+  shipped:"Enviado",completed:"Entregado",cancelled:"Cancelado"
+ };
  if(loading)return <div className="mx-auto w-full max-w-5xl py-8 text-sm text-[var(--muted)]">Cargando propuesta…</div>;
  if(!quote)return <div className="mx-auto w-full max-w-5xl py-8 text-sm text-red-700">{message||"Propuesta no encontrada."}</div>;
 
- const editable=quote.status!=="approved";
+ const editable=quote.status==="pending_approval";
  const total=quote.items.reduce((sum,item)=>sum+Number(item.quantity)*Number(item.unit_price),0);
 
  return <div className="mx-auto w-full max-w-5xl space-y-6">
   <Link href="/dashboard/comercial/propuestas" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium"><ArrowLeft size={16}/>Propuestas</Link>
   <header>
-   <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">Propuesta comercial</span>
-   <div className="mt-2 flex flex-wrap items-center gap-3"><h1 className="text-3xl font-bold">{quote.number}</h1><span className={`rounded-full px-3 py-1 text-xs font-semibold ${quote.status==="approved"?"bg-emerald-50 text-emerald-700":"bg-amber-50 text-amber-800"}`}>{quote.status==="approved"?"Aprobada":"Pendiente de aprobación"}</span></div>
+   <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">{quote.created_by_agent==="web_cart"?"Pedido del carrito web":"Propuesta comercial"}</span>
+   <div className="mt-2 flex flex-wrap items-center gap-3"><h1 className="text-3xl font-bold">{quote.number}</h1><span className={`rounded-full px-3 py-1 text-xs font-semibold ${quote.status==="approved"?"bg-emerald-50 text-emerald-700":"bg-amber-50 text-amber-800"}`}>{statusLabels[quote.status]??quote.status}</span></div>
   </header>
 
   <section className="grid gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:grid-cols-3">
@@ -68,6 +86,12 @@ export default function ProposalDetailPage({params}:{params:Promise<{id:string}>
    <div><span className="text-xs text-[var(--muted)]">Email</span><strong className="block break-all">{quote.lead.email}</strong></div>
    <div><span className="text-xs text-[var(--muted)]">WhatsApp</span><strong className="block">{quote.lead.whatsapp}</strong></div>
   </section>
+
+  {quote.created_by_agent==="web_cart"&&<section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+    <h2 className="font-bold">Datos del pedido web</h2>
+    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">{quote.notes||"Sin observaciones de entrega"}</p>
+    <a href={`https://wa.me/${quote.lead.whatsapp.replace(/\\D/g,"")}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex border-b border-[var(--brand)] pb-1 text-sm font-semibold">Contactar al cliente por WhatsApp</a>
+   </section>}
 
   <section className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
    <h2 className="font-bold">Detalle</h2>
@@ -86,6 +110,12 @@ export default function ProposalDetailPage({params}:{params:Promise<{id:string}>
       <button disabled={saving} onClick={save} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] px-4 font-semibold"><Save size={17}/>Guardar</button>
       <button disabled={saving} onClick={approve} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white"><CheckCircle2 size={17}/>Aprobar</button>
     </div>}
+   </div>
+   <div className="flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
+    {quote.status==="pending_approval"&&<button disabled={saving} onClick={()=>void setStatus("cancelled")} className="min-h-10 rounded-lg border border-red-300 px-4 text-sm text-red-700">Cancelar solicitud</button>}
+    {quote.status==="approved"&&<><button disabled={saving} onClick={()=>void setStatus("processing")} className="min-h-10 rounded-lg bg-black px-4 text-sm text-white">Iniciar preparación</button><button disabled={saving} onClick={()=>void setStatus("cancelled")} className="min-h-10 rounded-lg border border-red-300 px-4 text-sm text-red-700">Cancelar</button></>}
+    {quote.status==="processing"&&<><button disabled={saving} onClick={()=>void setStatus("shipped")} className="min-h-10 rounded-lg bg-black px-4 text-sm text-white">Marcar enviado</button><button disabled={saving} onClick={()=>void setStatus("cancelled")} className="min-h-10 rounded-lg border border-red-300 px-4 text-sm text-red-700">Cancelar</button></>}
+    {quote.status==="shipped"&&<button disabled={saving} onClick={()=>void setStatus("completed")} className="min-h-10 rounded-lg bg-black px-4 text-sm text-white">Marcar entregado</button>}
    </div>
    {message&&<p className="text-sm font-medium text-[var(--brand)]">{message}</p>}
   </section>
