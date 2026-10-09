@@ -19,10 +19,15 @@ type Quote = {
 const statusLabel:Record<string,string>={
   pending_approval:"Pendiente de aprobación",
   approved:"Aprobada",
+  processing:"En preparación",
+  shipped:"Enviado",
+  completed:"Entregado",
+  cancelled:"Cancelado",
 };
 
 export default function CommercialProposalsPage(){
   const [quotes,setQuotes]=useState<Quote[]>([]);
+  const [filter,setFilter]=useState<"all"|"web_cart"|"agent">("all");
   const [loading,setLoading]=useState(true);
   const [message,setMessage]=useState("");
 
@@ -52,11 +57,12 @@ export default function CommercialProposalsPage(){
       </button>
     </div>
 
+    <div className="flex flex-wrap gap-2">{([{id:"all",label:"Todas"},{id:"web_cart",label:"Pedidos web"},{id:"agent",label:"Cotizaciones de agentes"}] as const).map(option=><button key={option.id} onClick={()=>setFilter(option.id)} className={`rounded-lg px-4 py-2 text-sm font-semibold ${filter===option.id?"bg-[var(--brand)] text-white":"border border-[var(--border)] bg-[var(--surface)]"}`}>{option.label}</button>)}</div>
     <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
       {loading?<p className="p-5 text-sm text-[var(--muted)]">Cargando propuestas…</p>:quotes.length===0?
         <div className="p-8 text-center"><FileCheck2 className="mx-auto text-[var(--brand)]"/><p className="mt-3 font-semibold">No hay propuestas todavía.</p></div>:
         <div className="divide-y divide-[var(--border)]">
-          {quotes.map(quote=><Link key={quote.id} href={`/dashboard/comercial/propuestas/${quote.id}`} className="grid gap-3 p-4 transition hover:bg-[var(--app-bg)] sm:grid-cols-[1fr_1.2fr_.7fr_.7fr_auto] sm:items-center">
+          {quotes.filter(quote=>filter==="all" || (filter==="web_cart" ? quote.created_by_agent==="web_cart" : quote.created_by_agent!=="web_cart")).map(quote=><Link key={quote.id} href={`/dashboard/comercial/propuestas/${quote.id}`} className="grid gap-3 p-4 transition hover:bg-[var(--app-bg)] sm:grid-cols-[1fr_1.2fr_.7fr_.7fr_auto] sm:items-center">
             <div><strong className="block">{quote.number}</strong><span className="mt-1 inline-block rounded bg-[var(--app-bg)] px-2 py-0.5 text-[10px] uppercase">{quote.created_by_agent==="web_cart"?"Carrito web":"Agente comercial"}</span><span className="text-xs text-[var(--muted)]">{new Date(quote.created_at).toLocaleString("es-CO")}</span></div>
             <div><strong className="block text-sm">{quote.lead?.name}</strong><span className="block text-xs text-[var(--muted)]">{quote.lead?.email} · {quote.lead?.whatsapp}</span></div>
             <span className="text-sm">{quote.items?.length??0} ítem(s)</span>
