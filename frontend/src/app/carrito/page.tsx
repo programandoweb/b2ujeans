@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, type FormEvent } from "react";
 import { ArrowLeft, CheckCircle2, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/components/public/CartProvider";
@@ -77,7 +78,7 @@ export default function CartCheckoutPage() {
         </section> : <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1.15fr_.85fr]">
           <section className="space-y-4">
             {items.map(item => <div key={item.id} className="flex gap-4 bg-white p-4 sm:p-5">
-              {item.image ? <img src={item.image} alt="" className="h-32 w-24 shrink-0 object-cover"/> : <div className="h-32 w-24 shrink-0 bg-neutral-100"/>}
+              {item.image ? <Image src={item.image} alt="" width={96} height={128} sizes="96px" quality={60} className="h-32 w-24 shrink-0 object-cover"/> : <div className="h-32 w-24 shrink-0 bg-neutral-100"/>}
               <div className="flex-1">
                 <Link href={`/productos/${item.slug}`} className="font-semibold">{item.name}</Link>
                 <p className="mt-2 text-sm text-neutral-500">{item.price === null || item.price === undefined ? "Precio por confirmar" : format(Number(item.price))}</p>
