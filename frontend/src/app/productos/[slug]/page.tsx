@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Check, MessageCircle, ShoppingBag } from "lucide-react";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/public/AddToCartButton";
@@ -140,7 +141,7 @@ export default async function ProductDetailPage({
         <div>
           <div className="overflow-hidden bg-[#f2f1ed]">
             {gallery[0] ? (
-              <img src={gallery[0]} alt={product.name} className="aspect-[3/4] h-full w-full object-cover" />
+              <Image src={gallery[0]} alt={product.name} width={900} height={1200} sizes="(max-width: 1023px) 100vw, 55vw" quality={75} priority className="aspect-[3/4] h-auto w-full object-cover" />
             ) : (
               <div className="flex aspect-[3/4] items-center justify-center text-neutral-400">
                 <ShoppingBag size={60} strokeWidth={1.1} />
@@ -152,7 +153,7 @@ export default async function ProductDetailPage({
             <div className="mt-3 grid grid-cols-4 gap-3">
               {gallery.slice(1, 5).map((image) => (
                 <div key={image} className="overflow-hidden bg-[#f2f1ed]">
-                  <img src={image} alt="" className="aspect-[3/4] h-full w-full object-cover" loading="lazy" />
+                  <Image src={image} alt="" width={240} height={320} sizes="(max-width: 639px) 25vw, 15vw" quality={70} className="aspect-[3/4] h-auto w-full object-cover" />
                 </div>
               ))}
             </div>
