@@ -112,7 +112,7 @@ export default function GasproNotaOgCard({title,excerpt,image}:Props):ReactEleme
             background:"#d4b7a5",
           }}
         >
-          <div style={{display:"flex",fontSize:"32px",fontWeight:900,letterSpacing:"2px"}}>B2U JEANS</div>
+          <img src={image} alt="" width="500" height="630" style={{width:"500px",height:"630px",objectFit:"cover"}}/>
           <div
             style={{
               position:"absolute",
