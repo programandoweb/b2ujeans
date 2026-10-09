@@ -28,7 +28,7 @@ class CommercialQuoteController extends Controller
 
     public function update(Request $request, CommercialQuote $commercialQuote): JsonResponse
     {
-        abort_if($commercialQuote->status === 'approved', 422, 'Una propuesta aprobada no puede editarse.');
+        abort_unless($commercialQuote->status === 'pending_approval', 422, 'Solamente las propuestas pendientes se pueden editar.');
 
         $data = $request->validate([
             'notes' => ['nullable', 'string', 'max:5000'],
@@ -64,6 +64,37 @@ class CommercialQuoteController extends Controller
                 'total' => $total,
                 'status' => 'pending_approval',
             ]);
+        });
+
+        return $this->show($commercialQuote->fresh());
+    }
+
+    public function changeStatus(Request $request, CommercialQuote $commercialQuote): JsonResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', 'in:processing,shipped,completed,cancelled'],
+        ]);
+
+        $allowed = [
+            'pending_approval' => ['cancelled'],
+            'approved' => ['processing', 'cancelled'],
+            'processing' => ['shipped', 'cancelled'],
+            'shipped' => ['completed'],
+            'completed' => [],
+            'cancelled' => [],
+        ];
+
+        abort_unless(
+            in_array($data['status'], $allowed[$commercialQuote->status] ?? [], true),
+            422,
+            'La transición de estado no está permitida.'
+        );
+
+        DB::transaction(function () use ($commercialQuote, $data): void {
+            $commercialQuote->update(['status' => $data['status']]);
+            if ($data['status'] === 'cancelled') {
+                $commercialQuote->lead()->update(['status' => 'closed']);
+            }
         });
 
         return $this->show($commercialQuote->fresh());
