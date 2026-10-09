@@ -7,7 +7,7 @@ import { use, useEffect, useState } from "react";
 type Item={id:number;description:string;quantity:string;unit_price:string;line_total:string};
 type Quote={
  id:number;number:string;status:string;currency:string;notes?:string|null;total:string;created_by_agent?:string;
- lead:{name:string;email:string;whatsapp:string;status:string};
+ lead:{name:string;email:string;whatsapp:string;status:string;notes?:string|null};
  items:Item[];
 };
 
@@ -89,7 +89,7 @@ export default function ProposalDetailPage({params}:{params:Promise<{id:string}>
 
   {quote.created_by_agent==="web_cart"&&<section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
     <h2 className="font-bold">Datos del pedido web</h2>
-    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">{quote.notes||"Sin observaciones de entrega"}</p>
+    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">{quote.lead.notes||quote.notes||"Sin observaciones de entrega"}</p>
     <a href={`https://wa.me/${quote.lead.whatsapp.replace(/\D/g,"")}`} target="_blank" rel="noreferrer" className="mt-3 inline-flex border-b border-[var(--brand)] pb-1 text-sm font-semibold">Contactar al cliente por WhatsApp</a>
    </section>}
 
@@ -108,7 +108,7 @@ export default function ProposalDetailPage({params}:{params:Promise<{id:string}>
     <div><span className="text-sm text-[var(--muted)]">Total revisado</span><strong className="ml-3 text-xl">{new Intl.NumberFormat("es-CO",{style:"currency",currency:quote.currency||"COP",maximumFractionDigits:0}).format(total)}</strong></div>
     {editable&&<div className="flex gap-2">
       <button disabled={saving} onClick={save} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] px-4 font-semibold"><Save size={17}/>Guardar</button>
-      <button disabled={saving} onClick={approve} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white"><CheckCircle2 size={17}/>Aprobar</button>
+      <button disabled={saving} onClick={approve} title="Guarda primero los cambios de cantidades y precios" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 font-semibold text-white"><CheckCircle2 size={17}/>Aprobar</button>
     </div>}
    </div>
    <div className="flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
