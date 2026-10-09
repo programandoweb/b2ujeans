@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     "Descubre la colección B2U Jeans y explora los estilos disponibles por categoría.",
   alternates:{canonical:"/productos"},
   robots:{index:true,follow:true},
+  openGraph:{title:"Nueva colección | B2U Jeans",description:"Descubre el denim femenino y las últimas colecciones B2U Jeans.",url:"/productos",siteName:"B2U Jeans",locale:"es_VE",type:"website",images:[{url:"/opengraph-image",width:1200,height:630,alt:"B2U Jeans · Nueva colección"}]},
+  twitter:{card:"summary_large_image",images:["/opengraph-image"]},
 };
 
 type Category = {
