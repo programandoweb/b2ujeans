@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Search, ShoppingBag } from "lucide-react";
 import ManagedHero from "@/components/public/ManagedHero";
 import { getManagedHero } from "@/lib/public-hero";
+import AddToCartButton from "@/components/public/AddToCartButton";
 
 export const metadata: Metadata = {
   title: "Nueva Colección",
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 
 type Category = {
   id: number;
+  commercial_price?: string | number | null;
+  price_currency?: string | null;
   name: string;
   slug: string;
   description?: string | null;
@@ -229,6 +232,7 @@ export default async function ProductsPage({
                         Ver producto
                         <ArrowRight size={16} />
                       </Link>
+                      <div className="mt-3"><AddToCartButton product={{ id: product.id, name: product.name, slug: product.slug, image: image, price: product.commercial_price, currency: product.price_currency || "COP" }} /></div>
                     </div>
                   </article>
                 );
