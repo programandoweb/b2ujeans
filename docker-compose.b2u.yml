@@ -120,6 +120,8 @@ services:
       NEXT_PUBLIC_REALTIME_URL: ""
       REALTIME_INTERNAL_URL: http://b2u-realtime:4100
       AGENT_SHARED_SECRET: ${AGENT_SHARED_SECRET:-}
+    volumes:
+      - b2u_next_image_cache:/app/.next/cache
     depends_on:
       b2u-backend-nginx:
         condition: service_healthy
@@ -141,6 +143,7 @@ volumes:
   b2u_backend_vendor:
   b2u_backend_storage:
   b2u_baileys_sessions:
+  b2u_next_image_cache:
 
 networks:
   b2ujeans:
