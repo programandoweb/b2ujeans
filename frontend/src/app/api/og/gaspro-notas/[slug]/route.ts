@@ -47,13 +47,13 @@ export async function GET(
   const post=await getPost(slug);
   const origin=new URL(request.url).origin;
 
-  const title=post?.title??"Gaspro-notas";
-  const excerpt=(post?.excerpt??"Contenido técnico, casos y soluciones industriales de Gaspronal.")
+  const title=post?.title??"Notas B2U Jeans";
+  const excerpt=(post?.excerpt??"Tendencias, inspiración y denim de B2U Jeans.")
     .replace(/\s+/g," ")
     .trim()
     .slice(0,220);
   const image=sourceImageUrl(post?.og_image||post?.featured_image,origin);
-  const logoUrl=`${origin}/programandoweb/brand/logo-gaspronal-horizontal-white.png`;
+  const logoUrl=`${origin}/b2u/logo-b2u.svg`;
 
   return new ImageResponse(
     GasproNotaOgCard({title,excerpt,image,logoUrl}),
