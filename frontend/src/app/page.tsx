@@ -81,11 +81,7 @@ export default async function HomePage() {
 
       {heroSlides.length ? <ManagedHero slides={heroSlides} /> : (
       <section className="relative min-h-[68vh] overflow-hidden bg-neutral-900 lg:min-h-[76vh]">
-        <img
-          src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg"
-          alt="Tienda B2U Jeans"
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-80"
-        />
+        <Image src="https://www.b2ujean.com/wp-content/uploads/2026/03/Gemini_Generated_Image_kil2xzkil2xzkil2-scaled-1-1024x576.jpg" alt="Tienda B2U Jeans" fill priority sizes="100vw" quality={75} className="object-cover object-center opacity-80"/>
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
         <div className="relative mx-auto flex min-h-[68vh] max-w-[1480px] items-end px-5 pb-14 pt-28 sm:px-8 lg:min-h-[76vh] lg:px-12 lg:pb-20">
           <div className="max-w-2xl text-white">
