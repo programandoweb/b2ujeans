@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Source_Sans_3 } from "next/font/google";
 import PublicWhatsAppButton from "@/components/public/PublicWhatsAppButton";
+import { CartProvider } from "@/components/public/CartProvider";
 import "./globals.css";
 
 const b2uFont = Source_Sans_3({
@@ -54,8 +55,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={b2uFont.variable}>
-        {children}
-        <PublicWhatsAppButton />
+        <CartProvider>
+          {children}
+          <PublicWhatsAppButton />
+        </CartProvider>
       </body>
     </html>
   );
