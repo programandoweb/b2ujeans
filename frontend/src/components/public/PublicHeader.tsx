@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useState } from "react";
+import { useCart } from "@/components/public/CartProvider";
 
 type PublicHeaderProps = { whatsappHref: string };
 
@@ -17,6 +18,7 @@ const navigation = [
 ];
 
 export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
+  const { count, setOpen } = useCart();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
   useMotionValueEvent(scrollY, "change", (value) => setScrolled(value > 24));
@@ -65,9 +67,9 @@ export default function PublicHeader({ whatsappHref }: PublicHeaderProps) {
             <a href={whatsappHref} target="_blank" rel="noreferrer" className="hidden text-[11px] font-semibold uppercase tracking-[.1em] lg:block">
               WhatsApp
             </a>
-            <button aria-label="Carrito" className="relative flex h-11 w-11 items-center justify-center">
+            <button type="button" aria-label={`Abrir carrito, ${count} productos`} onClick={() => setOpen(true)} className="relative flex h-11 w-11 items-center justify-center">
               <ShoppingBag size={20} />
-              <span className="absolute right-0 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-black px-1 text-[9px] font-bold text-white">0</span>
+              <span className="absolute right-0 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-black px-1 text-[9px] font-bold text-white">{count}</span>
             </button>
           </div>
         </div>
