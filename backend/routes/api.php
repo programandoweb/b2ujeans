@@ -29,7 +29,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('health', HealthController::class);
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
     Route::post('cart/checkout', [PublicCartCheckoutController::class, 'store'])->middleware('throttle:5,1');
-    Route::get('cart/status', [PublicCartCheckoutController::class, 'status'])->middleware('throttle:10,1');
+    Route::post('cart/status', [PublicCartCheckoutController::class, 'status'])->middleware('throttle:10,1');
     Route::get('catalog/public/items', [CatalogController::class, 'publicIndex']);
     Route::get('catalog/public/use-cases', [CatalogController::class, 'publicUseCases']);
     Route::get('catalog/public/items/{slug}', [CatalogController::class, 'publicShow']);
