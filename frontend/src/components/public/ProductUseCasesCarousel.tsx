@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useMemo, useRef } from "react";
 
@@ -110,12 +111,7 @@ export default function ProductUseCasesCarousel({
               key={product.id}
               className="group relative min-h-[520px] w-[88vw] shrink-0 snap-start overflow-hidden rounded-[2rem] border border-white/10 bg-[var(--steel-soft)] sm:w-[68vw] lg:w-[44vw] xl:w-[36vw]"
             >
-              <img
-                src={image}
-                alt={product.name}
-                loading={index < 2 ? "eager" : "lazy"}
-                className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.035]"
-              />
+              <Image src={image} alt={product.name} fill sizes="(max-width: 639px) 88vw, (max-width: 1023px) 68vw, (max-width: 1279px) 44vw, 36vw" quality={70} priority={index < 2} className="object-cover transition duration-700 group-hover:scale-[1.035]"/>
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/38 to-black/10" />
 
               <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
