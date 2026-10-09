@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Check, MessageCircle, ShoppingBag } from "lucide-react";
 import { notFound } from "next/navigation";
+import AddToCartButton from "@/components/public/AddToCartButton";
 
 type Product = {
   id: number;
+  commercial_price?: string | number | null;
+  price_currency?: string | null;
   name: string;
   slug: string;
   reference?: string | null;
@@ -180,7 +183,9 @@ export default async function ProductDetailPage({
             <p className="mt-6 max-w-xl text-base leading-7 text-neutral-600">{product.short_description}</p>
           ) : null}
 
-          <div className="mt-8 border-y border-black/10 py-6">
+          <div className="mt-8 space-y-3 border-y border-black/10 py-6">
+            <p className="text-xl font-bold">{product.commercial_price == null ? "Precio por confirmar" : new Intl.NumberFormat("es-VE", { style: "currency", currency: product.price_currency || "COP" }).format(Number(product.commercial_price))}</p>
+            <AddToCartButton product={{id: product.id, name: product.name, slug: product.slug, image: gallery[0] || null, price: product.commercial_price, currency: product.price_currency || "COP"}} />
             <a
               href={whatsappHref}
               target="_blank"
@@ -188,7 +193,7 @@ export default async function ProductDetailPage({
               className="flex min-h-13 w-full items-center justify-center gap-3 bg-black px-6 text-[11px] font-bold uppercase tracking-[.14em] text-white transition hover:bg-neutral-800"
             >
               <MessageCircle size={17} />
-              Consultar por WhatsApp
+              Consultar por WhatsApp (opcional)
             </a>
           </div>
 
