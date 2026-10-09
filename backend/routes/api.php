@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InternalAgentCommercialController;
 use App\Http\Controllers\Api\V1\CommercialQuoteController;
+use App\Http\Controllers\Api\V1\PublicCartCheckoutController;
 use App\Http\Controllers\Api\V1\CommercialAppointmentController;
 use App\Http\Controllers\Api\V1\JorgeResearchController;
 use App\Http\Controllers\Api\V1\CommunicationProviderController;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('health', HealthController::class);
     Route::get('seo/redirects/resolve', [SeoRedirectController::class, 'resolve']);
+    Route::post('cart/checkout', [PublicCartCheckoutController::class, 'store'])->middleware('throttle:5,1');
     Route::get('catalog/public/items', [CatalogController::class, 'publicIndex']);
     Route::get('catalog/public/use-cases', [CatalogController::class, 'publicUseCases']);
     Route::get('catalog/public/items/{slug}', [CatalogController::class, 'publicShow']);
