@@ -98,4 +98,30 @@ class PublicCartCheckoutController extends Controller
             'message' => 'Solicitud recibida. Nuestro equipo confirmará los detalles y la disponibilidad antes del pago.',
         ], 201);
     }
+    public function status(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'number' => ['required', 'string', 'max:40'],
+            'email' => ['required', 'email', 'max:190'],
+        ]);
+
+        $quote = CommercialQuote::query()
+            ->where('number', strtoupper(trim($data['number'])))
+            ->where('created_by_agent', 'web_cart')
+            ->whereHas('lead', fn ($query) => $query->where('email', $data['email']))
+            ->first();
+
+        if (! $quote) {
+            return response()->json(['message' => 'No encontramos una solicitud con esos datos.'], 404);
+        }
+
+        return response()->json(['data' => [
+            'number' => $quote->number,
+            'status' => $quote->status,
+            'currency' => $quote->currency,
+            'total' => $quote->total,
+            'updated_at' => $quote->updated_at,
+        ]]);
+    }
+
 }
