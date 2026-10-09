@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Search, ShoppingBag } from "lucide-react";
 import ManagedHero from "@/components/public/ManagedHero";
 import { getManagedHero } from "@/lib/public-hero";
@@ -204,12 +205,7 @@ export default async function ProductsPage({
                   >
                     <div className="relative aspect-[3/4] overflow-hidden bg-[#f2f1ed]">
                       {image ? (
-                        <img
-                          src={image}
-                          alt={product.name}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
-                        />
+                        <Image src={image} alt={product.name} fill sizes="(max-width: 1023px) 50vw, 25vw" quality={70} className="object-cover transition duration-500 group-hover:scale-[1.025]"/>
                       ) : (
                         <div className="flex h-full items-center justify-center text-neutral-400"><ShoppingBag size={44} strokeWidth={1.2} /></div>
                       )}
