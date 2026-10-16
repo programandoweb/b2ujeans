@@ -235,7 +235,7 @@ export default function EditCatalogItemPage({ params }:{ params:Promise<{id:stri
       <Link href="/dashboard/catalogo" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium">
         <FiArrowLeft size={16}/>Volver
       </Link>
-      {publicUrl&&<a href={`B2U_SOURCE_URL}${publicUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium">
+      {publicUrl&&<a href={`${B2U_SOURCE_URL}${publicUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-sm font-medium">
         <FiExternalLink size={16}/>Ver original
       </a>}
     </div>
