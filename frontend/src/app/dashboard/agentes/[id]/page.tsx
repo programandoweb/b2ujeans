@@ -308,18 +308,18 @@ export default function AgentChatPage({ params }:{ params:Promise<{id:string}> }
       delete next[question.id];
       return next;
     });
-    setUnansweredMessage("Respuesta incorporada al RAG de Claudio.");
+    setUnansweredMessage("Respuesta incorporada al RAG de Gabriela.");
     await refreshUnanswered();
   }
 
   async function discardQuestion(question:UnansweredQuestion){
-    if(!confirm("¿Descartar esta pregunta del aprendizaje de Claudio?"))return;
+    if(!confirm("¿Descartar esta pregunta del aprendizaje de Gabriela?"))return;
 
     setUnansweredMessage("");
     const response=await fetch(`/api/admin/agents/claudio/unanswered-questions/${question.id}/discard`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({reason:"Descartada desde el perfil de Claudio."}),
+      body:JSON.stringify({reason:"Descartada desde el perfil de Gabriela."}),
     });
     const json=await response.json().catch(()=>({}));
 
@@ -536,7 +536,7 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2"><HelpCircle size={18} className="text-[var(--brand)]"/><h2 className="font-bold">Preguntas pendientes del RAG</h2></div>
-              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Preguntas reales que Claudio no respondió por falta de evidencia. Respóndelas para entrenar su base de conocimiento o descártalas.</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Preguntas reales que Gabriela no respondió por falta de evidencia. Respóndelas para entrenar su base de conocimiento o descártalas.</p>
             </div>
             <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-bold text-[var(--brand)]">{unanswered.length}</span>
           </div>
@@ -557,7 +557,7 @@ El proceso solamente se considera terminado cuando todas las imágenes recuperab
               <textarea
                 value={answers[question.id]??""}
                 onChange={e=>setAnswers(current=>({...current,[question.id]:e.target.value}))}
-                placeholder="Escribe la respuesta verificada que Claudio podrá utilizar…"
+                placeholder="Escribe la respuesta verificada que Gabriela podrá utilizar…"
                 rows={4}
                 className="w-full rounded-xl border border-[var(--border)] bg-transparent p-3 text-sm"
               />
