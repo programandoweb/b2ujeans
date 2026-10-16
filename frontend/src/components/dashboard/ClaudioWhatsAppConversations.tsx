@@ -30,7 +30,7 @@ type ConversationDetail = ConversationSummary & {
 };
 
 const statusLabels:Record<ConversationSummary["status"],string> = {
-  active:"Claudio atendiendo",
+  active:"Gabriela atendiendo",
   waiting_human:"Requiere asesor",
   human_active:"Asesor atendiendo",
   closed:"Cerrada",
@@ -146,10 +146,10 @@ export default function ClaudioWhatsAppConversations(){
         <div>
           <div className="flex items-center gap-2">
             <FaWhatsapp className="text-xl text-[var(--brand)]" aria-hidden="true"/>
-            <h2 className="font-bold">Conversaciones de WhatsApp de Claudio</h2>
+            <h2 className="font-bold">Conversaciones de WhatsApp de Gabriela</h2>
           </div>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Claudio responde automáticamente mientras la conversación esté activa. Puedes tomar el control y devolverla cuando termines.
+            Gabriela responde automáticamente mientras la conversación esté activa. Puedes tomar el control y devolverla cuando termines.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -232,7 +232,7 @@ export default function ClaudioWhatsAppConversations(){
                   onClick={()=>void action("resume")}
                   className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-xs font-bold disabled:opacity-50"
                 >
-                  <FiCheckCircle/>Devolver a Claudio
+                  <FiCheckCircle/>Devolver a Gabriela
                 </button>}
                 {selected.status!=="closed"&&<button
                   type="button"
@@ -248,7 +248,7 @@ export default function ClaudioWhatsAppConversations(){
                   onClick={()=>void action("resume")}
                   className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-3 text-xs font-bold disabled:opacity-50"
                 >
-                  <FiCheckCircle/>Reabrir con Claudio
+                  <FiCheckCircle/>Reabrir con Gabriela
                 </button>}
               </div>
             </div>
@@ -257,7 +257,7 @@ export default function ClaudioWhatsAppConversations(){
               {selected.messages.map(item=><div key={item.id} className={`flex ${item.direction==="inbound"?"justify-start":"justify-end"}`}>
                 <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 sm:max-w-[72%] ${item.direction==="inbound"?"border border-[var(--border)] bg-[var(--surface)]":"bg-[var(--brand)] text-white"}`}>
                   <span className={`mb-1 block text-[10px] font-black uppercase tracking-wide ${item.direction==="inbound"?"text-[var(--muted)]":"text-white/70"}`}>
-                    {item.sender_type==="customer"?"Cliente":item.sender_type==="human"?"Asesor":item.sender_type==="system"?"Sistema":"Claudio"}
+                    {item.sender_type==="customer"?"Cliente":item.sender_type==="human"?"Asesor":item.sender_type==="system"?"Sistema":"Gabriela"}
                   </span>
                   <p className="whitespace-pre-wrap">{item.content}</p>
                   <span className={`mt-1 block text-[10px] ${item.direction==="inbound"?"text-[var(--muted)]":"text-white/70"}`}>
@@ -283,7 +283,7 @@ export default function ClaudioWhatsAppConversations(){
                 <FiSend/>
               </button>
             </form>:<div className="border-t border-[var(--border)] p-4 text-xs text-[var(--muted)]">
-              {selected.status==="active"?"Claudio tiene el control automático de esta conversación.":selected.status==="waiting_human"?"Claudio solicitó intervención humana. Toma el control para responder.":"La conversación está cerrada."}
+              {selected.status==="active"?"Gabriela tiene el control automático de esta conversación.":selected.status==="waiting_human"?"Gabriela solicitó intervención humana. Toma el control para responder.":"La conversación está cerrada."}
             </div>}
           </>}
         </div>
