@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Schema;
 
 class AgentAnalyticsController extends Controller
 {
+    private const DASHBOARD_AGENTS = ['claudio', 'jorge'];
+
     public function dashboard(): JsonResponse
     {
         $since30 = now()->subDays(30);
@@ -38,7 +40,10 @@ class AgentAnalyticsController extends Controller
             ? AgentUnansweredQuestion::query()->where('status', 'pending')->count()
             : 0;
         $configuredAgents = $hasSettings
-            ? DB::table('agent_settings')->whereNotNull('primary_ai_model_id')->count()
+            ? DB::table('agent_settings')
+                ->whereIn('agent_id', self::DASHBOARD_AGENTS)
+                ->whereNotNull('primary_ai_model_id')
+                ->count()
             : 0;
 
         $activity = collect(range(0, 6))->map(function (int $offset) use ($since7, $hasInteractions): array {
@@ -75,7 +80,7 @@ class AgentAnalyticsController extends Controller
                 ->keyBy('agent_id')
             : collect();
 
-        $agents = collect(['claudio', 'cristina', 'jorge', 'sofia', 'lucia'])->map(function (string $agent) use ($byAgent, $settings, $hasKnowledge, $hasUnanswered): array {
+        $agents = collect(self::DASHBOARD_AGENTS)->map(function (string $agent) use ($byAgent, $settings, $hasKnowledge, $hasUnanswered): array {
             $knowledge = $agent === 'claudio' && $hasKnowledge
                 ? AgentKnowledgeEntry::query()->where('agent_id', 'claudio')->where('status', 'published')->count()
                 : 0;
