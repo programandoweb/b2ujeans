@@ -46,6 +46,8 @@ const statusLabel:Record<string,string>={
   archived:"Archivado",
 };
 
+const B2U_SOURCE_URL="https://www.b2ujean.com";
+
 export default function CatalogPage(){
   const [items,setItems]=useState<Item[]>([]);
   const [filter,setFilter]=useState<"all"|"product"|"service">("all");
@@ -281,7 +283,7 @@ export default function CatalogPage(){
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-2">
                     <a
-                      href={`https://www.gaspronal.com${item.public_url}`}
+                      href={`B2U_SOURCE_URL}${item.public_url}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="grid size-10 place-items-center rounded-xl border border-[var(--border)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
