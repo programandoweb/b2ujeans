@@ -20,6 +20,8 @@ import {
 
 type Agent={id:string;name:string;role:string};
 
+const VISIBLE_AGENT_IDS=new Set(["claudio","jorge"]);
+
 type AgentMetric={
   id:string;
   interactions_30d:number;
@@ -106,7 +108,7 @@ export default function AgentsPage(){
       return;
     }
 
-    setAgents(agentsJson.data??[]);
+    setAgents((agentsJson.data??[]).filter((agent:Agent)=>VISIBLE_AGENT_IDS.has(agent.id)));
     setData(metricsJson.data??null);
     setLoading(false);
   },[]);
@@ -370,7 +372,7 @@ export default function AgentsPage(){
             <FiHelpCircle className="text-[var(--brand)]"/>
             Vacíos de conocimiento
           </h2>
-          <p className="mt-1 text-xs text-[var(--muted)]">Preguntas que Claudio todavía no puede responder con evidencia.</p>
+          <p className="mt-1 text-xs text-[var(--muted)]">Preguntas que Gabriela todavía no puede responder con evidencia.</p>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
